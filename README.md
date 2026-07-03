@@ -36,6 +36,11 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   list_books agent tool, screen (118 tests total). Secondary lists
   (courses, flashcards, languages) and the Pomodoro timer to port per the
   handoff recipe.
+- [x] Career sphere — task manager (open/done/overdue, Today's Focus feed),
+  active projects with deadlines, interviews pipeline, agent tools
+  (add_career_task, list_career_tasks), screen (129 tests total). Secondary
+  lists (achievements, career goals, network, salary, career skills) to port
+  per the handoff recipe.
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development

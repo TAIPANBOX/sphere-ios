@@ -114,6 +114,35 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("career-v1") { db in
+            try db.create(table: "career_tasks") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("project", .text).notNull().defaults(to: "")
+                t.column("priority", .text).notNull()
+                t.column("status", .text).notNull()
+                t.column("dueDate", .datetime)
+                t.column("createdAt", .datetime).notNull()
+            }
+            try db.create(table: "career_projects") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("role", .text).notNull().defaults(to: "")
+                t.column("progressPercent", .integer).notNull().defaults(to: 0)
+                t.column("status", .text).notNull()
+                t.column("deadline", .datetime)
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "interviews") { t in
+                t.primaryKey("id", .text)
+                t.column("company", .text).notNull()
+                t.column("position", .text).notNull()
+                t.column("status", .text).notNull()
+                t.column("appliedDate", .datetime).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+        }
+
         // Next spheres: migrator.registerMigration("relationships-v1") { ... }
 
         return migrator
