@@ -143,6 +143,17 @@ struct AgentServiceTests {
         #expect(engine.calls.count == 3)
     }
 
+    @Test func registryWithoutSphereTypeOffersNoTools() async throws {
+        let engine = StubEngine(scripts: [[.textDelta("Hi"), .stop(.endTurn)]])
+        let (service, _, _) = try makeService(engine: engine)
+
+        _ = try await collect(service.chat(
+            sphere: "health", message: "hello", tools: waterRegistry(), sphereType: nil
+        ))
+        #expect(engine.calls[0].tools.isEmpty)
+        #expect(!engine.calls[0].system.contains("read-only lookup tool"))
+    }
+
     @Test func noApiKeyThrows() async throws {
         let engine = StubEngine()
         let (service, _, _) = try makeService(engine: engine, keys: [:])

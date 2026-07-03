@@ -89,7 +89,13 @@ public final class AgentService: Sendable {
                         tags: ["conversation", "user"], salience: 0.6
                     )
 
-                    let toolDefs = tools.map { $0.toolsFor(sphereType) } ?? []
+                    // Tools are offered only when the chat is bound to a sphere:
+                    // a registry without a sphereType would expose every tool
+                    // (toolsFor(nil) is the "all" query), which sphere-less
+                    // surfaces like the Meta Agent must not get.
+                    let toolDefs: [LLMTool] = (tools != nil && sphereType != nil)
+                        ? tools!.toolsFor(sphereType)
+                        : []
                     let system = SpherePrompts.forSphere(
                         sphere,
                         userName: userName,
