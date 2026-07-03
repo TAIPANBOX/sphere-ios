@@ -21,7 +21,11 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   offline cache), SphereToolRegistry, sphere/meta prompts
 - [x] Golden-template sphere (Goals) — @Observable store on GRDB, agent
   tools (add_goal / list_goals), Engram notes, SwiftUI screen in `SphereUI`
-  (83 tests total)
+- [x] Health sphere — HealthKit behind `HealthMetricsProviding` (real
+  `HealthKitService` + fake for tests), water/weight/workouts on GRDB,
+  agent tools (log_water_glass, log_weight, get_health_today), screen with
+  Swift Charts weekly steps (98 tests total). Secondary lists (medications,
+  labs, cycle, doctor) still to port — simple CRUD per the handoff recipe.
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development

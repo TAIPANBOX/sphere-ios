@@ -46,6 +46,27 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("health-v1") { db in
+            try db.create(table: "water") { t in
+                t.primaryKey("dateKey", .text)
+                t.column("glasses", .integer).notNull().defaults(to: 0)
+            }
+            try db.create(table: "weights") { t in
+                t.primaryKey("dateKey", .text)
+                t.column("date", .datetime).notNull()
+                t.column("kg", .double).notNull()
+            }
+            try db.create(table: "workouts") { t in
+                t.primaryKey("id", .text)
+                t.column("type", .text).notNull()
+                t.column("durationMinutes", .integer).notNull()
+                t.column("caloriesBurned", .integer)
+                t.column("distanceKm", .double)
+                t.column("date", .datetime).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+        }
+
         // Next spheres: migrator.registerMigration("finance-v1") { ... }
 
         return migrator
