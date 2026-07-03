@@ -41,6 +41,12 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   (add_career_task, list_career_tasks), screen (129 tests total). Secondary
   lists (achievements, career goals, network, salary, career skills) to port
   per the handoff recipe.
+- [x] Home tab — Life Score (per-sphere formulas from the Flutter home tab),
+  Today's Focus builder (urgency-ranked, with fallbacks), Open-Meteo weather
+  (+ CoreLocation provider), HomeStore aggregating the sphere stores with
+  streamed Meta Agent brief, HomeScreen (146 tests total). Wave-2 focus
+  sources (birthdays, home tasks, rest/hobbies scores) join as those spheres
+  are ported.
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development

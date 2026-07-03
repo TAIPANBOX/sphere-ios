@@ -14,9 +14,9 @@ public final class HealthStore {
     public private(set) var weights: [WeightEntry] = []
     public private(set) var workouts: [Workout] = []
 
-    public static let waterGoalGlasses = 8
-    public static let maxWaterGlasses = 12
-    public static let stepsGoal = 10_000
+    public nonisolated static let waterGoalGlasses = 8
+    public nonisolated static let maxWaterGlasses = 12
+    public nonisolated static let stepsGoal = 10_000
 
     private let database: AppDatabase
     private let engram: EngramStore?
