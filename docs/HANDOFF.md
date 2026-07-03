@@ -99,29 +99,34 @@ passes, screen compiles in `swift build`.
 
 ## What's next (in order)
 
-All 12 sphere stores + screens, the Home tab, and the chat are ported.
+All 12 sphere stores + screens, the Home tab, the chat, AND the app target
+are done. The Xcode project is generated from `project.yml` — run
+`xcodegen generate` after cloning (Sphere.xcodeproj is gitignored). The
+composition root lives in `Sphere/Sources/AppContainer.swift`; the shell in
+`SphereApp.swift` (4 tabs, minimal Settings = provider keys, minimal
+Profile = name). Verified to build and run in the iOS Simulator; CI builds
+both the package and the app.
+
 Remaining:
 
-1. **Xcode app project** (plan Phase 2): App target (iOS 17+) + Widget +
-   Watch targets depending on the `SphereCore` package. Wire the composition
-   root: `AppDatabase(path:)` + `EngramStore(path:)` in Application Support,
-   Keychain-backed `APIKeyStore` (`kSecAttrSynchronizable`),
-   `FileOfflineCache`, one `AgentService`, one store per enabled sphere,
-   `SphereToolRegistry(tools: stores.flatMap(\.tools))`.
-   Cross-sphere wiring that is already parameterized and waiting:
-   - `RestScreen(stressLevel: mindfulness.todayStress())`
+1. **Cross-sphere wiring not yet threaded** (all pure-function work +
+   container one-liners):
    - `FocusBuilder.build(hasMeditatedToday: mindfulness.hasMeditated())`
      + extend it with relationships birthdays and home-sphere
-     overdue/due-today tasks (Dart logic documented in FocusBuilder)
+     overdue/due-today tasks (Dart logic documented in FocusBuilder);
+     HomeStore then needs those stores injected
    - `LifeScore`: add rest/hobbies/relationships formulas from the Dart
      `_computeScores` (inputs exist: `rest.avgHoursLast7`,
      `hobbies.totalWeeklyMinutes`, `relationships.needsCheckin`)
    - Birthday reminders: observe `RelationshipsStore.contacts`, schedule
      UserNotifications
-2. Shell: TabView, onboarding, Settings (4 providers), Profile, String
-   Catalog from the ARB files (`sphere/lib/l10n/*.arb`).
-3. Secondary lists per sphere (flagged in README) + voice input in chat.
-4. iCloud sync (Phase 8) and Engram v2 (Phase 9) are post-launch updates;
+2. Full Settings (sphere toggles, theme, language, currency), full Profile
+   (body metrics, conditions, dietary), onboarding flow, String Catalog
+   from the ARB files (`sphere/lib/l10n/*.arb`).
+3. Dashboard grid: live stat lines + drag-to-reorder (Flutter
+   `dashboard/`); Widget + Watch targets (add to project.yml).
+4. Secondary lists per sphere (flagged in README) + voice input in chat.
+5. iCloud sync (Phase 8) and Engram v2 (Phase 9) are post-launch updates;
    do not start them ad hoc.
 
 ## Testing & CI

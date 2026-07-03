@@ -1,0 +1,55 @@
+name: Sphere
+options:
+  bundleIdPrefix: app.sphere
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+packages:
+  SphereCore:
+    path: SphereCore
+
+targets:
+  Sphere:
+    type: application
+    platform: iOS
+    sources:
+      - Sphere/Sources
+    dependencies:
+      - package: SphereCore
+        product: SphereCore
+      - package: SphereCore
+        product: SphereUI
+    info:
+      path: Sphere/Info.plist
+      properties:
+        CFBundleDisplayName: Sphere
+        UILaunchScreen: {}
+        NSLocationWhenInUseUsageDescription: >-
+          Sphere uses your location to show local weather on the Home tab.
+        NSHealthShareUsageDescription: >-
+          Sphere reads your steps, heart rate, sleep, energy, and HRV from
+          Apple Health so your Health agent can work with real data.
+        NSHealthUpdateUsageDescription: >-
+          Sphere does not write health data; this is required by HealthKit.
+        NSPhotoLibraryUsageDescription: >-
+          Attach photos to your agent conversations.
+    entitlements:
+      path: Sphere/Sphere.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 0.1.0
+
+schemes:
+  Sphere:
+    build:
+      targets:
+        Sphere: all
+    run:
+      config: Debug

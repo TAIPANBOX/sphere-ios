@@ -19,3 +19,20 @@ jobs:
       - name: Test
         working-directory: SphereCore
         run: swift test
+
+  app:
+    name: xcodebuild (Sphere app, iOS Simulator)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app || sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Build app
+        run: >
+          xcodebuild -project Sphere.xcodeproj -scheme Sphere
+          -sdk iphonesimulator -destination 'generic/platform=iOS Simulator'
+          build CODE_SIGNING_ALLOWED=NO

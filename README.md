@@ -87,17 +87,28 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
   rollover), check-in reminders, gift ideas/meeting notes, agent tools
   (add_contact, mark_contacted, get_relationships_summary — new), screen
   (218 tests total). **All 12 spheres ported.**
-- [ ] App target (iOS 17+), Widget, Watch — composition root wires: stress →
-  Rest recovery score, meditation/birthdays/home tasks → FocusBuilder,
-  rest/hobbies/relationships → LifeScore, birthdays → UserNotifications
+- [x] App target (iOS 17+) — XcodeGen project (`xcodegen generate` →
+  `Sphere.xcodeproj`), AppContainer composition root (databases in
+  Application Support, Keychain-backed API keys, one AgentService, 12
+  stores, unified tool registry, per-sphere chat sessions, Engram decay on
+  background), 4-tab shell (Home · Spheres grid with per-sphere chat ·
+  Settings with provider keys · Profile), HealthKit/location/photos usage
+  strings. Verified in the iOS Simulator.
+- [ ] Widget + Watch targets; full Settings/Profile/Onboarding ports;
+  dashboard grid live stats + reorder
 - [ ] Wave-2 LifeScore/FocusBuilder inputs (rest, hobbies, relationships,
   home) — extend the pure functions now that all stores exist
 
 ## Development
 
 ```bash
-cd SphereCore
-swift test
+# Core (models, Engram, LLM, stores) — fast, no simulator
+cd SphereCore && swift test
+
+# App — generate the Xcode project first (it is gitignored)
+brew install xcodegen
+xcodegen generate
+open Sphere.xcodeproj
 ```
 
 ## License
