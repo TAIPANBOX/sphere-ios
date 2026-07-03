@@ -85,6 +85,12 @@ passes, screen compiles in `swift build`.
 - **Name clashes with SwiftUI**: SwiftUI defines its own `Transaction` (and
   other common nouns). Inside `SphereUI`, qualify domain types when the
   compiler reports "ambiguous for type lookup": `SphereCore.Transaction`.
+- **`static let` on a `@MainActor` class is actor-isolated** in Swift 6.
+  Constants meant to be used from nonisolated code (tool builders, pure
+  functions) must be declared `nonisolated static let`.
+- **`.foregroundStyle(cond ? .secondary : .red)` fails to type-check** —
+  `.secondary` is a HierarchicalShapeStyle, `.red` a Color. Write
+  `cond ? Color.secondary : Color.red`.
 
 ## What's next (in order)
 
