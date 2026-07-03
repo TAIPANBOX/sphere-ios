@@ -18,7 +18,10 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
 - [x] LLM layer — Anthropic native + OpenAI-compatible engines (OpenAI,
   Gemini, OpenRouter), SSE streaming, tool-call assembly
 - [x] Agent layer — AgentService (chat tool-loop, daily brief, insight with
-  offline cache), SphereToolRegistry, sphere/meta prompts (66 tests total)
+  offline cache), SphereToolRegistry, sphere/meta prompts
+- [x] Golden-template sphere (Goals) — @Observable store on GRDB, agent
+  tools (add_goal / list_goals), Engram notes, SwiftUI screen in `SphereUI`
+  (83 tests total)
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development
