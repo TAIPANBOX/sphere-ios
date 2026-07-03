@@ -178,6 +178,35 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("travel-v1") { db in
+            try db.create(table: "travel_plans") { t in
+                t.primaryKey("id", .text)
+                t.column("destination", .text).notNull()
+                t.column("country", .text).notNull().defaults(to: "")
+                t.column("emoji", .text).notNull().defaults(to: "✈️")
+                t.column("type", .text).notNull()
+                t.column("status", .text).notNull()
+                t.column("startDate", .datetime)
+                t.column("endDate", .datetime)
+                t.column("notes", .text).notNull().defaults(to: "")
+                t.column("budget", .double).notNull().defaults(to: 0)
+                t.column("packingList", .text).notNull().defaults(to: "{}")
+                t.column("documents", .text).notNull().defaults(to: "{}")
+            }
+            try db.create(table: "visited_countries") { t in
+                t.primaryKey("name", .text)
+                t.column("flag", .text).notNull()
+                t.column("year", .integer)
+            }
+            try db.create(table: "wishlist_destinations") { t in
+                t.primaryKey("id", .text)
+                t.column("destination", .text).notNull()
+                t.column("country", .text).notNull()
+                t.column("flag", .text).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+        }
+
         // Next spheres: migrator.registerMigration("relationships-v1") { ... }
 
         return migrator

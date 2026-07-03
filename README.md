@@ -57,6 +57,11 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   digital-detox streak, anti-burnout work hours, weekend plans, agent tools
   (log_sleep, get_rest_summary — new; the Dart version had none), screen
   with sleep chart (166 tests total).
+- [x] Travel sphere — trip planner with type-specific packing/document
+  checklists, next-trip countdown, countries visited (dedup), dream list,
+  agent tools (add_wishlist_destination, get_travel_summary — new), screen
+  with trip detail checklists and flow-layout country chips (176 tests
+  total).
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development
