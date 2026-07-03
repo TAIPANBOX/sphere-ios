@@ -299,7 +299,22 @@ public final class AppDatabase: Sendable {
             }
         }
 
-        // Next spheres: migrator.registerMigration("relationships-v1") { ... }
+        migrator.registerMigration("relationships-v1") { db in
+            try db.create(table: "contacts") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("emoji", .text).notNull().defaults(to: "👤")
+                t.column("type", .text).notNull()
+                t.column("birthday", .datetime)
+                t.column("lastContact", .datetime)
+                t.column("note", .text).notNull().defaults(to: "")
+                t.column("reminderDays", .integer).notNull().defaults(to: 30)
+                t.column("giftIdeas", .text).notNull().defaults(to: "[]")
+                t.column("meetingNotes", .text).notNull().defaults(to: "[]")
+                t.column("sharedExperiences", .text).notNull().defaults(to: "[]")
+                t.column("importantInfo", .text).notNull().defaults(to: "")
+            }
+        }
 
         return migrator
     }

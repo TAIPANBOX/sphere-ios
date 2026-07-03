@@ -83,7 +83,15 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   Score), agent tools (log_hobby_session with by-name matching that lists
   known hobbies on miss, get_hobbies_summary — new), screen (210 tests
   total).
-- [ ] App target (iOS 17+), Widget, Watch
+- [x] Relationships sphere — contacts with birthday countdown (year
+  rollover), check-in reminders, gift ideas/meeting notes, agent tools
+  (add_contact, mark_contacted, get_relationships_summary — new), screen
+  (218 tests total). **All 12 spheres ported.**
+- [ ] App target (iOS 17+), Widget, Watch — composition root wires: stress →
+  Rest recovery score, meditation/birthdays/home tasks → FocusBuilder,
+  rest/hobbies/relationships → LifeScore, birthdays → UserNotifications
+- [ ] Wave-2 LifeScore/FocusBuilder inputs (rest, hobbies, relationships,
+  home) — extend the pure functions now that all stores exist
 
 ## Development
 

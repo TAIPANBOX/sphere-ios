@@ -98,16 +98,28 @@ passes, screen compiles in `swift build`.
 
 ## What's next (in order)
 
+All 12 sphere stores + screens, the Home tab, and the chat are ported.
+Remaining:
+
 1. **Xcode app project** (plan Phase 2): App target (iOS 17+) + Widget +
    Watch targets depending on the `SphereCore` package. Wire the composition
    root: `AppDatabase(path:)` + `EngramStore(path:)` in Application Support,
    Keychain-backed `APIKeyStore` (`kSecAttrSynchronizable`),
-   `FileOfflineCache`, one `AgentService`, stores per enabled sphere,
+   `FileOfflineCache`, one `AgentService`, one store per enabled sphere,
    `SphereToolRegistry(tools: stores.flatMap(\.tools))`.
+   Cross-sphere wiring that is already parameterized and waiting:
+   - `RestScreen(stressLevel: mindfulness.todayStress())`
+   - `FocusBuilder.build(hasMeditatedToday: mindfulness.hasMeditated())`
+     + extend it with relationships birthdays and home-sphere
+     overdue/due-today tasks (Dart logic documented in FocusBuilder)
+   - `LifeScore`: add rest/hobbies/relationships formulas from the Dart
+     `_computeScores` (inputs exist: `rest.avgHoursLast7`,
+     `hobbies.totalWeeklyMinutes`, `relationships.needsCheckin`)
+   - Birthday reminders: observe `RelationshipsStore.contacts`, schedule
+     UserNotifications
 2. Shell: TabView, onboarding, Settings (4 providers), Profile, String
    Catalog from the ARB files (`sphere/lib/l10n/*.arb`).
-3. Home tab, then spheres wave 1 (Health → Learning → Career → Finance →
-   Goals screen already exists), wave 2, chat, integrations — per the plan.
+3. Secondary lists per sphere (flagged in README) + voice input in chat.
 4. iCloud sync (Phase 8) and Engram v2 (Phase 9) are post-launch updates;
    do not start them ad hoc.
 
