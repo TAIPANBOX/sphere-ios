@@ -71,7 +71,7 @@ public struct Contact: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "contact_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("contact", now: now)
     }
 
     /// Days until the next occurrence of the birthday (rolls to next year).

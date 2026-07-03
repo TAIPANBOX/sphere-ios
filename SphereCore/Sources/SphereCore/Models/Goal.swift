@@ -61,7 +61,7 @@ public struct Goal: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "goal_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("goal", now: now)
     }
 }
 

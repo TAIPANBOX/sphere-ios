@@ -49,7 +49,7 @@ public struct Book: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "book_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("book", now: now)
     }
 }
 
@@ -99,7 +99,7 @@ public struct LearningSkill: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "skill_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("skill", now: now)
     }
 }
 

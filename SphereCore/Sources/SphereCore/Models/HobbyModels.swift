@@ -48,7 +48,7 @@ public struct Hobby: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "hobby_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("hobby", now: now)
     }
 }
 
@@ -72,7 +72,7 @@ public struct HobbySession: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "hsession_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("hsession", now: now)
     }
 }
 

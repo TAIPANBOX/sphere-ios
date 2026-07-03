@@ -16,7 +16,7 @@ public struct Habit: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "habit_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("habit", now: now)
     }
 
     public func checkedIn(on date: Date = Date()) -> Bool {
@@ -53,8 +53,7 @@ public struct Habit: Codable, Equatable, Identifiable, Sendable {
     }
 
     static func dateKey(_ date: Date) -> String {
-        let parts = Calendar.current.dateComponents([.year, .month, .day], from: date)
-        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+        DayKey.make(date)
     }
 }
 

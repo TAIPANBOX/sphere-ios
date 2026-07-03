@@ -96,7 +96,7 @@ public struct Workout: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "workout_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("workout", now: now)
     }
 }
 
@@ -121,11 +121,21 @@ extension WeightEntry: FetchableRecord, PersistableRecord {
     public static let databaseTableName = "weights"
 }
 
-/// "yyyy-MM-dd" bucket keys in the user's current calendar — water intake,
-/// weight overwrites, habit check-ins.
+/// "yyyy-MM-dd" bucket keys — water intake, weight overwrites, habit
+/// check-ins, tool payload dates.
+///
+/// Pinned to the Gregorian calendar (in the user's time zone) so keys stay
+/// stable when the device uses a Buddhist/Japanese locale calendar and match
+/// the Dart data, which was always Gregorian.
 public enum DayKey {
+    static var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .current
+        return calendar
+    }
+
     public static func make(_ date: Date = Date()) -> String {
-        let parts = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        let parts = calendar.dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
 }

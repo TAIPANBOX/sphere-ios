@@ -69,7 +69,7 @@ public struct Transaction: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "tx_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("tx", now: now)
     }
 }
 
@@ -121,7 +121,7 @@ public struct Subscription: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "sub_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("sub", now: now)
     }
 
     public func daysUntilBilling(asOf now: Date = Date()) -> Int {

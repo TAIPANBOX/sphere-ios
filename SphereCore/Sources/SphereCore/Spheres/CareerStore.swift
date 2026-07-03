@@ -191,10 +191,13 @@ public final class CareerStore {
 
     /// Accepts the "YYYY-MM-DD" the schema asks for; anything unparseable is
     /// dropped (the task is still created), matching the Dart tryParse.
+    /// Pinned to POSIX/Gregorian: the model sends ISO dates, and a device
+    /// set to a Buddhist/Japanese calendar must not reinterpret the year.
     nonisolated static func parseDueDate(_ raw: String) -> Date? {
         guard !raw.isEmpty else { return nil }
         let formatter = DateFormatter()
-        formatter.calendar = Calendar.current
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
         formatter.timeZone = .current
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.date(from: raw)

@@ -59,7 +59,7 @@ public struct MeditationSession: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "med_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("med", now: now)
     }
 }
 
@@ -81,7 +81,7 @@ public struct JournalEntry: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "journal_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("journal", now: now)
     }
 }
 

@@ -60,7 +60,7 @@ public struct CareerTask: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "task_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("task", now: now)
     }
 }
 
@@ -127,7 +127,7 @@ public struct CareerProject: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "proj_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("proj", now: now)
     }
 }
 
@@ -194,7 +194,7 @@ public struct Interview: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "int_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("int", now: now)
     }
 }
 

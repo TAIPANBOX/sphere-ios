@@ -72,7 +72,7 @@ public struct CreativeProject: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "creative_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("creative", now: now)
     }
 }
 
@@ -94,7 +94,7 @@ public struct InspirationItem: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "insp_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("insp", now: now)
     }
 }
 

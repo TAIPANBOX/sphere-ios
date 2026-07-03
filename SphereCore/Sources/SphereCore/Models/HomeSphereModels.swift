@@ -61,7 +61,7 @@ public struct HomeTask: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "hometask_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("hometask", now: now)
     }
 }
 
@@ -118,7 +118,7 @@ public struct Plant: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "plant_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("plant", now: now)
     }
 }
 
@@ -140,7 +140,7 @@ public struct ShoppingItem: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "shop_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("shop", now: now)
     }
 }
 

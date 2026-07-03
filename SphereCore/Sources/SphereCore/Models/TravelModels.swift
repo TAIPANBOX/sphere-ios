@@ -76,7 +76,7 @@ public struct TravelPlan: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "trip_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("trip", now: now)
     }
 
     /// Days until the start date; nil when unscheduled or already started.
@@ -163,7 +163,7 @@ public struct WishlistDestination: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "wish_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("wish", now: now)
     }
 }
 

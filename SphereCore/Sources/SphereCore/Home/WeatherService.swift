@@ -102,7 +102,11 @@ public struct WeatherService: Sendable {
         if let days = json["daily"]?["time"]?.arrayValue,
            let maxes = json["daily"]?["temperature_2m_max"]?.arrayValue,
            let codes = json["daily"]?["weather_code"]?.arrayValue {
+            // Open-Meteo dates are ISO/Gregorian — pin the parser so a
+            // Buddhist/Japanese device calendar can't reinterpret the year.
             let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.calendar = Calendar(identifier: .gregorian)
             formatter.dateFormat = "yyyy-MM-dd"
             let dayFormatter = DateFormatter()
             dayFormatter.dateFormat = "EE"

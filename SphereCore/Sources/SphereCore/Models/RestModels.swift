@@ -61,7 +61,7 @@ public struct SleepEntry: Codable, Equatable, Identifiable, Sendable {
     }
 
     public static func newID(now: Date = Date()) -> String {
-        "sleep_\(Int64(now.timeIntervalSince1970 * 1000))"
+        EntityID.make("sleep", now: now)
     }
 }
 
