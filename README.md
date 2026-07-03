@@ -31,6 +31,11 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   (add_transaction, get_finance_summary), screen (110 tests total).
   Secondary lists (accounts, debts, investments, savings) to port per the
   handoff recipe.
+- [x] Learning sphere — books library (reading/queue/completed, page
+  progress, quotes, notes) + skills tracker (1–5 levels, categories),
+  list_books agent tool, screen (118 tests total). Secondary lists
+  (courses, flashcards, languages) and the Pomodoro timer to port per the
+  handoff recipe.
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development

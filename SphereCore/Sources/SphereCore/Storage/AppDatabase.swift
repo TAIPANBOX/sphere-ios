@@ -92,6 +92,28 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("learning-v1") { db in
+            try db.create(table: "books") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("author", .text).notNull().defaults(to: "")
+                t.column("currentPage", .integer).notNull().defaults(to: 0)
+                t.column("totalPages", .integer).notNull()
+                t.column("status", .text).notNull()
+                t.column("emoji", .text).notNull().defaults(to: "📖")
+                t.column("notes", .text).notNull().defaults(to: "")
+                t.column("quotes", .text).notNull().defaults(to: "[]")
+            }
+            try db.create(table: "skills") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("category", .text).notNull().defaults(to: "General")
+                t.column("level", .integer).notNull().defaults(to: 1)
+                t.column("status", .text).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+        }
+
         // Next spheres: migrator.registerMigration("relationships-v1") { ... }
 
         return migrator
