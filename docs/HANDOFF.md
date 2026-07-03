@@ -82,6 +82,9 @@ passes, screen compiles in `swift build`.
   compatible with the Dart DB for the future import. Don't rename them.
 - **SphereCore must not import SwiftUI/UIKit** — UI lives in `SphereUI`.
   This keeps `swift test` fast and the core portable to Watch/Widget.
+- **Name clashes with SwiftUI**: SwiftUI defines its own `Transaction` (and
+  other common nouns). Inside `SphereUI`, qualify domain types when the
+  compiler reports "ambiguous for type lookup": `SphereCore.Transaction`.
 
 ## What's next (in order)
 
