@@ -233,6 +233,31 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("home-v1") { db in
+            try db.create(table: "home_tasks") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("category", .text).notNull()
+                t.column("status", .text).notNull()
+                t.column("dueDate", .datetime)
+                t.column("isRecurring", .boolean).notNull().defaults(to: false)
+                t.column("createdAt", .datetime).notNull()
+            }
+            try db.create(table: "plants") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("emoji", .text).notNull().defaults(to: "🌿")
+                t.column("lastWatered", .datetime)
+                t.column("intervalDays", .integer).notNull().defaults(to: 3)
+            }
+            try db.create(table: "shopping_items") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("category", .text).notNull().defaults(to: "General")
+                t.column("checked", .boolean).notNull().defaults(to: false)
+            }
+        }
+
         // Next spheres: migrator.registerMigration("relationships-v1") { ... }
 
         return migrator

@@ -68,6 +68,11 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   add_journal_entry, get_mindfulness_summary), screen with mood row,
   animated 4-7-8 breathing exercise, stress chart, journal (186 tests
   total). Affirmations list to port per the handoff recipe.
+- [x] Home sphere — household tasks (overdue/due-today helpers for Today's
+  Focus), plant watering with intervals, shopping list, agent tools
+  (add_home_task, add_shopping_item, get_home_summary — new), screen
+  (194 tests total). Secondary lists (appliances, inventory, renovation,
+  utilities) to port per the handoff recipe.
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development
