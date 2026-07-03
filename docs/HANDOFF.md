@@ -126,5 +126,5 @@ Remaining:
 ## Testing & CI
 
 - `cd SphereCore && swift test` — full suite, runs on macOS, no simulator.
-- CI is not set up yet (Phase 0 leftover): add a GitHub Actions workflow
-  running `swift test` on macOS when the repo goes to GitHub.
+- CI: `.github/workflows/ci.yml` runs `swift build` + `swift test` on macOS
+  for every push/PR (repo: github.com/TAIPANBOX/sphere-ios, private).
