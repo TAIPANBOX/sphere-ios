@@ -52,6 +52,11 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   history building with image placeholders) + ChatScreen (markdown bubbles,
   photo attachments via PhotosPicker, auto-scroll) (155 tests total).
   Voice input (SFSpeechRecognizer) lands with the app target.
+- [x] Rest sphere — sleep log with recovery levels + Recovery Score
+  (formula from the Flutter screen), sleep schedule with midnight rollover,
+  digital-detox streak, anti-burnout work hours, weekend plans, agent tools
+  (log_sleep, get_rest_summary — new; the Dart version had none), screen
+  with sleep chart (166 tests total).
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development

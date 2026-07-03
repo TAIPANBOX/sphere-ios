@@ -91,6 +91,10 @@ passes, screen compiles in `swift build`.
 - **`.foregroundStyle(cond ? .secondary : .red)` fails to type-check** —
   `.secondary` is a HierarchicalShapeStyle, `.red` a Color. Write
   `cond ? Color.secondary : Color.red`.
+- **GRDB's async `read`/`write` require a Sendable result.** Returning `Row`
+  (not Sendable) silently selects the SYNC overload — you get a "no async
+  operations within await" warning and a main-thread-blocking read. Map rows
+  to Sendable values (tuples/structs) inside the closure.
 
 ## What's next (in order)
 

@@ -143,6 +143,41 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("rest-v1") { db in
+            try db.create(table: "sleep_entries") { t in
+                t.primaryKey("id", .text)
+                t.column("date", .datetime).notNull()
+                t.column("hoursSlept", .double).notNull()
+                t.column("recovery", .text).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+                t.column("bedtimeHour", .integer).notNull().defaults(to: 23)
+                t.column("bedtimeMinute", .integer).notNull().defaults(to: 0)
+            }
+            try db.create(table: "sleep_schedule") { t in
+                t.primaryKey("id", .text)
+                t.column("bedtimeHour", .integer).notNull()
+                t.column("bedtimeMinute", .integer).notNull()
+                t.column("wakeHour", .integer).notNull()
+                t.column("wakeMinute", .integer).notNull()
+                t.column("goalHours", .double).notNull()
+                t.column("remindersEnabled", .boolean).notNull()
+            }
+            try db.create(table: "detox_days") { t in
+                t.primaryKey("dateKey", .text)
+            }
+            try db.create(table: "work_hours") { t in
+                t.primaryKey("dateKey", .text)
+                t.column("hours", .double).notNull()
+            }
+            try db.create(table: "weekend_plans") { t in
+                t.primaryKey("weekKey", .text)
+                t.column("activities", .text).notNull().defaults(to: "[]")
+                t.column("location", .text).notNull().defaults(to: "")
+                t.column("withWho", .text).notNull().defaults(to: "")
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+        }
+
         // Next spheres: migrator.registerMigration("relationships-v1") { ... }
 
         return migrator
