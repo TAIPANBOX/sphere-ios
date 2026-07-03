@@ -16,8 +16,9 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
 - [x] Engram v1.5 on GRDB — episodic memory, FTS5 + BM25 recall, access
   reinforcement, Ebbinghaus decay + pruning
 - [x] LLM layer — Anthropic native + OpenAI-compatible engines (OpenAI,
-  Gemini, OpenRouter), SSE streaming, tool-call assembly (45 tests total)
-- [ ] AgentService + sphere tools
+  Gemini, OpenRouter), SSE streaming, tool-call assembly
+- [x] Agent layer — AgentService (chat tool-loop, daily brief, insight with
+  offline cache), SphereToolRegistry, sphere/meta prompts (66 tests total)
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development
