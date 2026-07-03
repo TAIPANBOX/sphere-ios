@@ -207,6 +207,32 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("mindfulness-v1") { db in
+            try db.create(table: "meditation_sessions") { t in
+                t.primaryKey("id", .text)
+                t.column("type", .text).notNull()
+                t.column("durationMinutes", .integer).notNull()
+                t.column("date", .datetime).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+                t.column("moodBefore", .integer).notNull().defaults(to: 3)
+                t.column("moodAfter", .integer).notNull().defaults(to: 4)
+            }
+            try db.create(table: "journal_entries") { t in
+                t.primaryKey("id", .text)
+                t.column("date", .datetime).notNull()
+                t.column("text", .text).notNull()
+                t.column("sentiment", .double)
+            }
+            try db.create(table: "moods") { t in
+                t.primaryKey("dateKey", .text)
+                t.column("score", .integer).notNull()
+            }
+            try db.create(table: "stress_levels") { t in
+                t.primaryKey("dateKey", .text)
+                t.column("level", .integer).notNull()
+            }
+        }
+
         // Next spheres: migrator.registerMigration("relationships-v1") { ... }
 
         return migrator

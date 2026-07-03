@@ -62,6 +62,12 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   agent tools (add_wishlist_destination, get_travel_summary — new), screen
   with trip detail checklists and flow-layout country chips (176 tests
   total).
+- [x] Mindfulness sphere — meditation sessions with streak, day-keyed mood
+  (1–5) and stress (1–10) check-ins, journal with Engram previews, all four
+  Dart agent tools ported verbatim (log_meditation, log_mood,
+  add_journal_entry, get_mindfulness_summary), screen with mood row,
+  animated 4-7-8 breathing exercise, stress chart, journal (186 tests
+  total). Affirmations list to port per the handoff recipe.
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development
