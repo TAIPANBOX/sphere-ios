@@ -78,6 +78,11 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   idea capture, agent tools (capture_idea, get_creativity_summary — new),
   screen with inline idea capture (202 tests total). Portfolio and project
   sessions to port per the handoff recipe.
+- [x] Hobbies sphere — hobby list with weekly targets/goals/equipment,
+  session log with cascade delete, weekly-minutes windows (feeds the Life
+  Score), agent tools (log_hobby_session with by-name matching that lists
+  known hobbies on miss, get_hobbies_summary — new), screen (210 tests
+  total).
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development

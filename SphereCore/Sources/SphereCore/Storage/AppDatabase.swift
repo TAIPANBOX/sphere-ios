@@ -278,6 +278,27 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("hobbies-v1") { db in
+            try db.create(table: "hobbies") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("emoji", .text).notNull().defaults(to: "🎸")
+                t.column("frequency", .text).notNull()
+                t.column("targetMinutesPerWeek", .integer).notNull().defaults(to: 60)
+                t.column("isActive", .boolean).notNull().defaults(to: true)
+                t.column("goal", .text).notNull().defaults(to: "")
+                t.column("equipment", .text).notNull().defaults(to: "[]")
+                t.column("resources", .text).notNull().defaults(to: "[]")
+            }
+            try db.create(table: "hobby_sessions") { t in
+                t.primaryKey("id", .text)
+                t.column("hobbyId", .text).notNull().indexed()
+                t.column("durationMinutes", .integer).notNull()
+                t.column("date", .datetime).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+        }
+
         // Next spheres: migrator.registerMigration("relationships-v1") { ... }
 
         return migrator
