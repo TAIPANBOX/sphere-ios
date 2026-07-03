@@ -67,7 +67,32 @@ public final class AppDatabase: Sendable {
             }
         }
 
-        // Next spheres: migrator.registerMigration("finance-v1") { ... }
+        migrator.registerMigration("finance-v1") { db in
+            try db.create(table: "transactions") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("amount", .double).notNull()
+                t.column("type", .text).notNull()
+                t.column("category", .text).notNull()
+                t.column("date", .datetime).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "budgets") { t in
+                t.primaryKey("id", .text)
+                t.column("category", .text).notNull()
+                t.column("limit", .double).notNull()
+            }
+            try db.create(table: "subscriptions") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("emoji", .text).notNull().defaults(to: "📱")
+                t.column("amount", .double).notNull()
+                t.column("billingDay", .integer).notNull()
+                t.column("isActive", .boolean).notNull().defaults(to: true)
+            }
+        }
+
+        // Next spheres: migrator.registerMigration("relationships-v1") { ... }
 
         return migrator
     }

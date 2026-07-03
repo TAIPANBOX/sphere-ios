@@ -26,6 +26,11 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   agent tools (log_water_glass, log_weight, get_health_today), screen with
   Swift Charts weekly steps (98 tests total). Secondary lists (medications,
   labs, cycle, doctor) still to port — simple CRUD per the handoff recipe.
+- [x] Finance sphere — transactions feed, monthly budgets with over-budget
+  detection, subscriptions with billing countdown, agent tools
+  (add_transaction, get_finance_summary), screen (110 tests total).
+  Secondary lists (accounts, debts, investments, savings) to port per the
+  handoff recipe.
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development
