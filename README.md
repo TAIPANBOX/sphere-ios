@@ -47,6 +47,11 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   streamed Meta Agent brief, HomeScreen (146 tests total). Wave-2 focus
   sources (birthdays, home tasks, rest/hobbies scores) join as those spheres
   are ported.
+- [x] Agent chat — ChatSession state machine (streaming bubbles, tool
+  confirmation chips, fresh bubble after tools, friendly error bubbles,
+  history building with image placeholders) + ChatScreen (markdown bubbles,
+  photo attachments via PhotosPicker, auto-scroll) (155 tests total).
+  Voice input (SFSpeechRecognizer) lands with the app target.
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development
