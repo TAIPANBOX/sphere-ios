@@ -4,7 +4,7 @@ Native SwiftUI rewrite of [Sphere](https://github.com/TAIPANBOX/sphere) — a
 Personal Life Intelligence System with 12 life-sphere AI agents and on-device
 cognitive memory (Engram).
 
-Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
+Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX/sphere/blob/main/planning/IOS_REWRITE_PLAN.md)
 
 ## Structure
 
@@ -99,3 +99,7 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
 cd SphereCore
 swift test
 ```
+
+## License
+
+MIT

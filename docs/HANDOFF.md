@@ -4,7 +4,8 @@ Written at the end of the Phase-1 core sprint (2026-07-03). The core was
 built and reviewed with extra care; from here on the work is mostly
 pattern-repetition. Read this once before touching the code.
 
-Master plan: `../../sphere/planning/IOS_REWRITE_PLAN.md` (phases, decisions).
+Master plan: `../../sphere/planning/IOS_REWRITE_PLAN.md` (phases, decisions;
+on GitHub: TAIPANBOX/sphere → planning/IOS_REWRITE_PLAN.md).
 Repo rules: `../CLAUDE.md`. Flutter reference app: `../../sphere` (frozen).
 
 ## What exists and is trusted
