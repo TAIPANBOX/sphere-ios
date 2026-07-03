@@ -258,6 +258,26 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("creativity-v1") { db in
+            try db.create(table: "creative_projects") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("description", .text).notNull().defaults(to: "")
+                t.column("type", .text).notNull()
+                t.column("status", .text).notNull()
+                t.column("progressPercent", .integer).notNull().defaults(to: 0)
+                t.column("createdAt", .datetime).notNull()
+                t.column("lastWorkedOn", .datetime)
+                t.column("collaborators", .text).notNull().defaults(to: "[]")
+            }
+            try db.create(table: "inspirations") { t in
+                t.primaryKey("id", .text)
+                t.column("content", .text).notNull()
+                t.column("tag", .text).notNull().defaults(to: "Idea")
+                t.column("date", .datetime).notNull()
+            }
+        }
+
         // Next spheres: migrator.registerMigration("relationships-v1") { ... }
 
         return migrator

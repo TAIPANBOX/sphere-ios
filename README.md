@@ -73,6 +73,11 @@ Rewrite plan: `../sphere/planning/IOS_REWRITE_PLAN.md`
   (add_home_task, add_shopping_item, get_home_summary — new), screen
   (194 tests total). Secondary lists (appliances, inventory, renovation,
   utilities) to port per the handoff recipe.
+- [x] Creativity sphere — creative projects (8 types, idea/in-progress/
+  paused/completed, progress with lastWorkedOn stamping, collaborators) +
+  idea capture, agent tools (capture_idea, get_creativity_summary — new),
+  screen with inline idea capture (202 tests total). Portfolio and project
+  sessions to port per the handoff recipe.
 - [ ] App target (iOS 17+), Widget, Watch
 
 ## Development
