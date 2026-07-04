@@ -20,6 +20,7 @@ targets:
         product: SphereCore
       - package: SphereCore
         product: SphereUI
+      - target: SphereWidgetExtension
     info:
       path: Sphere/Info.plist
       properties:
@@ -38,8 +39,38 @@ targets:
       path: Sphere/Sphere.entitlements
       properties:
         com.apple.developer.healthkit: true
+        com.apple.security.application-groups:
+          - group.app.sphere.shared
     settings:
       base:
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 0.1.0
+
+  SphereWidgetExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - SphereWidget
+    dependencies:
+      - package: SphereCore
+        product: SphereCore
+    info:
+      path: SphereWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Sphere
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: SphereWidget/SphereWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.app.sphere.shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.sphere.Sphere.Widget
         SWIFT_VERSION: "6.0"
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic

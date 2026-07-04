@@ -1,5 +1,6 @@
 import Foundation
 import SphereCore
+import WidgetKit
 
 /// Composition root: builds the databases, services, and one store per
 /// sphere, and wires the cross-sphere connections the stores expose as
@@ -103,6 +104,7 @@ final class AppContainer {
         try? await hobbies.load()
         try? await relationships.load()
         await BirthdayReminders.sync(contacts: relationships.contacts)
+        refreshWidget()
     }
 
     /// Call after contact mutations so reminders track the latest birthdays.
@@ -171,5 +173,27 @@ final class AppContainer {
     func runMemoryMaintenance() async {
         _ = try? await engram.runDecay()
         _ = try? await engram.prune()
+    }
+
+    /// Writes the home-screen widget snapshot (Life Score, best/needs-focus
+    /// sphere, top focus items) to the shared App Group and reloads the
+    /// widget timeline. Cheap; call after loadAll and on background.
+    func refreshWidget() {
+        guard let store = WidgetSnapshotStore.shared() else { return }
+        let scores = home.scores
+        guard let best = LifeScore.best(scores), let needs = LifeScore.needsFocus(scores) else { return }
+        let snapshot = WidgetSnapshot(
+            lifeScore: home.lifeScore,
+            bestEmoji: best.emoji,
+            bestName: best.sphere.rawValue.capitalized,
+            needsFocusEmoji: needs.emoji,
+            needsFocusName: needs.sphere.rawValue.capitalized,
+            topFocus: home.focusItems.prefix(3).map {
+                WidgetSnapshot.FocusLine(emoji: $0.emoji, title: $0.title)
+            },
+            updatedAt: Date()
+        )
+        store.write(snapshot)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
