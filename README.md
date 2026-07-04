@@ -94,10 +94,13 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
   background), 4-tab shell (Home · Spheres grid with per-sphere chat ·
   Settings with provider keys · Profile), HealthKit/location/photos usage
   strings. Verified in the iOS Simulator.
+- [x] Wave-2 cross-sphere wiring — LifeScore now scores 8 spheres
+  (+ relationships/rest/hobbies formulas from Dart), Today's Focus includes
+  contact birthdays and home-sphere overdue/due-today tasks, meditation
+  check wired from Mindfulness, yearly birthday notifications at 09:00
+  (UNCalendarNotificationTrigger, idempotent resync) (223 tests total).
 - [ ] Widget + Watch targets; full Settings/Profile/Onboarding ports;
   dashboard grid live stats + reorder
-- [ ] Wave-2 LifeScore/FocusBuilder inputs (rest, hobbies, relationships,
-  home) — extend the pure functions now that all stores exist
 
 ## Development
 

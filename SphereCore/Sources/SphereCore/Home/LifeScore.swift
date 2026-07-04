@@ -18,9 +18,7 @@ public struct SphereScore: Sendable, Equatable, Identifiable {
 }
 
 /// Life Score formulas ported from the Flutter home tab (`_computeScores`).
-/// Covers the wave-1 spheres; wave-2 spheres (relationships, rest, hobbies)
-/// join here when their stores are ported — until then the overall score is
-/// the mean of what exists.
+/// Eight scored spheres, in the Dart display order.
 public enum LifeScore {
     public static func compute(
         metrics: HealthMetrics?,
@@ -29,6 +27,11 @@ public enum LifeScore {
         totalIncome: Double,
         totalExpenses: Double,
         goals: [Goal],
+        contacts: [Contact] = [],
+        avgSleepHours: Double = 0,
+        avgRecovery: RecoveryLevel = .good,
+        hobbiesCount: Int = 0,
+        hobbiesWeeklyMinutes: Int = 0,
         now: Date = Date()
     ) -> [SphereScore] {
         [
@@ -36,6 +39,9 @@ public enum LifeScore {
             learning(books: books),
             career(tasks: careerTasks, now: now),
             finance(totalIncome: totalIncome, totalExpenses: totalExpenses),
+            relationships(contacts: contacts, now: now),
+            rest(avgSleepHours: avgSleepHours, avgRecovery: avgRecovery),
+            hobbies(count: hobbiesCount, weeklyMinutes: hobbiesWeeklyMinutes),
             goalsScore(goals: goals),
         ]
     }
@@ -128,6 +134,59 @@ public enum LifeScore {
             ? "Saving \(Int((rate * 100).rounded()))% of income"
             : "Spending exceeds income"
         return SphereScore(sphere: .finance, emoji: "💰", score: score, insight: insight)
+    }
+
+    static func relationships(contacts: [Contact], now: Date = Date()) -> SphereScore {
+        guard !contacts.isEmpty else {
+            return SphereScore(
+                sphere: .relationships, emoji: "💜", score: 0.75,
+                insight: "Add people you want to stay close to"
+            )
+        }
+        let checkin = contacts.count { $0.needsCheckin(asOf: now) }
+        let birthdays = contacts.count { ($0.daysUntilBirthday(asOf: now) ?? 999) <= 30 }
+        let score = checkin == 0
+            ? 0.9
+            : min(max(1.0 - Double(checkin) / Double(contacts.count) * 0.5, 0.3), 0.9)
+        let insight = if birthdays > 0 {
+            "\(contacts.count) people · \(birthdays) birthday\(birthdays == 1 ? "" : "s") coming up"
+        } else if checkin > 0 {
+            "\(contacts.count) people · \(checkin) need a check-in"
+        } else {
+            "\(contacts.count) people · all caught up"
+        }
+        return SphereScore(sphere: .relationships, emoji: "💜", score: score, insight: insight)
+    }
+
+    static func rest(avgSleepHours: Double, avgRecovery: RecoveryLevel) -> SphereScore {
+        guard avgSleepHours > 0 else {
+            return SphereScore(
+                sphere: .rest, emoji: "🌊", score: 0.5,
+                insight: "Log sleep to see recovery"
+            )
+        }
+        return SphereScore(
+            sphere: .rest, emoji: "🌊",
+            score: min(max(avgSleepHours / 8, 0.2), 1),
+            insight: String(format: "%.1fh avg sleep · %@ recovery", avgSleepHours, avgRecovery.label)
+        )
+    }
+
+    static func hobbies(count: Int, weeklyMinutes: Int) -> SphereScore {
+        guard count > 0 else {
+            return SphereScore(
+                sphere: .hobbies, emoji: "🎸", score: 0.5,
+                insight: "Add a hobby to make time for it"
+            )
+        }
+        let insight = weeklyMinutes > 0
+            ? "\(count) hobbies · \(weeklyMinutes) min this week"
+            : "\(count) hobbies · no time logged this week"
+        return SphereScore(
+            sphere: .hobbies, emoji: "🎸",
+            score: min(max(Double(weeklyMinutes) / 300, 0.1), 1),
+            insight: insight
+        )
     }
 
     static func goalsScore(goals: [Goal]) -> SphereScore {

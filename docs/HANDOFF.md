@@ -109,17 +109,12 @@ both the package and the app.
 
 Remaining:
 
-1. **Cross-sphere wiring not yet threaded** (all pure-function work +
-   container one-liners):
-   - `FocusBuilder.build(hasMeditatedToday: mindfulness.hasMeditated())`
-     + extend it with relationships birthdays and home-sphere
-     overdue/due-today tasks (Dart logic documented in FocusBuilder);
-     HomeStore then needs those stores injected
-   - `LifeScore`: add rest/hobbies/relationships formulas from the Dart
-     `_computeScores` (inputs exist: `rest.avgHoursLast7`,
-     `hobbies.totalWeeklyMinutes`, `relationships.needsCheckin`)
-   - Birthday reminders: observe `RelationshipsStore.contacts`, schedule
-     UserNotifications
+1. ~~Cross-sphere wiring~~ DONE: LifeScore scores 8 spheres, FocusBuilder
+   takes contacts/homeTasks/hasMeditatedToday, HomeStore injects the five
+   wave-2 stores, `BirthdayReminders.sync` (app target) reschedules yearly
+   09:00 notifications after `loadAll` — call
+   `container.refreshBirthdayReminders()` after contact mutations in future
+   contact-editing UI.
 2. Full Settings (sphere toggles, theme, language, currency), full Profile
    (body metrics, conditions, dietary), onboarding flow, String Catalog
    from the ARB files (`sphere/lib/l10n/*.arb`).

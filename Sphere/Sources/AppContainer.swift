@@ -73,6 +73,11 @@ final class AppContainer {
             career: career,
             finance: finance,
             goals: goals,
+            rest: rest,
+            hobbies: hobbies,
+            mindfulness: mindfulness,
+            relationships: relationships,
+            homeSphere: homeSphere,
             agent: agent,
             weatherService: WeatherService(),
             location: CoreLocationProvider()
@@ -94,6 +99,12 @@ final class AppContainer {
         try? await creativity.load()
         try? await hobbies.load()
         try? await relationships.load()
+        await BirthdayReminders.sync(contacts: relationships.contacts)
+    }
+
+    /// Call after contact mutations so reminders track the latest birthdays.
+    func refreshBirthdayReminders() async {
+        await BirthdayReminders.sync(contacts: relationships.contacts)
     }
 
     /// One conversation per sphere, kept alive for the app session.

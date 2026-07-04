@@ -79,6 +79,63 @@ struct FocusBuilderTests {
         #expect(!noSteps.contains { $0.id == "health_steps" })
     }
 
+    @Test func birthdaysTodayAreUrgentWithinThreeDays() {
+        let calendar = Calendar.current
+        let todayBday = calendar.date(byAdding: .year, value: -30, to: calendar.startOfDay(for: now))!
+        let inTwoDays = calendar.date(
+            byAdding: .year, value: -25,
+            to: calendar.startOfDay(for: now).addingTimeInterval(2 * 86_400)
+        )!
+        let farAway = calendar.date(
+            byAdding: .year, value: -25,
+            to: calendar.startOfDay(for: now).addingTimeInterval(20 * 86_400)
+        )!
+        let items = FocusBuilder.build(
+            careerTasks: [], goals: [], metrics: nil,
+            contacts: [
+                Contact(id: "c1", name: "Olena", birthday: inTwoDays),
+                Contact(id: "c2", name: "Max", birthday: todayBday),
+                Contact(id: "c3", name: "Far", birthday: farAway),
+            ],
+            now: now
+        )
+        let today = items.first { $0.id == "bday_c2" }
+        #expect(today?.urgency == .urgent)
+        #expect(today?.subtitle == "Today! 🎉")
+        #expect(today?.tag == "Today")
+
+        let soon = items.first { $0.id == "bday_c1" }
+        #expect(soon?.urgency == .important)
+        #expect(soon?.subtitle == "In 2 days")
+        #expect(!items.contains { $0.id == "bday_c3" })
+    }
+
+    @Test func homeTasksFeedOverdueAndToday() {
+        let items = FocusBuilder.build(
+            careerTasks: [], goals: [], metrics: nil,
+            homeTasks: [
+                HomeTask(
+                    id: "h1", title: "Water bill", category: .bills,
+                    dueDate: now.addingTimeInterval(-2 * 86_400), createdAt: now
+                ),
+                HomeTask(id: "h2", title: "Vacuum", category: .cleaning, dueDate: now, createdAt: now),
+                HomeTask(
+                    id: "h3", title: "Done late", category: .bills, status: .done,
+                    dueDate: now.addingTimeInterval(-86_400), createdAt: now
+                ),
+            ],
+            now: now
+        )
+        let overdue = items.first { $0.id == "home_overdue_h1" }
+        #expect(overdue?.urgency == .urgent)
+        #expect(overdue?.subtitle == "Bills · Overdue")
+
+        let today = items.first { $0.id == "home_today_h2" }
+        #expect(today?.urgency == .daily)
+        #expect(today?.tag == "Today")
+        #expect(!items.contains { $0.id.contains("h3") })
+    }
+
     @Test func meditationSkippedWhenAlreadyDone() {
         let items = FocusBuilder.build(
             careerTasks: [], goals: [], metrics: nil, hasMeditatedToday: true, now: now

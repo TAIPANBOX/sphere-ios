@@ -63,6 +63,40 @@ struct LifeScoreTests {
         #expect(score.insight == "2 active · 60% avg progress")
     }
 
+    @Test func relationshipsFormulaTracksCheckins() {
+        let now = Date()
+        #expect(LifeScore.relationships(contacts: [], now: now).score == 0.75)
+
+        let caughtUp = Contact(id: "c1", name: "A", lastContact: now)
+        let overdue = Contact(id: "c2", name: "B", lastContact: now.addingTimeInterval(-40 * 86_400))
+        #expect(LifeScore.relationships(contacts: [caughtUp], now: now).score == 0.9)
+
+        // 1 of 2 needs check-in: 1 - (1/2)*0.5 = 0.75
+        let mixed = LifeScore.relationships(contacts: [caughtUp, overdue], now: now)
+        #expect(abs(mixed.score - 0.75) < 1e-9)
+        #expect(mixed.insight == "2 people · 1 need a check-in")
+    }
+
+    @Test func restFormulaTracksSleepVsGoal() {
+        #expect(LifeScore.rest(avgSleepHours: 0, avgRecovery: .good).score == 0.5)
+
+        let good = LifeScore.rest(avgSleepHours: 7.2, avgRecovery: .good)
+        #expect(abs(good.score - 0.9) < 1e-9)
+        #expect(good.insight == "7.2h avg sleep · Good recovery")
+
+        // Clamped to 0.2 at the bottom, 1.0 at the top.
+        #expect(LifeScore.rest(avgSleepHours: 1, avgRecovery: .poor).score == 0.2)
+        #expect(LifeScore.rest(avgSleepHours: 10, avgRecovery: .excellent).score == 1)
+    }
+
+    @Test func hobbiesFormulaTracksWeeklyMinutes() {
+        #expect(LifeScore.hobbies(count: 0, weeklyMinutes: 0).score == 0.5)
+        // 150 of the 300-min reference week.
+        #expect(abs(LifeScore.hobbies(count: 2, weeklyMinutes: 150).score - 0.5) < 1e-9)
+        // No time logged clamps to the 0.1 floor.
+        #expect(abs(LifeScore.hobbies(count: 2, weeklyMinutes: 0).score - 0.1) < 1e-9)
+    }
+
     @Test func overallBestAndNeedsFocus() {
         let scores = LifeScore.compute(
             metrics: nil,
@@ -72,10 +106,12 @@ struct LifeScoreTests {
             totalExpenses: 600,
             goals: []
         )
-        #expect(scores.count == 5)
-        // health 0.75, learning 0.6, career 0.85, finance 0.58, goals 0.5
-        #expect(abs(LifeScore.overall(scores) - 0.656) < 1e-9)
+        #expect(scores.count == 8)
+        // health .75, learning .6, career .85, finance .58,
+        // relationships .75, rest .5, hobbies .5, goals .5
+        #expect(abs(LifeScore.overall(scores) - 0.62875) < 1e-9)
         #expect(LifeScore.best(scores)?.sphere == .career)
-        #expect(LifeScore.needsFocus(scores)?.sphere == .goals)
+        // First of the tied 0.5 spheres in display order.
+        #expect(LifeScore.needsFocus(scores)?.sphere == .rest)
     }
 }

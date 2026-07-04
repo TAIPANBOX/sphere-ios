@@ -24,6 +24,11 @@ public final class HomeStore {
     private let career: CareerStore
     private let finance: FinanceStore
     private let goals: GoalsStore
+    private let rest: RestStore?
+    private let hobbies: HobbiesStore?
+    private let mindfulness: MindfulnessStore?
+    private let relationships: RelationshipsStore?
+    private let homeSphere: HomeSphereStore?
     private let agent: AgentService?
     private let weatherService: WeatherService?
     private let location: (any LocationProviding)?
@@ -34,6 +39,11 @@ public final class HomeStore {
         career: CareerStore,
         finance: FinanceStore,
         goals: GoalsStore,
+        rest: RestStore? = nil,
+        hobbies: HobbiesStore? = nil,
+        mindfulness: MindfulnessStore? = nil,
+        relationships: RelationshipsStore? = nil,
+        homeSphere: HomeSphereStore? = nil,
         agent: AgentService? = nil,
         weatherService: WeatherService? = nil,
         location: (any LocationProviding)? = nil
@@ -43,6 +53,11 @@ public final class HomeStore {
         self.career = career
         self.finance = finance
         self.goals = goals
+        self.rest = rest
+        self.hobbies = hobbies
+        self.mindfulness = mindfulness
+        self.relationships = relationships
+        self.homeSphere = homeSphere
         self.agent = agent
         self.weatherService = weatherService
         self.location = location
@@ -57,7 +72,12 @@ public final class HomeStore {
             careerTasks: career.tasks,
             totalIncome: finance.totalIncome,
             totalExpenses: finance.totalExpenses,
-            goals: goals.goals
+            goals: goals.goals,
+            contacts: relationships?.contacts ?? [],
+            avgSleepHours: rest?.avgHoursLast7() ?? 0,
+            avgRecovery: rest?.avgRecoveryLast7() ?? .good,
+            hobbiesCount: hobbies?.hobbies.count ?? 0,
+            hobbiesWeeklyMinutes: hobbies?.totalWeeklyMinutes() ?? 0
         )
     }
 
@@ -78,7 +98,10 @@ public final class HomeStore {
         FocusBuilder.build(
             careerTasks: career.tasks,
             goals: goals.goals,
-            metrics: health.metricsAvailable ? health.metrics : nil
+            metrics: health.metricsAvailable ? health.metrics : nil,
+            contacts: relationships?.contacts ?? [],
+            homeTasks: homeSphere?.tasks ?? [],
+            hasMeditatedToday: mindfulness?.hasMeditated() ?? false
         )
     }
 

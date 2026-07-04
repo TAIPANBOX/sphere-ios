@@ -39,13 +39,15 @@ public struct FocusItem: Sendable, Equatable, Identifiable {
 }
 
 /// Today's Focus aggregation ported from the Flutter home tab
-/// (`_buildFocusItems`). Wave-2 sources (contacts' birthdays, home-sphere
-/// tasks) plug in here once those stores are ported.
+/// (`_buildFocusItems`), including the wave-2 sources: contacts' birthdays
+/// and home-sphere tasks.
 public enum FocusBuilder {
     public static func build(
         careerTasks: [CareerTask],
         goals: [Goal],
         metrics: HealthMetrics?,
+        contacts: [Contact] = [],
+        homeTasks: [HomeTask] = [],
         hasMeditatedToday: Bool = false,
         stepsGoal: Int = HealthStore.stepsGoal,
         now: Date = Date()
@@ -83,6 +85,22 @@ public enum FocusBuilder {
             ))
         }
 
+        let overdueHome = homeTasks.filter { task in
+            guard task.status == .todo, let dueDate = task.dueDate else { return false }
+            return calendar.startOfDay(for: dueDate) < today
+        }
+        for task in overdueHome {
+            items.append(FocusItem(
+                id: "home_overdue_\(task.id)",
+                emoji: task.category.emoji,
+                title: task.title,
+                subtitle: "\(task.category.label) · Overdue",
+                sphere: .home,
+                urgency: .urgent,
+                tag: "Overdue"
+            ))
+        }
+
         let highTasks = careerTasks
             .filter { $0.status != .done && !$0.isOverdue(asOf: now) && $0.priority == .high }
             .prefix(2)
@@ -98,6 +116,22 @@ public enum FocusBuilder {
             ))
         }
 
+        let birthdays = contacts
+            .filter { ($0.daysUntilBirthday(asOf: now) ?? 999) <= 3 }
+            .sorted { ($0.daysUntilBirthday(asOf: now) ?? 999) < ($1.daysUntilBirthday(asOf: now) ?? 999) }
+        for contact in birthdays {
+            let days = contact.daysUntilBirthday(asOf: now) ?? 0
+            items.append(FocusItem(
+                id: "bday_\(contact.id)",
+                emoji: "🎂",
+                title: "\(contact.name)'s Birthday",
+                subtitle: days == 0 ? "Today! 🎉" : days == 1 ? "Tomorrow" : "In \(days) days",
+                sphere: .relationships,
+                urgency: days == 0 ? .urgent : .important,
+                tag: days == 0 ? "Today" : days == 1 ? "Tomorrow" : nil
+            ))
+        }
+
         let stuckGoals = goals
             .filter { $0.status == .active && $0.progressPercent < 20 }
             .prefix(2)
@@ -110,6 +144,24 @@ public enum FocusBuilder {
                 sphere: .goals,
                 urgency: .important,
                 tag: "\(goal.progressPercent)%"
+            ))
+        }
+
+        let todayHome = homeTasks
+            .filter { task in
+                guard task.status == .todo, let dueDate = task.dueDate else { return false }
+                return calendar.isDate(dueDate, inSameDayAs: now)
+            }
+            .prefix(2)
+        for task in todayHome {
+            items.append(FocusItem(
+                id: "home_today_\(task.id)",
+                emoji: task.category.emoji,
+                title: task.title,
+                subtitle: "\(task.category.label) · Scheduled today",
+                sphere: .home,
+                urgency: .daily,
+                tag: "Today"
             ))
         }
 

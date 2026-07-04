@@ -35,8 +35,9 @@ struct HomeStoreTests {
 
     @Test func lifeScoreAggregatesDefaultsWhenEmpty() throws {
         let home = try makeHome()
-        // health 0.75, learning 0.5, career 0.85, finance 0.5, goals 0.5 → 62%
-        #expect(home.lifeScore == 62)
+        // 8 spheres of defaults: (0.75+0.5+0.85+0.5+0.75+0.5+0.5+0.5)/8 → 61%
+        #expect(home.lifeScore == 61)
+        #expect(home.scores.count == 8)
         #expect(home.bestSphere?.sphere == .career)
         #expect(home.focusItems.count >= 5)
     }
