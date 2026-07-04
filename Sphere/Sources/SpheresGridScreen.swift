@@ -15,6 +15,7 @@ struct SpheresGridScreen: View {
     }
 
     @State private var destination: Destination?
+    @AppStorage(Prefs.currency) private var currency = Currency.deviceDefault.rawValue
 
     private static let emojis: [SphereType: String] = [
         .health: "🫀", .learning: "📚", .career: "💼", .finance: "💰",
@@ -89,7 +90,7 @@ struct SpheresGridScreen: View {
         case .health: HealthScreen(store: container.health, heightCm: container.profile.profile.heightCm)
         case .learning: LearningScreen(store: container.learning)
         case .career: CareerScreen(store: container.career)
-        case .finance: FinanceScreen(store: container.finance)
+        case .finance: FinanceScreen(store: container.finance, currency: storedCurrency(currency))
         case .relationships: RelationshipsScreen(store: container.relationships)
         case .rest: RestScreen(store: container.rest, stressLevel: container.mindfulness.todayStress())
         case .hobbies: HobbiesScreen(store: container.hobbies)

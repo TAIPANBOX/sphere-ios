@@ -7,6 +7,7 @@ struct SphereApp: App {
     @State private var container = AppContainer()
     @State private var loaded = false
     @Environment(\.scenePhase) private var scenePhase
+    @AppStorage(Prefs.theme) private var theme = ThemePreference.system.rawValue
 
     var body: some Scene {
         WindowGroup {
@@ -19,6 +20,7 @@ struct SphereApp: App {
                     RootView(container: container)
                 }
             }
+            .preferredColorScheme(ThemePreference(rawValue: theme)?.colorScheme)
             .task {
                 await container.loadAll()
                 loaded = true

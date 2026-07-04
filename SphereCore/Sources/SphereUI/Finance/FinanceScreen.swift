@@ -3,13 +3,12 @@ import SphereCore
 
 public struct FinanceScreen: View {
     private let store: FinanceStore
-    /// Currency symbol from Settings (Phase 2 wires the real value).
-    private let currency: String
+    private let currency: Currency
     @State private var showingAddTransaction = false
 
     private let accent = SphereTheme.accent(for: .finance)
 
-    public init(store: FinanceStore, currency: String = "$") {
+    public init(store: FinanceStore, currency: Currency = .usd) {
         self.store = store
         self.currency = currency
     }
@@ -46,7 +45,7 @@ public struct FinanceScreen: View {
     }
 
     private func money(_ value: Double) -> String {
-        "\(currency)\(String(format: "%.0f", value))"
+        currency.format(value)
     }
 
     // MARK: - Summary

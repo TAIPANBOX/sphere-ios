@@ -8,6 +8,8 @@ struct SettingsScreen: View {
 
     @State private var keys: [LLMProviderID: String] = [:]
     @State private var loaded = false
+    @AppStorage(Prefs.theme) private var theme = ThemePreference.system.rawValue
+    @AppStorage(Prefs.currency) private var currency = Currency.deviceDefault.rawValue
 
     private static let emojis: [SphereType: String] = [
         .health: "🫀", .learning: "📚", .career: "💼", .finance: "💰",
@@ -32,6 +34,19 @@ struct SettingsScreen: View {
                 Text("Keys are stored in the iCloud Keychain and never leave "
                     + "your devices. The first configured provider (top to "
                     + "bottom) powers your agents.")
+            }
+
+            Section("Appearance") {
+                Picker("Theme", selection: $theme) {
+                    ForEach(ThemePreference.allCases, id: \.rawValue) { pref in
+                        Text(pref.label).tag(pref.rawValue)
+                    }
+                }
+                Picker("Currency", selection: $currency) {
+                    ForEach(Currency.allCases, id: \.rawValue) { currency in
+                        Text(currency.label).tag(currency.rawValue)
+                    }
+                }
             }
 
             Section("My Spheres") {
