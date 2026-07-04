@@ -25,6 +25,7 @@ final class AppContainer {
     let hobbies: HobbiesStore
     let relationships: RelationshipsStore
 
+    let profile: ProfileStore
     let toolRegistry: SphereToolRegistry
     let home: HomeStore
 
@@ -59,6 +60,7 @@ final class AppContainer {
         creativity = CreativityStore(database: database, engram: engram)
         hobbies = HobbiesStore(database: database, engram: engram)
         relationships = RelationshipsStore(database: database, engram: engram)
+        profile = ProfileStore(database: database)
 
         toolRegistry = SphereToolRegistry(tools:
             goals.tools + health.tools + finance.tools + learning.tools
@@ -87,6 +89,7 @@ final class AppContainer {
     /// Loads every sphere store once at launch so grids, Life Score, and
     /// agent lookup tools see data without visiting each screen first.
     func loadAll() async {
+        try? await profile.load()
         try? await goals.load()
         try? await health.load()
         try? await finance.load()
@@ -107,20 +110,22 @@ final class AppContainer {
         await BirthdayReminders.sync(contacts: relationships.contacts)
     }
 
-    /// One conversation per sphere, kept alive for the app session.
-    func chatSession(for sphere: SphereType, userName: String) -> ChatSession {
-        if let existing = chatSessions[sphere.rawValue] {
-            existing.userName = userName
-            return existing
-        }
-        let session = ChatSession(
-            sphereName: sphere.rawValue.capitalized,
-            sphereType: sphere,
-            agent: agent,
-            tools: toolRegistry,
-            userName: userName
-        )
-        chatSessions[sphere.rawValue] = session
+    /// One conversation per sphere, kept alive for the app session. Name and
+    /// profile context are refreshed on each open so profile edits take
+    /// effect without restarting the session.
+    func chatSession(for sphere: SphereType) -> ChatSession {
+        let session = chatSessions[sphere.rawValue] ?? {
+            let created = ChatSession(
+                sphereName: sphere.rawValue.capitalized,
+                sphereType: sphere,
+                agent: agent,
+                tools: toolRegistry
+            )
+            chatSessions[sphere.rawValue] = created
+            return created
+        }()
+        session.userName = profile.profile.name
+        session.userContext = profile.agentContext
         return session
     }
 

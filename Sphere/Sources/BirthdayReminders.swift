@@ -9,9 +9,15 @@ enum BirthdayReminders {
     private static let prefix = "bday_"
 
     static func sync(contacts: [Contact]) async {
+        let withBirthdays = contacts.filter { $0.birthday != nil }
         let center = UNUserNotificationCenter.current()
-        let settings = await center.notificationSettings()
-        if settings.authorizationStatus == .notDetermined {
+
+        // Don't prompt for notification permission until there is actually a
+        // birthday to remind about — a bare install has no contacts, so the
+        // prompt shouldn't appear on the welcome screen.
+        let status = await center.notificationSettings().authorizationStatus
+        if status == .notDetermined {
+            guard !withBirthdays.isEmpty else { return }
             _ = try? await center.requestAuthorization(options: [.alert, .sound, .badge])
         }
         guard await center.notificationSettings().authorizationStatus == .authorized else { return }
@@ -23,7 +29,7 @@ enum BirthdayReminders {
 
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .current
-        for contact in contacts {
+        for contact in withBirthdays {
             guard let birthday = contact.birthday else { continue }
             var parts = calendar.dateComponents([.month, .day], from: birthday)
             parts.hour = 9

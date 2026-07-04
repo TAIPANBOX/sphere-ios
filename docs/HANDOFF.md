@@ -115,14 +115,22 @@ Remaining:
    09:00 notifications after `loadAll` — call
    `container.refreshBirthdayReminders()` after contact mutations in future
    contact-editing UI.
-2. Full Settings (sphere toggles, theme, language, currency), full Profile
-   (body metrics, conditions, dietary), onboarding flow, String Catalog
-   from the ARB files (`sphere/lib/l10n/*.arb`).
+2. ~~Onboarding, full Profile, Settings sphere toggles~~ DONE:
+   `UserProfile`/`ProfileStore` in SphereCore (agentContext feeds chat
+   sessions via `AppContainer.chatSession`), `OnboardingFlow`,
+   `ProfileScreen`, `SettingsScreen` in the app target. Still to do here:
+   theme/language/currency in Settings, and the String Catalog from the ARB
+   files (`sphere/lib/l10n/*.arb`) for EN/UK.
 3. Dashboard grid: live stat lines + drag-to-reorder (Flutter
    `dashboard/`); Widget + Watch targets (add to project.yml).
 4. Secondary lists per sphere (flagged in README) + voice input in chat.
 5. iCloud sync (Phase 8) and Engram v2 (Phase 9) are post-launch updates;
    do not start them ad hoc.
+
+Wiring note: the profile's `agentContext` reaches sphere agents through
+`AppContainer.chatSession(for:)` (refreshed each open). The Meta Agent brief
+does not yet include profile context — add it via `SpherePrompts.metaAgent`
+`extraContext` if desired.
 
 ## Testing & CI
 

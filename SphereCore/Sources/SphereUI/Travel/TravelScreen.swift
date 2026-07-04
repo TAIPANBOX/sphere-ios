@@ -330,15 +330,19 @@ struct AddWishSheet: View {
     }
 }
 
-/// Minimal wrapping layout for the visited-countries chips.
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
+/// Minimal wrapping layout for chip rows (visited countries, profile tags).
+public struct FlowLayout: Layout {
+    public var spacing: CGFloat
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+    public init(spacing: CGFloat = 8) {
+        self.spacing = spacing
+    }
+
+    public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         layout(proposal: proposal, subviews: subviews).size
     }
 
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+    public func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         let positions = layout(proposal: proposal, subviews: subviews).positions
         for (subview, position) in zip(subviews, positions) {
             subview.place(

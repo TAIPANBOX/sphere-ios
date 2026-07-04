@@ -99,7 +99,15 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
   contact birthdays and home-sphere overdue/due-today tasks, meditation
   check wired from Mindfulness, yearly birthday notifications at 09:00
   (UNCalendarNotificationTrigger, idempotent resync) (223 tests total).
-- [ ] Widget + Watch targets; full Settings/Profile/Onboarding ports;
+- [x] Profile + onboarding + Settings — UserProfile shared-context model
+  (`agentContext` woven into every agent's system prompt), ProfileStore on
+  GRDB (single JSON row), 4-step onboarding flow (welcome → personal →
+  dietary → spheres) gating first launch, full Profile editor (personal /
+  body / dietary / allergies / conditions chips), Settings with provider
+  keys + My Spheres toggles; grid shows only active spheres; birthday
+  reminders defer their permission prompt until a contact has a birthday
+  (230 tests total). Verified in the iOS Simulator.
+- [ ] Widget + Watch targets; theme/language/currency in Settings;
   dashboard grid live stats + reorder
 
 ## Development

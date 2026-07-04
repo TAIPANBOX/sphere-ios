@@ -299,6 +299,15 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("profile-v1") { db in
+            // Single row (id = "main"); the profile schema grows over time,
+            // so it is stored as one JSON blob rather than typed columns.
+            try db.create(table: "user_profile") { t in
+                t.primaryKey("id", .text)
+                t.column("data", .text).notNull()
+            }
+        }
+
         migrator.registerMigration("relationships-v1") { db in
             try db.create(table: "contacts") { t in
                 t.primaryKey("id", .text)

@@ -5,15 +5,24 @@ import SphereUI
 @main
 struct SphereApp: App {
     @State private var container = AppContainer()
+    @State private var loaded = false
     @Environment(\.scenePhase) private var scenePhase
-    @AppStorage("profile.name") private var userName = ""
 
     var body: some Scene {
         WindowGroup {
-            RootView(container: container, userName: $userName)
-                .task {
-                    await container.loadAll()
+            Group {
+                if !loaded {
+                    ProgressView()
+                } else if !container.profile.profile.onboarded {
+                    OnboardingFlow(container: container)
+                } else {
+                    RootView(container: container)
                 }
+            }
+            .task {
+                await container.loadAll()
+                loaded = true
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background {
@@ -25,27 +34,26 @@ struct SphereApp: App {
 
 struct RootView: View {
     let container: AppContainer
-    @Binding var userName: String
 
     var body: some View {
         TabView {
             NavigationStack {
-                HomeScreen(store: container.home, userName: userName)
+                HomeScreen(store: container.home, userName: container.profile.profile.name)
             }
             .tabItem { Label("Home", systemImage: "house.fill") }
 
             NavigationStack {
-                SpheresGridScreen(container: container, userName: userName)
+                SpheresGridScreen(container: container)
             }
             .tabItem { Label("Spheres", systemImage: "circle.hexagongrid.fill") }
 
             NavigationStack {
-                SettingsScreen(keyStore: container.keyStore)
+                SettingsScreen(container: container)
             }
             .tabItem { Label("Settings", systemImage: "gearshape.fill") }
 
             NavigationStack {
-                ProfileScreen(userName: $userName)
+                ProfileScreen(container: container)
             }
             .tabItem { Label("Profile", systemImage: "person.crop.circle.fill") }
         }

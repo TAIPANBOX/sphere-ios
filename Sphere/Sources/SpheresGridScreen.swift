@@ -7,14 +7,17 @@ import SphereUI
 /// arrive with the full dashboard port.)
 struct SpheresGridScreen: View {
     let container: AppContainer
-    let userName: String
 
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+    private var activeSpheres: [SphereType] {
+        SphereType.allCases.filter { container.profile.profile.isSphereActive($0) }
+    }
 
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 12) {
-                ForEach(SphereType.allCases, id: \.self) { sphere in
+                ForEach(activeSpheres, id: \.self) { sphere in
                     NavigationLink {
                         sphereScreen(sphere)
                     } label: {
@@ -23,7 +26,7 @@ struct SpheresGridScreen: View {
                     .buttonStyle(.plain)
                     .overlay(alignment: .topTrailing) {
                         NavigationLink {
-                            ChatScreen(session: container.chatSession(for: sphere, userName: userName))
+                            ChatScreen(session: container.chatSession(for: sphere))
                         } label: {
                             Image(systemName: "bubble.left.fill")
                                 .font(.caption)

@@ -1,13 +1,19 @@
 import SwiftUI
 import SphereCore
 
-/// Minimal Phase-2 Settings: AI provider keys (Keychain). Sphere toggles,
-/// theme, language, and currency arrive with the full Settings port.
+/// Phase-2 Settings: AI provider keys (Keychain) and sphere enablement.
+/// Theme, language, and currency arrive with the full Settings port.
 struct SettingsScreen: View {
-    let keyStore: KeychainAPIKeyStore
+    let container: AppContainer
 
     @State private var keys: [LLMProviderID: String] = [:]
     @State private var loaded = false
+
+    private static let emojis: [SphereType: String] = [
+        .health: "🫀", .learning: "📚", .career: "💼", .finance: "💰",
+        .relationships: "💜", .rest: "🌊", .hobbies: "🎸", .travel: "✈️",
+        .mindfulness: "🧘", .creativity: "🎨", .home: "🏡", .goals: "🎯",
+    ]
 
     var body: some View {
         Form {
@@ -15,7 +21,7 @@ struct SettingsScreen: View {
                 ForEach(LLMProviderID.allCases, id: \.self) { provider in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(provider.displayName).font(.subheadline.weight(.medium))
-                        SecureField("API key", text: binding(for: provider))
+                        SecureField("API key", text: keyBinding(for: provider))
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                     }
@@ -27,6 +33,14 @@ struct SettingsScreen: View {
                     + "your devices. The first configured provider (top to "
                     + "bottom) powers your agents.")
             }
+
+            Section("My Spheres") {
+                ForEach(SphereType.allCases, id: \.self) { sphere in
+                    Toggle(isOn: sphereBinding(for: sphere)) {
+                        Text("\(Self.emojis[sphere] ?? "✨") \(sphere.rawValue.capitalized)")
+                    }
+                }
+            }
         }
         .navigationTitle("Settings")
         .onAppear(perform: loadKeys)
@@ -36,19 +50,25 @@ struct SettingsScreen: View {
         guard !loaded else { return }
         loaded = true
         for provider in LLMProviderID.allCases {
-            keys[provider] = keyStore.key(for: provider) ?? ""
+            keys[provider] = container.keyStore.key(for: provider) ?? ""
         }
     }
 
-    private func binding(for provider: LLMProviderID) -> Binding<String> {
+    private func keyBinding(for provider: LLMProviderID) -> Binding<String> {
         Binding(
             get: { keys[provider] ?? "" },
             set: { newValue in
                 keys[provider] = newValue
-                keyStore.set(
-                    newValue.trimmingCharacters(in: .whitespaces),
-                    for: provider
-                )
+                container.keyStore.set(newValue.trimmingCharacters(in: .whitespaces), for: provider)
+            }
+        )
+    }
+
+    private func sphereBinding(for sphere: SphereType) -> Binding<Bool> {
+        Binding(
+            get: { container.profile.profile.isSphereActive(sphere) },
+            set: { active in
+                Task { try? await container.profile.setSphereActive(sphere, active: active) }
             }
         )
     }
