@@ -107,8 +107,11 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
   keys + My Spheres toggles; grid shows only active spheres; birthday
   reminders defer their permission prompt until a contact has a birthday
   (230 tests total). Verified in the iOS Simulator.
-- [ ] Widget + Watch targets; theme/language/currency in Settings;
-  dashboard grid live stats + reorder
+- [x] Spheres tab — live per-sphere stat line + progress (eight reuse the
+  LifeScore insight/score, four computed via SphereStat), drag-to-reorder
+  persisted to the profile (`sphereOrder`, unknown spheres trail in enum
+  order), row → sphere screen, bubble → agent chat (235 tests total).
+- [ ] Widget + Watch targets; theme/language/currency in Settings
 
 ## Development
 

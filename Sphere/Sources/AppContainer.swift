@@ -129,6 +129,44 @@ final class AppContainer {
         return session
     }
 
+    /// Live one-line summary + progress for a sphere card. Reuses the
+    /// LifeScore insight/score for the eight scored spheres; computes the
+    /// other four from their stores.
+    func sphereStat(for sphere: SphereType) -> SphereStat {
+        if let score = home.scores.first(where: { $0.sphere == sphere }) {
+            return SphereStat(statLine: score.insight, progress: score.score)
+        }
+        switch sphere {
+        case .travel:
+            let next = travel.nextTrip()
+            return .travel(
+                upcomingTrip: next.flatMap { trip in trip.daysUntil().map { (trip.destination, $0) } },
+                visitedCount: travel.visited.count
+            )
+        case .mindfulness:
+            return .mindfulness(
+                streakDays: mindfulness.currentStreak(),
+                todayMood: mindfulness.todaysMood()
+            )
+        case .creativity:
+            let active = creativity.inProgress
+            let avg = active.isEmpty ? 0 : active.map(\.progressPercent).reduce(0, +) / active.count
+            return .creativity(inProgressCount: active.count, avgProgress: avg)
+        case .home:
+            return .home(
+                openTasks: homeSphere.openTasks.count,
+                thirstyPlants: homeSphere.needsWateringCount()
+            )
+        default:
+            return SphereStat(statLine: "", progress: 0.5)
+        }
+    }
+
+    /// Persists a reordered sphere list from a drag-to-reorder gesture.
+    func reorderSpheres(_ spheres: [SphereType]) async {
+        try? await profile.setSphereOrder(spheres)
+    }
+
     /// Nightly-ish Engram maintenance; call on app background.
     func runMemoryMaintenance() async {
         _ = try? await engram.runDecay()

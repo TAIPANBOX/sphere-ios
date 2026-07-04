@@ -61,6 +61,12 @@ public final class ProfileStore {
         }
     }
 
+    /// Persists a new sphere order (the full active-sphere sequence after a
+    /// drag-to-reorder).
+    public func setSphereOrder(_ spheres: [SphereType]) async throws {
+        try await update { $0.sphereOrder = spheres.map(\.rawValue) }
+    }
+
     /// Context string for agent system prompts (see ``UserProfile/agentContext(asOf:)``).
     public var agentContext: String {
         profile.agentContext()

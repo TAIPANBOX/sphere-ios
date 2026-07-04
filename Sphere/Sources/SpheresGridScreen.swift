@@ -2,50 +2,91 @@ import SwiftUI
 import SphereCore
 import SphereUI
 
-/// 2-column grid of the 12 spheres. Tap opens the sphere screen; the chat
-/// bubble opens the sphere's agent. (Drag-to-reorder and live stat lines
-/// arrive with the full dashboard port.)
+/// Spheres tab: the user's active spheres in their saved order, each with a
+/// live one-line stat and progress bar. Tap a row to open the sphere; tap
+/// the bubble to chat with its agent. Edit mode enables drag-to-reorder,
+/// which persists to the profile.
 struct SpheresGridScreen: View {
     let container: AppContainer
 
-    private let columns = [GridItem(.flexible()), GridItem(.flexible())]
+    enum Destination: Hashable {
+        case screen(SphereType)
+        case chat(SphereType)
+    }
 
-    private var activeSpheres: [SphereType] {
-        SphereType.allCases.filter { container.profile.profile.isSphereActive($0) }
+    @State private var destination: Destination?
+
+    private static let emojis: [SphereType: String] = [
+        .health: "🫀", .learning: "📚", .career: "💼", .finance: "💰",
+        .relationships: "💜", .rest: "🌊", .hobbies: "🎸", .travel: "✈️",
+        .mindfulness: "🧘", .creativity: "🎨", .home: "🏡", .goals: "🎯",
+    ]
+
+    private var spheres: [SphereType] {
+        container.profile.profile.orderedActiveSpheres
     }
 
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 12) {
-                ForEach(activeSpheres, id: \.self) { sphere in
-                    NavigationLink {
-                        sphereScreen(sphere)
-                    } label: {
-                        SphereCard(sphere: sphere)
-                    }
-                    .buttonStyle(.plain)
-                    .overlay(alignment: .topTrailing) {
-                        NavigationLink {
-                            ChatScreen(session: container.chatSession(for: sphere))
-                        } label: {
-                            Image(systemName: "bubble.left.fill")
-                                .font(.caption)
-                                .foregroundStyle(SphereTheme.accent(for: sphere))
-                                .padding(8)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
+        List {
+            ForEach(spheres, id: \.self) { sphere in
+                row(for: sphere)
             }
-            .padding()
+            .onMove(perform: move)
         }
         .navigationTitle("Spheres")
+        .toolbar { EditButton() }
+        .navigationDestination(item: $destination) { dest in
+            switch dest {
+            case .screen(let sphere): sphereScreen(sphere)
+            case .chat(let sphere): ChatScreen(session: container.chatSession(for: sphere))
+            }
+        }
+    }
+
+    private func row(for sphere: SphereType) -> some View {
+        let accent = SphereTheme.accent(for: sphere)
+        let stat = container.sphereStat(for: sphere)
+        return HStack(spacing: 12) {
+            Button {
+                destination = .screen(sphere)
+            } label: {
+                HStack(spacing: 12) {
+                    Text(Self.emojis[sphere] ?? "✨").font(.system(size: 28))
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(sphere.rawValue.capitalized).font(.body.weight(.semibold))
+                        if !stat.statLine.isEmpty {
+                            Text(stat.statLine)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        ProgressView(value: stat.progress).tint(accent)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                destination = .chat(sphere)
+            } label: {
+                Image(systemName: "bubble.left.fill")
+                    .foregroundStyle(accent)
+            }
+            .buttonStyle(.borderless)
+        }
+    }
+
+    private func move(from source: IndexSet, to offset: Int) {
+        var reordered = spheres
+        reordered.move(fromOffsets: source, toOffset: offset)
+        Task { await container.reorderSpheres(reordered) }
     }
 
     @ViewBuilder
     private func sphereScreen(_ sphere: SphereType) -> some View {
         switch sphere {
-        case .health: HealthScreen(store: container.health)
+        case .health: HealthScreen(store: container.health, heightCm: container.profile.profile.heightCm)
         case .learning: LearningScreen(store: container.learning)
         case .career: CareerScreen(store: container.career)
         case .finance: FinanceScreen(store: container.finance)
@@ -58,29 +99,5 @@ struct SpheresGridScreen: View {
         case .home: HomeSphereScreen(store: container.homeSphere)
         case .goals: GoalsScreen(store: container.goals)
         }
-    }
-}
-
-private struct SphereCard: View {
-    let sphere: SphereType
-
-    private static let emojis: [SphereType: String] = [
-        .health: "🫀", .learning: "📚", .career: "💼", .finance: "💰",
-        .relationships: "💜", .rest: "🌊", .hobbies: "🎸", .travel: "✈️",
-        .mindfulness: "🧘", .creativity: "🎨", .home: "🏡", .goals: "🎯",
-    ]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(Self.emojis[sphere] ?? "✨").font(.system(size: 30))
-            Text(sphere.rawValue.capitalized)
-                .font(.body.weight(.semibold))
-        }
-        .frame(maxWidth: .infinity, minHeight: 96, alignment: .leading)
-        .padding(14)
-        .background(
-            SphereTheme.accent(for: sphere).opacity(0.1),
-            in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-        )
     }
 }

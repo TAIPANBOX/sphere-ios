@@ -55,6 +55,10 @@ public struct UserProfile: Codable, Equatable, Sendable {
     /// Enabled spheres. Empty means all 12 are active (Dart semantics).
     public var activeSpheres: [String]
 
+    /// User's preferred sphere order on the grid. Empty = default enum order;
+    /// unknown/missing spheres fall back to the end in enum order.
+    public var sphereOrder: [String]
+
     /// Set once onboarding completes; gates the first-launch flow.
     public var onboarded: Bool
 
@@ -71,6 +75,7 @@ public struct UserProfile: Codable, Equatable, Sendable {
         foodAllergies: [String] = [],
         healthConditions: [String] = [],
         activeSpheres: [String] = [],
+        sphereOrder: [String] = [],
         onboarded: Bool = false
     ) {
         self.name = name
@@ -85,7 +90,23 @@ public struct UserProfile: Codable, Equatable, Sendable {
         self.foodAllergies = foodAllergies
         self.healthConditions = healthConditions
         self.activeSpheres = activeSpheres
+        self.sphereOrder = sphereOrder
         self.onboarded = onboarded
+    }
+
+    /// Active spheres in the user's saved order. Any sphere absent from
+    /// `sphereOrder` (newly enabled, or all when order is empty) trails in
+    /// the default enum order, so the grid never drops a sphere.
+    public var orderedActiveSpheres: [SphereType] {
+        let ranked = sphereOrder.enumerated().reduce(into: [String: Int]()) { $0[$1.element] = $1.offset }
+        let enumIndex = SphereType.allCases.enumerated()
+            .reduce(into: [SphereType: Int]()) { $0[$1.element] = $1.offset }
+        return SphereType.allCases
+            .filter(isSphereActive)
+            .sorted {
+                (ranked[$0.rawValue] ?? .max, enumIndex[$0] ?? 0)
+                    < (ranked[$1.rawValue] ?? .max, enumIndex[$1] ?? 0)
+            }
     }
 
     public var fullName: String {

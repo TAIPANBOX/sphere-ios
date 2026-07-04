@@ -121,8 +121,11 @@ Remaining:
    `ProfileScreen`, `SettingsScreen` in the app target. Still to do here:
    theme/language/currency in Settings, and the String Catalog from the ARB
    files (`sphere/lib/l10n/*.arb`) for EN/UK.
-3. Dashboard grid: live stat lines + drag-to-reorder (Flutter
-   `dashboard/`); Widget + Watch targets (add to project.yml).
+3. ~~Spheres grid: live stat lines + drag-to-reorder~~ DONE
+   (`SpheresGridScreen` is now a reorderable List; `container.sphereStat`
+   reuses LifeScore for 8 spheres + `SphereStat` helpers for the other 4;
+   order persists in `profile.sphereOrder`). Widget + Watch targets
+   (add to project.yml) still to do.
 4. Secondary lists per sphere (flagged in README) + voice input in chat.
 5. iCloud sync (Phase 8) and Engram v2 (Phase 9) are post-launch updates;
    do not start them ad hoc.
