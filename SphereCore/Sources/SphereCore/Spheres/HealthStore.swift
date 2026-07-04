@@ -13,6 +13,8 @@ public final class HealthStore {
     public private(set) var waterToday = 0
     public private(set) var weights: [WeightEntry] = []
     public private(set) var workouts: [Workout] = []
+    public private(set) var medications: [Medication] = []
+    public private(set) var labResults: [LabResult] = []
 
     public nonisolated static let waterGoalGlasses = 8
     public nonisolated static let maxWaterGlasses = 12
@@ -34,18 +36,22 @@ public final class HealthStore {
 
     public func load(today: Date = Date()) async throws {
         let todayKey = DayKey.make(today)
-        let (water, weights, workouts) = try await database.writer.read { db in
+        let (water, weights, workouts, medications, labs) = try await database.writer.read { db in
             (
                 try Int.fetchOne(
                     db, sql: "SELECT glasses FROM water WHERE dateKey = ?", arguments: [todayKey]
                 ) ?? 0,
                 try WeightEntry.fetchAll(db, sql: "SELECT * FROM weights ORDER BY date"),
-                try Workout.fetchAll(db)
+                try Workout.fetchAll(db),
+                try Medication.fetchAll(db),
+                try LabResult.fetchAll(db, sql: "SELECT * FROM lab_results ORDER BY date DESC")
             )
         }
         self.waterToday = water
         self.weights = weights
         self.workouts = workouts
+        self.medications = medications
+        self.labResults = labs
     }
 
     /// Pulls fresh metrics from HealthKit (or whatever provider is wired).
@@ -142,6 +148,49 @@ public final class HealthStore {
 
     public var totalWorkoutMinutes: Int {
         workouts.reduce(0) { $0 + $1.durationMinutes }
+    }
+
+    // MARK: - Medications
+
+    public func addMedication(_ medication: Medication) async throws {
+        try await database.writer.write { db in try medication.insert(db) }
+        medications.append(medication)
+        engram?.note(
+            agentId: SphereType.health.rawValue,
+            content: "Started medication: \(medication.name)"
+                + (medication.dosage.isEmpty ? "" : " (\(medication.dosage))"),
+            tags: ["log", "health", "medication"]
+        )
+    }
+
+    public func removeMedication(id: String) async throws {
+        _ = try await database.writer.write { db in try Medication.deleteOne(db, key: id) }
+        medications.removeAll { $0.id == id }
+    }
+
+    public func toggleMedication(id: String, on date: Date = Date()) async throws {
+        guard let medication = medications.first(where: { $0.id == id }) else { return }
+        let toggled = medication.takenToday(on: date)
+            ? medication.unmarkingTaken(on: date)
+            : medication.markingTaken(on: date)
+        try await database.writer.write { db in try toggled.save(db) }
+        medications = medications.map { $0.id == id ? toggled : $0 }
+    }
+
+    public func medicationsTakenToday(on date: Date = Date()) -> Int {
+        medications.count { $0.takenToday(on: date) }
+    }
+
+    // MARK: - Lab results
+
+    public func addLabResult(_ result: LabResult) async throws {
+        try await database.writer.write { db in try result.insert(db) }
+        labResults.insert(result, at: 0)
+    }
+
+    public func removeLabResult(id: String) async throws {
+        _ = try await database.writer.write { db in try LabResult.deleteOne(db, key: id) }
+        labResults.removeAll { $0.id == id }
     }
 
     // MARK: - Agent tools
@@ -252,6 +301,13 @@ public final class HealthStore {
         }
         if let latestWeight {
             snapshot["latestWeightKg"] = .number(latestWeight.kg)
+        }
+        if !medications.isEmpty {
+            snapshot["medications"] = .object([
+                "total": .number(Double(medications.count)),
+                "takenToday": .number(Double(medicationsTakenToday())),
+                "names": .array(medications.map { .string($0.name) }),
+            ])
         }
         return JSONValue.object(snapshot).encodedString()
     }

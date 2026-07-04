@@ -121,6 +121,104 @@ extension WeightEntry: FetchableRecord, PersistableRecord {
     public static let databaseTableName = "weights"
 }
 
+public enum MedFrequency: String, Codable, CaseIterable, Sendable {
+    case once, twice, threePerDay
+
+    public var label: String {
+        switch self {
+        case .once: "Once daily"
+        case .twice: "Twice daily"
+        case .threePerDay: "3× daily"
+        }
+    }
+}
+
+public struct Medication: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var name: String
+    public var dosage: String
+    public var frequency: MedFrequency
+    /// Day keys ("yyyy-MM-dd") the dose was marked taken.
+    public var takenDates: [String]
+
+    public init(
+        id: String,
+        name: String,
+        dosage: String = "",
+        frequency: MedFrequency = .once,
+        takenDates: [String] = []
+    ) {
+        self.id = id
+        self.name = name
+        self.dosage = dosage
+        self.frequency = frequency
+        self.takenDates = takenDates
+    }
+
+    public func takenToday(on date: Date = Date()) -> Bool {
+        takenDates.contains(DayKey.make(date))
+    }
+
+    public func markingTaken(on date: Date = Date()) -> Medication {
+        let key = DayKey.make(date)
+        guard !takenDates.contains(key) else { return self }
+        var copy = self
+        copy.takenDates.append(key)
+        return copy
+    }
+
+    public func unmarkingTaken(on date: Date = Date()) -> Medication {
+        let key = DayKey.make(date)
+        var copy = self
+        copy.takenDates.removeAll { $0 == key }
+        return copy
+    }
+
+    public static func newID(now: Date = Date()) -> String {
+        EntityID.make("med_rx", now: now)
+    }
+}
+
+extension Medication: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "medications"
+}
+
+public struct LabResult: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var name: String
+    public var value: String
+    public var unit: String
+    public var refRange: String
+    public var date: Date
+    public var isNormal: Bool
+
+    public init(
+        id: String,
+        name: String,
+        value: String,
+        unit: String = "",
+        refRange: String = "",
+        date: Date,
+        isNormal: Bool = true
+    ) {
+        self.id = id
+        self.name = name
+        self.value = value
+        self.unit = unit
+        self.refRange = refRange
+        self.date = date
+        self.isNormal = isNormal
+    }
+
+    public static func newID(now: Date = Date()) -> String {
+        EntityID.make("lab", now: now)
+    }
+}
+
+extension LabResult: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "lab_results"
+}
+
 /// "yyyy-MM-dd" bucket keys — water intake, weight overwrites, habit
 /// check-ins, tool payload dates.
 ///

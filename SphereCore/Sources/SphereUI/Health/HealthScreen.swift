@@ -8,6 +8,8 @@ public struct HealthScreen: View {
     private let heightCm: Double?
     @State private var showingLogWeight = false
     @State private var showingAddWorkout = false
+    @State private var showingAddMedication = false
+    @State private var showingAddLab = false
 
     private let accent = SphereTheme.accent(for: .health)
 
@@ -23,6 +25,8 @@ public struct HealthScreen: View {
                 stepsChartCard
                 waterCard
                 weightCard
+                medicationsSection
+                labResultsSection
                 workoutsSection
             }
             .padding()
@@ -36,6 +40,16 @@ public struct HealthScreen: View {
         .sheet(isPresented: $showingAddWorkout) {
             AddWorkoutSheet { workout in
                 Task { try? await store.addWorkout(workout) }
+            }
+        }
+        .sheet(isPresented: $showingAddMedication) {
+            AddMedicationSheet { medication in
+                Task { try? await store.addMedication(medication) }
+            }
+        }
+        .sheet(isPresented: $showingAddLab) {
+            AddLabResultSheet { result in
+                Task { try? await store.addLabResult(result) }
             }
         }
         .task {
@@ -189,6 +203,95 @@ public struct HealthScreen: View {
         .sphereCard()
     }
 
+    // MARK: - Medications
+
+    private var medicationsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Medications").font(.title3.weight(.semibold))
+                Spacer()
+                if !store.medications.isEmpty {
+                    Text("\(store.medicationsTakenToday())/\(store.medications.count) taken")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Button {
+                    showingAddMedication = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            ForEach(store.medications) { medication in
+                HStack(spacing: 12) {
+                    Button {
+                        Task { try? await store.toggleMedication(id: medication.id) }
+                    } label: {
+                        Image(systemName: medication.takenToday() ? "checkmark.circle.fill" : "circle")
+                            .font(.title3)
+                            .foregroundStyle(medication.takenToday() ? .green : .secondary)
+                    }
+                    .buttonStyle(.plain)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(medication.name).font(.body.weight(.medium))
+                        Text([medication.dosage, medication.frequency.label]
+                            .filter { !$0.isEmpty }.joined(separator: " · "))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button(role: .destructive) {
+                        Task { try? await store.removeMedication(id: medication.id) }
+                    } label: {
+                        Image(systemName: "trash").foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .sphereCard()
+            }
+        }
+    }
+
+    // MARK: - Lab results
+
+    private var labResultsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Lab Results").font(.title3.weight(.semibold))
+                Spacer()
+                Button {
+                    showingAddLab = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            ForEach(store.labResults) { result in
+                HStack(spacing: 12) {
+                    Circle()
+                        .fill(result.isNormal ? Color.green : Color.orange)
+                        .frame(width: 8, height: 8)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(result.name).font(.body.weight(.medium))
+                        if !result.refRange.isEmpty {
+                            Text("ref \(result.refRange)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("\(result.value) \(result.unit)")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(result.isNormal ? Color.primary : Color.orange)
+                        Text(result.date, style: .date)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .sphereCard()
+            }
+        }
+    }
+
     // MARK: - Workouts
 
     private var workoutsSection: some View {
@@ -278,6 +381,96 @@ struct LogWeightSheet: View {
                         dismiss()
                     }
                     .disabled(kg.map { !(20...400).contains($0) } ?? true)
+                }
+            }
+        }
+    }
+}
+
+struct AddMedicationSheet: View {
+    let onAdd: (Medication) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var dosage = ""
+    @State private var frequency = MedFrequency.once
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Name", text: $name)
+                TextField("Dosage (e.g. 50 mcg)", text: $dosage)
+                Picker("Frequency", selection: $frequency) {
+                    ForEach(MedFrequency.allCases, id: \.self) { frequency in
+                        Text(frequency.label).tag(frequency)
+                    }
+                }
+            }
+            .navigationTitle("Add Medication")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(Medication(
+                            id: Medication.newID(),
+                            name: name.trimmingCharacters(in: .whitespaces),
+                            dosage: dosage.trimmingCharacters(in: .whitespaces),
+                            frequency: frequency
+                        ))
+                        dismiss()
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+struct AddLabResultSheet: View {
+    let onAdd: (LabResult) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var value = ""
+    @State private var unit = ""
+    @State private var refRange = ""
+    @State private var isNormal = true
+    @State private var date = Date()
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Test name", text: $name)
+                TextField("Value", text: $value)
+                TextField("Unit (e.g. mg/dL)", text: $unit)
+                TextField("Reference range", text: $refRange)
+                Toggle("Within normal range", isOn: $isNormal)
+                DatePicker("Date", selection: $date, displayedComponents: .date)
+            }
+            .navigationTitle("Add Lab Result")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(LabResult(
+                            id: LabResult.newID(),
+                            name: name.trimmingCharacters(in: .whitespaces),
+                            value: value.trimmingCharacters(in: .whitespaces),
+                            unit: unit.trimmingCharacters(in: .whitespaces),
+                            refRange: refRange.trimmingCharacters(in: .whitespaces),
+                            date: date,
+                            isNormal: isNormal
+                        ))
+                        dismiss()
+                    }
+                    .disabled(
+                        name.trimmingCharacters(in: .whitespaces).isEmpty
+                            || value.trimmingCharacters(in: .whitespaces).isEmpty
+                    )
                 }
             }
         }

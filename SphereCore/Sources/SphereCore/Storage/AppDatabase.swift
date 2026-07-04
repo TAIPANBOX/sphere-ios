@@ -92,6 +92,25 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("health-v2") { db in
+            try db.create(table: "medications") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("dosage", .text).notNull().defaults(to: "")
+                t.column("frequency", .text).notNull()
+                t.column("takenDates", .text).notNull().defaults(to: "[]")
+            }
+            try db.create(table: "lab_results") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("value", .text).notNull()
+                t.column("unit", .text).notNull().defaults(to: "")
+                t.column("refRange", .text).notNull().defaults(to: "")
+                t.column("date", .datetime).notNull()
+                t.column("isNormal", .boolean).notNull().defaults(to: true)
+            }
+        }
+
         migrator.registerMigration("learning-v1") { db in
             try db.create(table: "books") { t in
                 t.primaryKey("id", .text)

@@ -90,8 +90,11 @@ passes, screen compiles in `swift build`.
   Constants meant to be used from nonisolated code (tool builders, pure
   functions) must be declared `nonisolated static let`.
 - **`.foregroundStyle(cond ? .secondary : .red)` fails to type-check** —
-  `.secondary` is a HierarchicalShapeStyle, `.red` a Color. Write
-  `cond ? Color.secondary : Color.red`.
+  `.secondary`/`.primary` are HierarchicalShapeStyle, `.red`/`.orange` are
+  Color. Write `cond ? Color.secondary : Color.red`. **Symptom is
+  misleading**: one such ternary deep in a row makes the whole enclosing
+  `ForEach` fail to infer and report `cannot convert '[X]' to 'Binding<C>'`
+  / "X is not Identifiable" — chase the ShapeStyle ternary, not the ForEach.
 - **GRDB's async `read`/`write` require a Sendable result.** Returning `Row`
   (not Sendable) silently selects the SYNC overload — you get a "no async
   operations within await" warning and a main-thread-blocking read. Map rows
