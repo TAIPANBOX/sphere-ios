@@ -120,7 +120,12 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
   best/needs chips; medium: + top-3 focus) reading a shared App Group
   snapshot the app writes after loadAll/background; store unit-tested,
   pipeline verified on a signed simulator build (241 tests total).
-- [ ] Watch target; language (String Catalog from ARB, EN/UK)
+- [x] Apple Watch — watchOS app (Life Score ring + best/needs + top focus)
+  and complications (circular gauge / rectangular / inline) fed by the phone
+  over WatchConnectivity (`updateApplicationContext`); the watch persists the
+  snapshot to its own App Group for the complication (243 tests total).
+- [ ] Language (String Catalog from ARB, EN/UK); Watch quick-logging +
+  voice queries (read path done, write path next)
 
 ## Development
 

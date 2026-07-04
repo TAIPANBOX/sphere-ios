@@ -129,9 +129,15 @@ Remaining:
    by `AppContainer.refreshWidget`. **App Group provisioning needs signing**,
    so it only works on signed builds — the CI `CODE_SIGNING_ALLOWED=NO`
    build compiles it but the runtime write is a graceful no-op there.
-   Still to do: **Watch target** (add a watchOS app + WatchConnectivity;
-   the SphereCore package already builds for watchOS 10 — reuse the
-   WidgetSnapshot for a complication, or send state over WCSession).
+   ~~Watch target~~ DONE: `SphereWatch` app + `SphereWatchWidgetExtension`
+   complication, fed by `WatchBridge` (phone) → `WatchModel`/`WatchSession`
+   (watch) over WCSession. Two build gotchas now baked into project.yml/CI:
+   watch/extension bundle ids must be children of the app; and **never pass
+   `-sdk iphonesimulator`** when the scheme embeds watchOS targets (it forces
+   them onto the iOS SDK, breaking WCSessionDelegate conformance) — use
+   `-destination` only. Watch READ path is done; quick-logging / voice-query
+   WRITE path (watch → phone via WCSession sendMessage → apply to a store)
+   is the next Watch increment.
 4. Secondary lists per sphere (flagged in README) + voice input in chat.
 5. iCloud sync (Phase 8) and Engram v2 (Phase 9) are post-launch updates;
    do not start them ad hoc.
