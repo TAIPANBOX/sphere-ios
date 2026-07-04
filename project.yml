@@ -47,6 +47,10 @@ targets:
           Sphere does not write health data; this is required by HealthKit.
         NSPhotoLibraryUsageDescription: >-
           Attach photos to your agent conversations.
+        NSMicrophoneUsageDescription: >-
+          Dictate messages to your agents by voice.
+        NSSpeechRecognitionUsageDescription: >-
+          Transcribe your voice into chat messages, on-device where possible.
     entitlements:
       path: Sphere/Sphere.entitlements
       properties:

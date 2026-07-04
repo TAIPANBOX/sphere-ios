@@ -9,6 +9,9 @@ public struct ChatScreen: View {
     @State private var draft = ""
     @State private var pickedItems: [PhotosPickerItem] = []
     @State private var pendingImages: [LLMImage] = []
+    #if os(iOS)
+    @State private var dictation = SpeechDictation()
+    #endif
 
     public init(session: ChatSession) {
         self.session = session
@@ -62,6 +65,16 @@ public struct ChatScreen: View {
                     Image(systemName: "photo")
                         .foregroundStyle(.secondary)
                 }
+                #if os(iOS)
+                Button {
+                    dictation.toggle { draft = $0 }
+                } label: {
+                    Image(systemName: dictation.isRecording ? "mic.fill" : "mic")
+                        .foregroundStyle(dictation.isRecording ? .red : .secondary)
+                        .symbolEffect(.pulse, isActive: dictation.isRecording)
+                }
+                .buttonStyle(.plain)
+                #endif
                 TextField("Message your \(session.sphereName) agent…", text: $draft, axis: .vertical)
                     .textFieldStyle(.plain)
                     .lineLimit(1...5)
@@ -87,6 +100,9 @@ public struct ChatScreen: View {
 
     private func sendDraft() {
         guard canSend else { return }
+        #if os(iOS)
+        dictation.stop()
+        #endif
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         let images = pendingImages
         draft = ""

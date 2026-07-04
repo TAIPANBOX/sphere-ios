@@ -31,8 +31,12 @@
 	<string>Sphere does not write health data; this is required by HealthKit.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Sphere uses your location to show local weather on the Home tab.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Dictate messages to your agents by voice.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Attach photos to your agent conversations.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Transcribe your voice into chat messages, on-device where possible.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 </dict>
