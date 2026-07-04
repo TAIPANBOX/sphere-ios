@@ -128,8 +128,11 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
   onboarding, Settings, Profile) with Ukrainian from the Flutter ARB;
   verified rendering under `-AppleLanguages '(uk)'`. Sphere screens
   (SphereUI package) still inline-English — same pattern, larger volume.
+- [x] Voice input in chat — on-device `SFSpeechRecognizer` dictation
+  (SpeechDictation in SphereUI, iOS-guarded); mic button in the chat input
+  streams partial transcripts into the draft (243 tests total).
 - [ ] SphereUI screen localization (String Catalog in the SPM target);
-  Watch quick-logging + voice queries; voice input in chat; secondary lists
+  Watch quick-logging + voice queries; secondary lists per sphere
 
 ## Development
 

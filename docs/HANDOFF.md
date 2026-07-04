@@ -144,7 +144,12 @@ Remaining:
    `-destination` only. Watch READ path is done; quick-logging / voice-query
    WRITE path (watch → phone via WCSession sendMessage → apply to a store)
    is the next Watch increment.
-4. Secondary lists per sphere (flagged in README) + voice input in chat.
+4. ~~Voice input in chat~~ DONE (`SpeechDictation` in SphereUI, iOS-guarded;
+   mic button in `ChatScreen`). Still: **secondary lists per sphere**
+   (flagged in README — e.g. Health medications/labs/cycle/doctor, Finance
+   accounts/debts/investments/savings, etc.; each is simple CRUD following
+   the golden-template recipe) and the **Watch write-path** (quick-log/voice
+   from the wrist → WCSession sendMessage → apply on the phone).
 5. iCloud sync (Phase 8) and Engram v2 (Phase 9) are post-launch updates;
    do not start them ad hoc.
 
