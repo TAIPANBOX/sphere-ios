@@ -25,8 +25,8 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app || sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+      # No xcode-select here: the runner's default Xcode ships with a
+      # matching iOS Simulator runtime; hand-picked versions may not.
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate project
