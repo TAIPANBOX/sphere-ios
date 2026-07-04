@@ -201,3 +201,76 @@ public struct Interview: Codable, Equatable, Identifiable, Sendable {
 extension Interview: FetchableRecord, PersistableRecord {
     public static let databaseTableName = "interviews"
 }
+
+public struct Achievement: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var title: String
+    public var description: String
+    public var date: Date
+    public var impact: String
+
+    public init(
+        id: String,
+        title: String,
+        description: String = "",
+        date: Date,
+        impact: String = ""
+    ) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.date = date
+        self.impact = impact
+    }
+
+    public static func newID(now: Date = Date()) -> String {
+        EntityID.make("achv", now: now)
+    }
+}
+
+extension Achievement: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "achievements"
+}
+
+public struct NetworkContact: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var name: String
+    public var role: String
+    public var company: String
+    public var note: String
+    public var lastContact: Date?
+
+    public init(
+        id: String,
+        name: String,
+        role: String = "",
+        company: String = "",
+        note: String = "",
+        lastContact: Date? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.role = role
+        self.company = company
+        self.note = note
+        self.lastContact = lastContact
+    }
+
+    /// Days since the last touch; a large sentinel when never contacted.
+    public func daysSinceContact(asOf now: Date = Date()) -> Int {
+        guard let lastContact else { return 9_999 }
+        return Calendar.current.dateComponents(
+            [.day],
+            from: Calendar.current.startOfDay(for: lastContact),
+            to: Calendar.current.startOfDay(for: now)
+        ).day ?? 0
+    }
+
+    public static func newID(now: Date = Date()) -> String {
+        EntityID.make("netc", now: now)
+    }
+}
+
+extension NetworkContact: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "network_contacts"
+}

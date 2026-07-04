@@ -12,6 +12,9 @@ public final class CareerStore {
     public private(set) var tasks: [CareerTask] = []
     public private(set) var projects: [CareerProject] = []
     public private(set) var interviews: [Interview] = []
+    /// Newest first.
+    public private(set) var achievements: [Achievement] = []
+    public private(set) var network: [NetworkContact] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
@@ -22,16 +25,20 @@ public final class CareerStore {
     }
 
     public func load() async throws {
-        let (tasks, projects, interviews) = try await database.writer.read { db in
+        let (tasks, projects, interviews, achievements, network) = try await database.writer.read { db in
             (
                 try CareerTask.fetchAll(db, sql: "SELECT * FROM career_tasks ORDER BY createdAt DESC, rowid DESC"),
                 try CareerProject.fetchAll(db),
-                try Interview.fetchAll(db)
+                try Interview.fetchAll(db),
+                try Achievement.fetchAll(db, sql: "SELECT * FROM achievements ORDER BY date DESC"),
+                try NetworkContact.fetchAll(db)
             )
         }
         self.tasks = tasks
         self.projects = projects
         self.interviews = interviews
+        self.achievements = achievements
+        self.network = network
     }
 
     // MARK: - Tasks
@@ -122,6 +129,52 @@ public final class CareerStore {
     public func removeInterview(id: String) async throws {
         _ = try await database.writer.write { db in try Interview.deleteOne(db, key: id) }
         interviews.removeAll { $0.id == id }
+    }
+
+    // MARK: - Achievements
+
+    public func addAchievement(_ achievement: Achievement) async throws {
+        try await database.writer.write { db in try achievement.insert(db) }
+        achievements.insert(achievement, at: 0)
+        achievements.sort { $0.date > $1.date }
+        engram?.note(
+            agentId: SphereType.career.rawValue,
+            content: "Logged achievement: \(achievement.title)"
+                + (achievement.impact.isEmpty ? "" : " — \(achievement.impact)"),
+            tags: ["log", "career", "achievement"],
+            salience: 0.75
+        )
+    }
+
+    public func removeAchievement(id: String) async throws {
+        _ = try await database.writer.write { db in try Achievement.deleteOne(db, key: id) }
+        achievements.removeAll { $0.id == id }
+    }
+
+    // MARK: - Network
+
+    public func addNetworkContact(_ contact: NetworkContact) async throws {
+        try await database.writer.write { db in try contact.insert(db) }
+        network.append(contact)
+    }
+
+    public func removeNetworkContact(id: String) async throws {
+        _ = try await database.writer.write { db in try NetworkContact.deleteOne(db, key: id) }
+        network.removeAll { $0.id == id }
+    }
+
+    public func markNetworkContacted(id: String, on date: Date = Date()) async throws {
+        guard var contact = network.first(where: { $0.id == id }) else { return }
+        contact.lastContact = date
+        try await database.writer.write { [contact] db in try contact.save(db) }
+        network = network.map { $0.id == id ? contact : $0 }
+    }
+
+    /// Network contacts not touched in 60+ days, most overdue first.
+    public func staleContacts(asOf now: Date = Date()) -> [NetworkContact] {
+        network
+            .filter { $0.daysSinceContact(asOf: now) >= 60 }
+            .sorted { $0.daysSinceContact(asOf: now) > $1.daysSinceContact(asOf: now) }
     }
 
     // MARK: - Agent tools

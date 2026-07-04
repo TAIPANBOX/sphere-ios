@@ -179,6 +179,24 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("career-v2") { db in
+            try db.create(table: "achievements") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("description", .text).notNull().defaults(to: "")
+                t.column("date", .datetime).notNull()
+                t.column("impact", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "network_contacts") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("role", .text).notNull().defaults(to: "")
+                t.column("company", .text).notNull().defaults(to: "")
+                t.column("note", .text).notNull().defaults(to: "")
+                t.column("lastContact", .datetime)
+            }
+        }
+
         migrator.registerMigration("rest-v1") { db in
             try db.create(table: "sleep_entries") { t in
                 t.primaryKey("id", .text)

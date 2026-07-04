@@ -5,6 +5,8 @@ public struct CareerScreen: View {
     private let store: CareerStore
     @State private var showingAddTask = false
     @State private var showingAddInterview = false
+    @State private var showingAddAchievement = false
+    @State private var showingAddContact = false
 
     private let accent = SphereTheme.accent(for: .career)
 
@@ -19,6 +21,8 @@ public struct CareerScreen: View {
                 tasksSection
                 projectsSection
                 interviewsSection
+                achievementsSection
+                networkSection
             }
             .padding()
         }
@@ -27,6 +31,8 @@ public struct CareerScreen: View {
             Menu {
                 Button("Add Task") { showingAddTask = true }
                 Button("Add Interview") { showingAddInterview = true }
+                Button("Add Achievement") { showingAddAchievement = true }
+                Button("Add Contact") { showingAddContact = true }
             } label: {
                 Image(systemName: "plus")
             }
@@ -39,6 +45,16 @@ public struct CareerScreen: View {
         .sheet(isPresented: $showingAddInterview) {
             AddInterviewSheet { interview in
                 Task { try? await store.addInterview(interview) }
+            }
+        }
+        .sheet(isPresented: $showingAddAchievement) {
+            AddAchievementSheet { achievement in
+                Task { try? await store.addAchievement(achievement) }
+            }
+        }
+        .sheet(isPresented: $showingAddContact) {
+            AddNetworkContactSheet { contact in
+                Task { try? await store.addNetworkContact(contact) }
             }
         }
         .task {
@@ -203,6 +219,89 @@ public struct CareerScreen: View {
         if status.isNegative { return .red }
         return accent
     }
+
+    // MARK: - Achievements
+
+    private var achievementsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Achievements").font(.title3.weight(.semibold))
+            if store.achievements.isEmpty {
+                Text("Log a win worth remembering.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .sphereCard()
+            }
+            ForEach(store.achievements) { achievement in
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("🏆 \(achievement.title)").font(.body.weight(.medium))
+                        Spacer()
+                        Text(achievement.date, style: .date)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    if !achievement.impact.isEmpty {
+                        Text(achievement.impact).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .sphereCard()
+                .swipeActions {
+                    Button(role: .destructive) {
+                        Task { try? await store.removeAchievement(id: achievement.id) }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Network
+
+    private var networkSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Network").font(.title3.weight(.semibold))
+                Spacer()
+                if !store.staleContacts().isEmpty {
+                    Text("\(store.staleContacts().count) to reconnect")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.orange)
+                }
+            }
+            ForEach(store.network) { contact in
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(contact.name).font(.body.weight(.medium))
+                        Text([contact.role, contact.company]
+                            .filter { !$0.isEmpty }.joined(separator: " · "))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    let stale = contact.daysSinceContact() >= 60
+                    Button {
+                        Task { try? await store.markNetworkContacted(id: contact.id) }
+                    } label: {
+                        Text(contact.lastContact == nil ? "Reach out" : "\(contact.daysSinceContact())d")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(stale ? Color.orange : Color.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .sphereCard()
+                .swipeActions {
+                    Button(role: .destructive) {
+                        Task { try? await store.removeNetworkContact(id: contact.id) }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
+        }
+    }
 }
 
 struct AddCareerTaskSheet: View {
@@ -248,6 +347,83 @@ struct AddCareerTaskSheet: View {
                         dismiss()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+struct AddAchievementSheet: View {
+    let onAdd: (Achievement) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var title = ""
+    @State private var impact = ""
+    @State private var date = Date()
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Achievement", text: $title)
+                TextField("Impact (optional)", text: $impact)
+                DatePicker("Date", selection: $date, displayedComponents: .date)
+            }
+            .navigationTitle("Log Achievement")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(Achievement(
+                            id: Achievement.newID(),
+                            title: title.trimmingCharacters(in: .whitespaces),
+                            date: date,
+                            impact: impact.trimmingCharacters(in: .whitespaces)
+                        ))
+                        dismiss()
+                    }
+                    .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+struct AddNetworkContactSheet: View {
+    let onAdd: (NetworkContact) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var role = ""
+    @State private var company = ""
+    @State private var note = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Name", text: $name)
+                TextField("Role", text: $role)
+                TextField("Company", text: $company)
+                TextField("Note", text: $note)
+            }
+            .navigationTitle("Add Contact")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(NetworkContact(
+                            id: NetworkContact.newID(),
+                            name: name.trimmingCharacters(in: .whitespaces),
+                            role: role.trimmingCharacters(in: .whitespaces),
+                            company: company.trimmingCharacters(in: .whitespaces),
+                            note: note.trimmingCharacters(in: .whitespaces)
+                        ))
+                        dismiss()
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
         }
