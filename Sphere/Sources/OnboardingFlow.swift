@@ -117,7 +117,7 @@ struct OnboardingFlow: View {
                             if on { disabledSpheres.insert(sphere) } else { disabledSpheres.remove(sphere) }
                         } label: {
                             HStack {
-                                Text(sphere.rawValue.capitalized)
+                                Text(LocalizedStringKey(sphere.rawValue.capitalized))
                                     .font(.subheadline.weight(.medium))
                                 Spacer()
                                 Image(systemName: on ? "checkmark.circle.fill" : "circle")

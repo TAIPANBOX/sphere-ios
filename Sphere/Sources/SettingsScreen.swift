@@ -52,7 +52,10 @@ struct SettingsScreen: View {
             Section("My Spheres") {
                 ForEach(SphereType.allCases, id: \.self) { sphere in
                     Toggle(isOn: sphereBinding(for: sphere)) {
-                        Text("\(Self.emojis[sphere] ?? "✨") \(sphere.rawValue.capitalized)")
+                        HStack {
+                            Text(Self.emojis[sphere] ?? "✨")
+                            Text(LocalizedStringKey(sphere.rawValue.capitalized))
+                        }
                     }
                 }
             }

@@ -54,7 +54,8 @@ struct SpheresGridScreen: View {
                 HStack(spacing: 12) {
                     Text(Self.emojis[sphere] ?? "✨").font(.system(size: 28))
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(sphere.rawValue.capitalized).font(.body.weight(.semibold))
+                        Text(LocalizedStringKey(sphere.rawValue.capitalized))
+                            .font(.body.weight(.semibold))
                         if !stat.statLine.isEmpty {
                             Text(stat.statLine)
                                 .font(.caption)
