@@ -12,7 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app || sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+        # Newest installed Xcode: the codebase uses current-SDK APIs and the
+        # app job already builds with the runner default. (The old 16.2 pin
+        # predates them and its Swift rejects newer constructs.)
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
       - name: Build
         working-directory: SphereCore
         run: swift build

@@ -55,7 +55,11 @@ public struct CRUDListScreen<Item: Identifiable, Row: View, AddSheet: View>: Vie
             } else {
                 List {
                     ForEach(items) { item in rowContent(item) }
-                        .onDelete { offsets in offsets.map { items[$0] }.forEach(delete) }
+                        .onDelete { offsets in
+                            // Plain loop: the map/forEach chain trips typed-throws
+                            // checking on some Swift 6.x compilers.
+                            for offset in offsets { delete(items[offset]) }
+                        }
                 }
             }
         }

@@ -39,8 +39,11 @@ struct ProfileScreen: View {
                     Spacer()
                     VStack(spacing: 10) {
                         avatarView
+                        // Capture the Bool, not the main-actor property: some SDKs
+                        // type PhotosPicker's label closure as @Sendable.
+                        let pickerTitle = hasAvatar ? "Change photo" : "Add photo"
                         PhotosPicker(selection: $photoItem, matching: .images) {
-                            Text(hasAvatar ? "Change photo" : "Add photo")
+                            Text(pickerTitle)
                         }
                         if hasAvatar {
                             Button("Remove", role: .destructive, action: removeAvatar)
