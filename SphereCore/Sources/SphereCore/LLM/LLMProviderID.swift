@@ -1,16 +1,21 @@
 import Foundation
 
 /// Which backend answers the agents. On-device (Apple Foundation Models) is
-/// the free, no-key default; the four cloud providers are the optional power
-/// tier. Tier-1 downloadable models (Stage 8) will add a `.localModel(id)`
-/// case here.
+/// the free, no-key default; a downloaded Tier-1 model is the free path for
+/// devices without Apple Intelligence; the four cloud providers are the
+/// optional power tier.
 public enum AIBackend: Equatable, Hashable, Sendable {
     case onDevice
+    /// The active model downloaded via the model manager (AI Tier 1). Which
+    /// model is active lives in `ModelManager`; the engine is injected by the
+    /// app target.
+    case localModel
     case cloud(LLMProviderID)
 
     public var label: String {
         switch self {
         case .onDevice: "On-device (free)"
+        case .localModel: "Downloaded model"
         case .cloud(let provider): provider.displayName
         }
     }
@@ -19,6 +24,7 @@ public enum AIBackend: Equatable, Hashable, Sendable {
     public var storageValue: String {
         switch self {
         case .onDevice: "onDevice"
+        case .localModel: "localModel"
         case .cloud(let provider): provider.rawValue
         }
     }
@@ -26,6 +32,8 @@ public enum AIBackend: Equatable, Hashable, Sendable {
     public init?(storageValue: String) {
         if storageValue == "onDevice" {
             self = .onDevice
+        } else if storageValue == "localModel" {
+            self = .localModel
         } else if let provider = LLMProviderID(rawValue: storageValue) {
             self = .cloud(provider)
         } else {

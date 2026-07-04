@@ -60,6 +60,15 @@ final class AppContainer {
             engram: engram,
             cache: cache,
             onDeviceEngine: { OnDeviceAI.makeEngineIfAvailable() },
+            localModelEngine: {
+                // Nonisolated read: the active choice lives in UserDefaults and
+                // installation is a marker file, so no MainActor state is touched.
+                guard let id = UserDefaults.standard.string(forKey: Prefs.activeModel),
+                      let model = ModelCatalog.model(id: id),
+                      LocalModelAI.isInstalled(model)
+                else { return nil }
+                return LocalModelAI.makeEngine(hubID: model.hubID)
+            },
             preferredBackend: { AppBackendPreference.current }
         )
 
@@ -123,7 +132,10 @@ final class AppContainer {
             database: database, rest: rest, mindfulness: mindfulness, health: health
         )
         models = ModelManager(
-            downloader: ModelDownloadService(), preferences: ModelPreferences()
+            // MLX-backed downloader on device (real Hub download with progress);
+            // URLSession fallback keeps the simulator/UI path working.
+            downloader: LocalModelAI.makeDownloader() ?? ModelDownloadService(),
+            preferences: ModelPreferences()
         )
         recap = RecapStore(
             mindfulness: mindfulness, health: health, learning: learning,

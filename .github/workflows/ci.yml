@@ -32,6 +32,10 @@ jobs:
       # matching iOS Simulator runtime; hand-picked versions may not.
       - name: Install XcodeGen
         run: brew install xcodegen
+      - name: Ensure Metal toolchain
+        # MLX compiles Metal shaders; Xcode 26 ships the Metal toolchain as a
+        # separate component that runner images may lack. No-op when present.
+        run: xcodebuild -downloadComponent MetalToolchain || true
       - name: Generate project
         run: xcodegen generate
       - name: Build app

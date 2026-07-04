@@ -26,6 +26,9 @@ struct SettingsScreen: View {
                     if onDeviceAvailable {
                         Text("On-device (free)").tag("onDevice")
                     }
+                    if !container.models.installedModels.isEmpty {
+                        Text("Downloaded model").tag("localModel")
+                    }
                     ForEach(LLMProviderID.allCases, id: \.self) { provider in
                         Text(provider.displayName).tag(provider.rawValue)
                     }

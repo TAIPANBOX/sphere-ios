@@ -29,6 +29,12 @@ public struct ModelInfo: Codable, Equatable, Identifiable, Sendable {
         self.contextTokens = contextTokens
         self.url = url
     }
+
+    /// Hugging Face repo id (e.g. "mlx-community/Qwen2.5-1.5B-Instruct-4bit"),
+    /// derived from the catalog URL — what the MLX hub loader takes.
+    public var hubID: String {
+        url.replacingOccurrences(of: "https://huggingface.co/", with: "")
+    }
 }
 
 /// The curated Tier-1 models (EXPANSION_PLAN §9.1). Small, 4-bit, on-device.

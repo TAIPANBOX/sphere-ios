@@ -27,6 +27,10 @@ public final class AgentService: Sendable {
     /// system model is available, else nil. Injected by the app target so
     /// SphereCore stays free of the FoundationModels framework.
     private let onDeviceEngine: @Sendable () -> (any LLMEngine)?
+    /// Returns an engine for the active downloaded model (AI Tier 1) when one
+    /// is installed and selected, else nil. Injected by the app target so
+    /// SphereCore stays free of the MLX frameworks.
+    private let localModelEngine: @Sendable () -> (any LLMEngine)?
     /// The user's explicit backend choice, if any (else auto-resolve).
     private let preferredBackend: @Sendable () -> AIBackend?
 
@@ -36,6 +40,7 @@ public final class AgentService: Sendable {
         cache: any OfflineCache,
         engineFactory: @escaping @Sendable (LLMProviderID) -> any LLMEngine = { $0.makeEngine() },
         onDeviceEngine: @escaping @Sendable () -> (any LLMEngine)? = { nil },
+        localModelEngine: @escaping @Sendable () -> (any LLMEngine)? = { nil },
         preferredBackend: @escaping @Sendable () -> AIBackend? = { nil }
     ) {
         self.keyStore = keyStore
@@ -43,6 +48,7 @@ public final class AgentService: Sendable {
         self.cache = cache
         self.engineFactory = engineFactory
         self.onDeviceEngine = onDeviceEngine
+        self.localModelEngine = localModelEngine
         self.preferredBackend = preferredBackend
     }
 
@@ -51,7 +57,8 @@ public final class AgentService: Sendable {
     /// Resolves which backend answers this exchange. Order:
     /// 1. the user's explicit choice, if usable;
     /// 2. free on-device (Apple) when available;
-    /// 3. the first configured cloud key (Anthropic → OpenAI → Gemini →
+    /// 3. the active downloaded model (Tier 1), when installed;
+    /// 4. the first configured cloud key (Anthropic → OpenAI → Gemini →
     ///    OpenRouter).
     /// Throws `noApiKey` only when none of the above is available.
     private func resolveBackend() throws -> (engine: any LLMEngine, apiKey: String, label: String) {
@@ -59,6 +66,8 @@ public final class AgentService: Sendable {
             switch preferred {
             case .onDevice:
                 if let engine = onDeviceEngine() { return (engine, "", preferred.label) }
+            case .localModel:
+                if let engine = localModelEngine() { return (engine, "", preferred.label) }
             case .cloud(let provider):
                 if let key = keyStore.key(for: provider), !key.isEmpty {
                     return (engineFactory(provider), key, provider.displayName)
@@ -66,6 +75,7 @@ public final class AgentService: Sendable {
             }
         }
         if let engine = onDeviceEngine() { return (engine, "", AIBackend.onDevice.label) }
+        if let engine = localModelEngine() { return (engine, "", AIBackend.localModel.label) }
         for provider in LLMProviderID.allCases {
             if let key = keyStore.key(for: provider), !key.isEmpty {
                 return (engineFactory(provider), key, provider.displayName)

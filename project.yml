@@ -15,6 +15,13 @@ knownRegions:
 packages:
   SphereCore:
     path: SphereCore
+  # MLX LLM libraries for the downloaded-model backend (AI Tier 1). App target
+  # ONLY — never the widget/watch extensions (loading weights there would hit
+  # the memory jetsam limit). Runs on device GPUs; the simulator can build but
+  # not run MLX, which LocalModelAI guards with !targetEnvironment(simulator).
+  MLXExamples:
+    url: https://github.com/ml-explore/mlx-swift-examples
+    from: 2.21.0
 
 targets:
   Sphere:
@@ -27,6 +34,10 @@ targets:
         product: SphereCore
       - package: SphereCore
         product: SphereUI
+      - package: MLXExamples
+        product: MLXLLM
+      - package: MLXExamples
+        product: MLXLMCommon
       - target: SphereWidgetExtension
       - target: SphereWatch
         embed: true

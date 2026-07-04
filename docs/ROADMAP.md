@@ -394,10 +394,19 @@ this adds choice + reach for non-Apple-Intelligence devices.*
   `.complete` marker) + `ModelPreferences`. SphereUI `ModelsScreen` (size + RAM-fit
   badges, Get/Cancel/Delete, progress, pick-active) linked from Settings → AI.
   10 tests. **Actual multi-GB download + inference land with LocalModelEngine.**
-- [ ] **LocalModelEngine** (§9.1 Tier 1) — MLX Swift / LocalLLMClient; 5
-  curated models (SmolLM2-1.7B, Qwen2.5-1.5B, Gemma-2-2B, Llama-3.2-3B,
-  Phi-3.5-mini); constrained decoding for tool-call JSON. Never in
-  extensions.
+- [x] **LocalModelEngine** (§9.1 Tier 1) — DONE (text-only v1): `AIBackend`
+  gained `.localModel`; `AgentService` gained an injected `localModelEngine`
+  closure — resolution: explicit choice → Apple on-device → downloaded model →
+  cloud keys. App target: `mlx-swift-examples` package (app ONLY, never
+  extensions), `LocalModelEngine` (MLX `ChatSession` streaming/respond, model
+  container cached via actor, engine cached per hubID), `MLXModelService`
+  (real Hub download with progress, replaces the URLSession placeholder on
+  device; sim keeps the fallback), `LocalModelAI` gate — engines only off the
+  simulator. Settings picker gained "Downloaded model" when one is installed.
+  `ModelInfo.hubID`. Device build compiles the MLX path; sim runs the UI. CI
+  gained a Metal-toolchain step (Xcode 26 ships it separately). 7 tests.
+  **Runtime inference needs a real device (MLX = device GPU); constrained
+  decoding for tool calls is a follow-up.**
 
 **Done when:** a non-Apple-Intelligence device can download a model and chat.
 

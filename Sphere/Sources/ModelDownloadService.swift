@@ -11,30 +11,12 @@ import SphereCore
 /// across launches, and *running* the model is not wired here. Fetching the file
 /// is real.
 final class ModelDownloadService: ModelDownloading, @unchecked Sendable {
-    private static var modelsDir: URL? {
-        let fm = FileManager.default
-        guard var dir = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("Sphere/Models", isDirectory: true) else { return nil }
-        try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
-        // Keep multi-GB models out of iCloud backup.
-        var values = URLResourceValues()
-        values.isExcludedFromBackup = true
-        try? dir.setResourceValues(values)
-        return dir
-    }
-
     private func directory(for model: ModelInfo) -> URL? {
-        Self.modelsDir?.appendingPathComponent(model.id, isDirectory: true)
+        LocalModelFiles.modelsDir?.appendingPathComponent(model.id, isDirectory: true)
     }
 
     func installedIDs() -> Set<String> {
-        guard let dir = Self.modelsDir,
-              let entries = try? FileManager.default.contentsOfDirectory(atPath: dir.path)
-        else { return [] }
-        // A model counts as installed when its folder holds the completion marker.
-        return Set(entries.filter { id in
-            FileManager.default.fileExists(atPath: dir.appendingPathComponent("\(id)/.complete").path)
-        })
+        LocalModelFiles.installedIDs()
     }
 
     func download(_ model: ModelInfo) -> AsyncThrowingStream<Double, Error> {
@@ -76,7 +58,7 @@ final class ModelDownloadService: ModelDownloading, @unchecked Sendable {
     }
 
     func freeDiskMB() -> Int {
-        let url = Self.modelsDir ?? URL(fileURLWithPath: NSHomeDirectory())
+        let url = LocalModelFiles.modelsDir ?? URL(fileURLWithPath: NSHomeDirectory())
         let capacity = try? url.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
             .volumeAvailableCapacityForImportantUsage
         guard let bytes = capacity else { return 0 }

@@ -1551,6 +1551,16 @@
         }
       }
     },
+    "Downloaded model": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажена модель"
+          }
+        }
+      }
+    },
     "Dream Destination": {
       "localizations": {
         "uk": {
