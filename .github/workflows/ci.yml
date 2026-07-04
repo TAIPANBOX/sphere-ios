@@ -32,7 +32,10 @@ jobs:
       - name: Generate project
         run: xcodegen generate
       - name: Build app
+        # No -sdk override: it would force the embedded watchOS targets to
+        # build against the iOS SDK. -destination lets each target use its
+        # own platform SDK.
         run: >
           xcodebuild -project Sphere.xcodeproj -scheme Sphere
-          -sdk iphonesimulator -destination 'generic/platform=iOS Simulator'
+          -destination 'generic/platform=iOS Simulator'
           build CODE_SIGNING_ALLOWED=NO

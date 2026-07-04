@@ -21,6 +21,8 @@ targets:
       - package: SphereCore
         product: SphereUI
       - target: SphereWidgetExtension
+      - target: SphereWatch
+        embed: true
     info:
       path: Sphere/Info.plist
       properties:
@@ -73,6 +75,67 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: app.sphere.Sphere.Widget
         SWIFT_VERSION: "6.0"
         TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 0.1.0
+
+  SphereWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - Watch
+    dependencies:
+      - package: SphereCore
+        product: SphereCore
+      - target: SphereWatchWidgetExtension
+        embed: true
+    info:
+      path: Watch/Info.plist
+      properties:
+        CFBundleDisplayName: Sphere
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: app.sphere.Sphere
+        NSLocationWhenInUseUsageDescription: Sphere shows your local weather.
+    entitlements:
+      path: Watch/SphereWatch.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.app.sphere.shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.sphere.Sphere.watch
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "4"
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 0.1.0
+
+  SphereWatchWidgetExtension:
+    type: app-extension
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - WatchWidget
+    dependencies:
+      - package: SphereCore
+        product: SphereCore
+    info:
+      path: WatchWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Sphere
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: WatchWidget/SphereWatchWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.app.sphere.shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.sphere.Sphere.watch.widget
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "4"
         CODE_SIGN_STYLE: Automatic
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 0.1.0

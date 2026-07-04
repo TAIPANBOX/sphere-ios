@@ -195,5 +195,6 @@ final class AppContainer {
         )
         store.write(snapshot)
         WidgetCenter.shared.reloadAllTimelines()
+        WatchBridge.shared.send(snapshot)
     }
 }
