@@ -14,33 +14,48 @@ public final class RestStore {
     public private(set) var detoxDays: Set<String> = []
     public private(set) var workHours: [String: Double] = [:]
     public private(set) var weekendPlans: [String: WeekendPlan] = [:]
+    public private(set) var naps: [Nap] = []
+    public private(set) var recoveryActivities: [RecoveryActivity] = []
+    public private(set) var vacationDays: Set<String> = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
+    private let metricsProvider: (any HealthMetricsProviding)?
 
-    public init(database: AppDatabase, engram: EngramStore? = nil) {
+    public init(
+        database: AppDatabase, engram: EngramStore? = nil,
+        metricsProvider: (any HealthMetricsProviding)? = nil
+    ) {
         self.database = database
         self.engram = engram
+        self.metricsProvider = metricsProvider
     }
 
     public func load() async throws {
-        let (entries, schedule, detox, work, weekends) = try await database.writer.read { db in
-            (
-                try SleepEntry.fetchAll(db, sql: "SELECT * FROM sleep_entries ORDER BY date DESC, rowid DESC"),
-                try SleepSchedule.fetchOne(db, key: "main"),
-                try String.fetchAll(db, sql: "SELECT dateKey FROM detox_days"),
-                // Row is not Sendable; map to pairs inside the closure so the
-                // async read overload applies.
-                try Row.fetchAll(db, sql: "SELECT dateKey, hours FROM work_hours")
-                    .map { ($0["dateKey"] as String, $0["hours"] as Double) },
-                try WeekendPlan.fetchAll(db)
-            )
-        }
+        let (entries, schedule, detox, work, weekends, naps, recovery, vacation) =
+            try await database.writer.read { db in
+                (
+                    try SleepEntry.fetchAll(db, sql: "SELECT * FROM sleep_entries ORDER BY date DESC, rowid DESC"),
+                    try SleepSchedule.fetchOne(db, key: "main"),
+                    try String.fetchAll(db, sql: "SELECT dateKey FROM detox_days"),
+                    // Row is not Sendable; map to pairs inside the closure so the
+                    // async read overload applies.
+                    try Row.fetchAll(db, sql: "SELECT dateKey, hours FROM work_hours")
+                        .map { ($0["dateKey"] as String, $0["hours"] as Double) },
+                    try WeekendPlan.fetchAll(db),
+                    try Nap.fetchAll(db, sql: "SELECT * FROM naps ORDER BY date DESC"),
+                    try RecoveryActivity.fetchAll(db, sql: "SELECT * FROM recovery_activities ORDER BY rating DESC"),
+                    try String.fetchAll(db, sql: "SELECT dateKey FROM vacation_days")
+                )
+            }
         sleepEntries = entries
         if let schedule { self.schedule = schedule }
         detoxDays = Set(detox)
         workHours = Dictionary(uniqueKeysWithValues: work)
         weekendPlans = Dictionary(uniqueKeysWithValues: weekends.map { ($0.weekKey, $0) })
+        self.naps = naps
+        self.recoveryActivities = recovery
+        self.vacationDays = Set(vacation)
     }
 
     // MARK: - Sleep log
@@ -58,6 +73,35 @@ public final class RestStore {
     public func remove(id: String) async throws {
         _ = try await database.writer.write { db in try SleepEntry.deleteOne(db, key: id) }
         sleepEntries.removeAll { $0.id == id }
+    }
+
+    public var hasHealthProvider: Bool { metricsProvider != nil }
+
+    /// Pulls per-night sleep from HealthKit and fills nights that aren't already
+    /// logged (manual entries are never overwritten). Deterministic per-night
+    /// ids make re-import idempotent. Returns how many nights were added.
+    @discardableResult
+    public func importSleepFromHealth(days: Int = 14) async -> Int {
+        guard let metricsProvider else { return 0 }
+        _ = await metricsProvider.requestAuthorization()
+        let nights = await metricsProvider.recentSleepNights(days: days)
+        guard !nights.isEmpty else { return 0 }
+
+        let existingDayKeys = Set(sleepEntries.map { DayKey.make($0.date) })
+        var imported = 0
+        for night in nights where night.hours >= 0.5 {
+            let key = DayKey.make(night.date)
+            guard !existingDayKeys.contains(key) else { continue }
+            let entry = SleepEntry(
+                id: "hksleep-\(key)", date: night.date,
+                hoursSlept: (night.hours * 10).rounded() / 10, note: "From Apple Health"
+            )
+            try? await database.writer.write { db in try entry.save(db) }
+            sleepEntries.append(entry)
+            imported += 1
+        }
+        if imported > 0 { sleepEntries.sort { $0.date > $1.date } }
+        return imported
     }
 
     public func last7(asOf now: Date = Date()) -> [SleepEntry] {
@@ -205,6 +249,69 @@ public final class RestStore {
         guard var plan = weekendPlans[key], plan.activities.indices.contains(index) else { return }
         plan.activities.remove(at: index)
         try await saveWeekendPlan(plan)
+    }
+
+    // MARK: - Naps
+
+    public func addNap(_ nap: Nap) async throws {
+        try await database.writer.write { db in try nap.insert(db) }
+        naps.insert(nap, at: 0)
+    }
+
+    public func removeNap(id: String) async throws {
+        _ = try await database.writer.write { db in try Nap.deleteOne(db, key: id) }
+        naps.removeAll { $0.id == id }
+    }
+
+    // MARK: - Recovery-activities menu
+
+    public func addRecoveryActivity(_ activity: RecoveryActivity) async throws {
+        try await database.writer.write { db in try activity.insert(db) }
+        recoveryActivities.append(activity)
+        recoveryActivities.sort { $0.rating > $1.rating }
+    }
+
+    public func removeRecoveryActivity(id: String) async throws {
+        _ = try await database.writer.write { db in try RecoveryActivity.deleteOne(db, key: id) }
+        recoveryActivities.removeAll { $0.id == id }
+    }
+
+    // MARK: - Vacation ledger
+
+    public func isVacationDay(_ date: Date = Date()) -> Bool {
+        vacationDays.contains(DayKey.make(date))
+    }
+
+    public func toggleVacation(on date: Date = Date()) async throws {
+        let key = DayKey.make(date)
+        if vacationDays.contains(key) {
+            try await database.writer.write { db in
+                try db.execute(sql: "DELETE FROM vacation_days WHERE dateKey = ?", arguments: [key])
+            }
+            vacationDays.remove(key)
+        } else {
+            try await database.writer.write { db in
+                try db.execute(sql: "INSERT INTO vacation_days (dateKey) VALUES (?)", arguments: [key])
+            }
+            vacationDays.insert(key)
+        }
+    }
+
+    /// Vacation days taken in the calendar year of `now`.
+    public func usedVacationDays(asOf now: Date = Date()) -> Int {
+        let year = String(DayKey.make(now).prefix(4))
+        return vacationDays.count { $0.hasPrefix(year) }
+    }
+
+    public func remainingVacationDays(allowance: Int, asOf now: Date = Date()) -> Int {
+        max(allowance - usedVacationDays(asOf: now), 0)
+    }
+
+    // MARK: - Sleep debt (gem)
+
+    /// Accumulated sleep deficit over the last 7 nights vs the schedule goal.
+    public func sleepDebtLast7(asOf now: Date = Date()) -> Double {
+        SleepMath.sleepDebt(hoursByNight: last7(asOf: now).map(\.hoursSlept), goal: schedule.goalHours)
     }
 
     // MARK: - Agent tools

@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 import SphereCore
 
 public struct FinanceScreen: View {
@@ -19,14 +20,21 @@ public struct FinanceScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.safeToSpendToday() != nil {
+                    safeToSpendCard
+                }
                 summaryCard
                 if !store.overBudget().isEmpty {
                     overBudgetWarning
+                }
+                if !store.categorySpendingThisMonth().isEmpty {
+                    categoryChartCard
                 }
                 accountsSection
                 savingsSection
                 budgetsSection
                 subscriptionsSection
+                moreSection
                 transactionsSection
             }
             .padding()
@@ -97,6 +105,141 @@ public struct FinanceScreen: View {
                 .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Safe to spend (gem)
+
+    private var safeToSpendCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label("Safe to spend today", systemImage: "wallet.pass.fill")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(accent)
+            Text(money(store.safeToSpendToday() ?? 0))
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+            Text("Your remaining monthly budget, spread over the days left.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .sphereCard()
+    }
+
+    // MARK: - Category chart (gem)
+
+    private var categoryChartCard: some View {
+        let data = Array(store.categorySpendingThisMonth().prefix(6))
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("This month by category").font(.headline)
+            Chart(data, id: \.0) { entry in
+                BarMark(
+                    x: .value("Spent", entry.1),
+                    y: .value("Category", entry.0.label)
+                )
+                .foregroundStyle(accent.gradient)
+                .cornerRadius(4)
+                .annotation(position: .trailing) {
+                    Text(money(entry.1)).font(.caption2).foregroundStyle(.secondary)
+                }
+            }
+            .chartXAxis(.hidden)
+            .frame(height: CGFloat(data.count) * 34 + 10)
+        }
+        .sphereCard()
+    }
+
+    // MARK: - More (debts, investments, wishlist)
+
+    private var moreSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("More").font(.title3.weight(.semibold))
+            VStack(spacing: 0) {
+                MoreLink("Debts", systemImage: "creditcard.fill",
+                         count: store.debts.isEmpty ? nil : store.debts.count) { debtsList }
+                Divider().padding(.leading, 38)
+                MoreLink("Investments", systemImage: "chart.line.uptrend.xyaxis",
+                         count: store.investments.isEmpty ? nil : store.investments.count) { investmentsList }
+                Divider().padding(.leading, 38)
+                MoreLink("Wishlist", systemImage: "sparkles",
+                         count: store.wishlist.isEmpty ? nil : store.wishlist.count) { wishlistList }
+            }
+            .sphereCard()
+        }
+    }
+
+    private var debtsList: some View {
+        CRUDListScreen(
+            title: "Debts",
+            items: store.debts,
+            emptyTitle: "No debts tracked",
+            emptySystemImage: "creditcard",
+            addSheet: { AddDebtSheet { debt in Task { try? await store.addDebt(debt) } } },
+            row: { debt in
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(debt.name).font(.body.weight(.medium))
+                        Spacer()
+                        Text(money(debt.remaining)).font(.subheadline.weight(.semibold))
+                    }
+                    ProgressView(value: debt.progress).tint(accent)
+                    if debt.monthlyPayment > 0 {
+                        Text("\(money(debt.monthlyPayment))/mo").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+            },
+            onDelete: { debt in Task { try? await store.removeDebt(id: debt.id) } },
+            onRestore: { debt in Task { try? await store.addDebt(debt) } }
+        )
+    }
+
+    private var investmentsList: some View {
+        CRUDListScreen(
+            title: "Investments",
+            items: store.investments,
+            emptyTitle: "No investments tracked",
+            emptySystemImage: "chart.line.uptrend.xyaxis",
+            addSheet: { AddInvestmentSheet { inv in Task { try? await store.addInvestment(inv) } } },
+            row: { inv in
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(inv.name).font(.body.weight(.medium))
+                        Text(inv.type.label).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Text(money(inv.value)).font(.subheadline.weight(.semibold)).foregroundStyle(.green)
+                }
+            },
+            onDelete: { inv in Task { try? await store.removeInvestment(id: inv.id) } },
+            onRestore: { inv in Task { try? await store.addInvestment(inv) } }
+        )
+    }
+
+    private var wishlistList: some View {
+        CRUDListScreen(
+            title: "Wishlist",
+            items: store.wishlist,
+            emptyTitle: "Nothing on the list",
+            emptySystemImage: "sparkles",
+            addSheet: { AddWishlistSheet { item in Task { try? await store.addWishlistItem(item) } } },
+            row: { item in wishlistRow(item) },
+            onDelete: { item in Task { try? await store.removeWishlistItem(id: item.id) } },
+            onRestore: { item in Task { try? await store.addWishlistItem(item) } }
+        )
+    }
+
+    private func wishlistRow(_ item: WishlistItem) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.title).font(.body.weight(.medium))
+                if item.isRipe() {
+                    Text("Ready — buy it or let it go").font(.caption).foregroundStyle(.orange)
+                } else {
+                    Text("Cooling off · ripens in \(item.hoursUntilRipe())h")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            Text(money(item.amount)).font(.subheadline.weight(.semibold))
+        }
     }
 
     // MARK: - Accounts
@@ -459,6 +602,126 @@ struct AddTransactionSheet: View {
                         title.trimmingCharacters(in: .whitespaces).isEmpty
                             || amount.map { $0 <= 0 } ?? true
                     )
+                }
+            }
+        }
+    }
+}
+
+struct AddDebtSheet: View {
+    let onAdd: (Debt) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var lender = ""
+    @State private var totalText = ""
+    @State private var remainingText = ""
+    @State private var monthlyText = ""
+
+    private var total: Double? { Double(totalText.replacingOccurrences(of: ",", with: ".")) }
+    private var remaining: Double? { Double(remainingText.replacingOccurrences(of: ",", with: ".")) }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Name (e.g. Car loan)", text: $name)
+                TextField("Lender", text: $lender)
+                TextField("Total amount", text: $totalText)
+                TextField("Remaining", text: $remainingText)
+                TextField("Monthly payment", text: $monthlyText)
+            }
+            .navigationTitle("Add Debt")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(Debt(
+                            id: Debt.newID(),
+                            name: name.trimmingCharacters(in: .whitespaces),
+                            lender: lender.trimmingCharacters(in: .whitespaces),
+                            totalAmount: total ?? 0,
+                            remaining: remaining ?? total ?? 0,
+                            monthlyPayment: Double(monthlyText.replacingOccurrences(of: ",", with: ".")) ?? 0
+                        ))
+                        dismiss()
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || total == nil)
+                }
+            }
+        }
+    }
+}
+
+struct AddInvestmentSheet: View {
+    let onAdd: (Investment) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var type = InvestmentType.other
+    @State private var valueText = ""
+
+    private var value: Double? { Double(valueText.replacingOccurrences(of: ",", with: ".")) }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Name", text: $name)
+                Picker("Type", selection: $type) {
+                    ForEach(InvestmentType.allCases, id: \.self) { Text($0.label).tag($0) }
+                }
+                TextField("Current value", text: $valueText)
+            }
+            .navigationTitle("Add Investment")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(Investment(
+                            id: Investment.newID(),
+                            name: name.trimmingCharacters(in: .whitespaces),
+                            type: type,
+                            value: value ?? 0
+                        ))
+                        dismiss()
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || value == nil)
+                }
+            }
+        }
+    }
+}
+
+struct AddWishlistSheet: View {
+    let onAdd: (WishlistItem) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var title = ""
+    @State private var amountText = ""
+
+    private var amount: Double? { Double(amountText.replacingOccurrences(of: ",", with: ".")) }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("What do you want?", text: $title)
+                    TextField("Price", text: $amountText)
+                } footer: {
+                    Text("It waits 72 hours before becoming a buy-or-drop decision — "
+                        + "a simple guard against impulse buys.")
+                }
+            }
+            .navigationTitle("Add to Wishlist")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(WishlistItem(
+                            id: WishlistItem.newID(),
+                            title: title.trimmingCharacters(in: .whitespaces),
+                            amount: amount ?? 0,
+                            createdAt: Date()
+                        ))
+                        dismiss()
+                    }
+                    .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty || amount == nil)
                 }
             }
         }

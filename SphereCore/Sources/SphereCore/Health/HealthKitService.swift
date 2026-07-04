@@ -21,16 +21,90 @@ public final class HealthKitService: HealthMetricsProviding, @unchecked Sendable
             HKQuantityType(.activeEnergyBurned),
             HKQuantityType(.heartRateVariabilitySDNN),
             HKCategoryType(.sleepAnalysis),
+            HKCategoryType(.menstrualFlow),
+        ]
+    }
+
+    private static var shareTypes: Set<HKSampleType> {
+        [
+            HKQuantityType(.bodyMass),
+            HKQuantityType(.dietaryWater),
+            HKQuantityType(.activeEnergyBurned),
+            HKObjectType.workoutType(),
         ]
     }
 
     public func requestAuthorization() async -> Bool {
         guard HKHealthStore.isHealthDataAvailable() else { return false }
         do {
-            try await store.requestAuthorization(toShare: [], read: Self.readTypes)
+            try await store.requestAuthorization(toShare: Self.shareTypes, read: Self.readTypes)
             return true
         } catch {
             return false
+        }
+    }
+
+    // MARK: - Write-back
+
+    public func writeWeight(kg: Double, date: Date) async {
+        await save(.bodyMass, value: kg, unit: .gramUnit(with: .kilo), date: date)
+    }
+
+    public func writeWaterGlass(date: Date) async {
+        // A glass ≈ 250 ml.
+        await save(.dietaryWater, value: 0.25, unit: .liter(), date: date)
+    }
+
+    public func writeWorkout(type: WorkoutType, minutes: Int, calories: Int?, date: Date) async {
+        guard HKHealthStore.isHealthDataAvailable(), minutes > 0 else { return }
+        let end = date
+        let start = end.addingTimeInterval(Double(-minutes) * 60)
+        let config = HKWorkoutConfiguration()
+        config.activityType = Self.activityType(for: type)
+        let builder = HKWorkoutBuilder(healthStore: store, configuration: config, device: nil)
+        do {
+            try await builder.beginCollection(at: start)
+            if let calories, calories > 0 {
+                let energy = HKQuantitySample(
+                    type: HKQuantityType(.activeEnergyBurned),
+                    quantity: HKQuantity(unit: .kilocalorie(), doubleValue: Double(calories)),
+                    start: start, end: end
+                )
+                try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
+                    builder.add([energy]) { _, error in
+                        if let error { cont.resume(throwing: error) } else { cont.resume() }
+                    }
+                }
+            }
+            try await builder.endCollection(at: end)
+            _ = try await builder.finishWorkout()
+        } catch {
+            // Write-back is best-effort; a failed sample must not break logging.
+        }
+    }
+
+    private func save(
+        _ identifier: HKQuantityTypeIdentifier, value: Double, unit: HKUnit, date: Date
+    ) async {
+        guard HKHealthStore.isHealthDataAvailable() else { return }
+        let sample = HKQuantitySample(
+            type: HKQuantityType(identifier),
+            quantity: HKQuantity(unit: unit, doubleValue: value),
+            start: date, end: date
+        )
+        try? await store.save(sample)
+    }
+
+    private static func activityType(for type: WorkoutType) -> HKWorkoutActivityType {
+        switch type {
+        case .running: .running
+        case .cycling: .cycling
+        case .swimming: .swimming
+        case .gym: .traditionalStrengthTraining
+        case .yoga: .yoga
+        case .walking: .walking
+        case .hiit: .highIntensityIntervalTraining
+        case .other: .other
         }
     }
 
@@ -112,6 +186,80 @@ public final class HealthKitService: HealthMetricsProviding, @unchecked Sendable
                 continuation.resume(returning: value)
             }
             store.execute(query)
+        }
+    }
+
+    public func recentSleepNights(days: Int) async -> [SleepNight] {
+        guard HKHealthStore.isHealthDataAvailable(), days > 0 else { return [] }
+        let end = Date()
+        let start = Calendar.current.startOfDay(for: end)
+            .addingTimeInterval(Double(-days) * 86_400)
+        let intervals = await sleepIntervals(from: start, to: end)
+        return SleepImport.nights(from: intervals)
+    }
+
+    public func recentCycleFlow(days: Int) async -> [CycleFlowDay] {
+        guard HKHealthStore.isHealthDataAvailable(), days > 0 else { return [] }
+        let end = Date()
+        let start = Calendar.current.startOfDay(for: end)
+            .addingTimeInterval(Double(-days) * 86_400)
+        return await withCheckedContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: HKCategoryType(.menstrualFlow),
+                predicate: HKQuery.predicateForSamples(withStart: start, end: end),
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: nil
+            ) { _, samples, _ in
+                let days = (samples as? [HKCategorySample] ?? []).compactMap { sample -> CycleFlowDay? in
+                    guard let flow = Self.flowLevel(sample.value) else { return nil }
+                    return CycleFlowDay(date: sample.startDate, flow: flow)
+                }
+                continuation.resume(returning: days)
+            }
+            store.execute(query)
+        }
+    }
+
+    private static func flowLevel(_ value: Int) -> FlowLevel? {
+        switch value {
+        case HKCategoryValueMenstrualFlow.light.rawValue: return .light
+        case HKCategoryValueMenstrualFlow.medium.rawValue: return .medium
+        case HKCategoryValueMenstrualFlow.heavy.rawValue: return .heavy
+        case HKCategoryValueMenstrualFlow.unspecified.rawValue: return .medium
+        default: return nil  // .none = no bleeding
+        }
+    }
+
+    private func sleepIntervals(from start: Date, to end: Date) async -> [SleepInterval] {
+        await withCheckedContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: HKCategoryType(.sleepAnalysis),
+                predicate: HKQuery.predicateForSamples(withStart: start, end: end),
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: nil
+            ) { _, samples, _ in
+                let intervals = (samples as? [HKCategorySample] ?? []).map { sample in
+                    SleepInterval(
+                        start: sample.startDate, end: sample.endDate,
+                        asleep: Self.isAsleep(sample.value)
+                    )
+                }
+                continuation.resume(returning: intervals)
+            }
+            store.execute(query)
+        }
+    }
+
+    /// True for real sleep stages; false for `inBed` (awake in bed) and `awake`.
+    private static func isAsleep(_ value: Int) -> Bool {
+        switch value {
+        case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
+             HKCategoryValueSleepAnalysis.asleepCore.rawValue,
+             HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
+             HKCategoryValueSleepAnalysis.asleepREM.rawValue:
+            return true
+        default:
+            return false
         }
     }
 

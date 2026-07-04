@@ -15,6 +15,9 @@ public final class HealthStore {
     public private(set) var workouts: [Workout] = []
     public private(set) var medications: [Medication] = []
     public private(set) var labResults: [LabResult] = []
+    public private(set) var cycleEntries: [CycleEntry] = []
+    public private(set) var energyLevels: [String: Int] = [:]
+    public private(set) var mealQuality: [String: Int] = [:]
 
     public nonisolated static let waterGoalGlasses = 8
     public nonisolated static let maxWaterGlasses = 12
@@ -36,22 +39,31 @@ public final class HealthStore {
 
     public func load(today: Date = Date()) async throws {
         let todayKey = DayKey.make(today)
-        let (water, weights, workouts, medications, labs) = try await database.writer.read { db in
-            (
-                try Int.fetchOne(
-                    db, sql: "SELECT glasses FROM water WHERE dateKey = ?", arguments: [todayKey]
-                ) ?? 0,
-                try WeightEntry.fetchAll(db, sql: "SELECT * FROM weights ORDER BY date"),
-                try Workout.fetchAll(db),
-                try Medication.fetchAll(db),
-                try LabResult.fetchAll(db, sql: "SELECT * FROM lab_results ORDER BY date DESC")
-            )
-        }
+        let (water, weights, workouts, medications, labs, cycles, energy, meals) =
+            try await database.writer.read { db in
+                (
+                    try Int.fetchOne(
+                        db, sql: "SELECT glasses FROM water WHERE dateKey = ?", arguments: [todayKey]
+                    ) ?? 0,
+                    try WeightEntry.fetchAll(db, sql: "SELECT * FROM weights ORDER BY date"),
+                    try Workout.fetchAll(db),
+                    try Medication.fetchAll(db),
+                    try LabResult.fetchAll(db, sql: "SELECT * FROM lab_results ORDER BY date DESC"),
+                    try CycleEntry.fetchAll(db, sql: "SELECT * FROM cycle_entries ORDER BY startDate DESC"),
+                    try Row.fetchAll(db, sql: "SELECT dateKey, level FROM energy_levels")
+                        .map { ($0["dateKey"] as String, $0["level"] as Int) },
+                    try Row.fetchAll(db, sql: "SELECT dateKey, quality FROM meal_quality")
+                        .map { ($0["dateKey"] as String, $0["quality"] as Int) }
+                )
+            }
         self.waterToday = water
         self.weights = weights
         self.workouts = workouts
         self.medications = medications
         self.labResults = labs
+        self.cycleEntries = cycles
+        self.energyLevels = Dictionary(uniqueKeysWithValues: energy)
+        self.mealQuality = Dictionary(uniqueKeysWithValues: meals)
     }
 
     /// Pulls fresh metrics from HealthKit (or whatever provider is wired).
@@ -96,21 +108,11 @@ public final class HealthStore {
     /// can't lose an increment via a read-modify-write on `waterToday`.
     @discardableResult
     public func incrementWater(on date: Date = Date()) async throws -> Int {
-        let key = DayKey.make(date)
-        let cap = Self.maxWaterGlasses
-        let newValue = try await database.writer.write { db -> Int in
-            try db.execute(
-                sql: """
-                    INSERT INTO water (dateKey, glasses) VALUES (?, 1)
-                    ON CONFLICT(dateKey) DO UPDATE SET glasses = MIN(glasses + 1, ?)
-                    """,
-                arguments: [key, cap]
-            )
-            return try Int.fetchOne(
-                db, sql: "SELECT glasses FROM water WHERE dateKey = ?", arguments: [key]
-            ) ?? 0
-        }
-        if key == DayKey.make() { waterToday = newValue }
+        let newValue = try await QuickLogSQL.incrementWater(
+            database.writer, cap: Self.maxWaterGlasses, on: date
+        )
+        if DayKey.make(date) == DayKey.make() { waterToday = newValue }
+        await metricsProvider?.writeWaterGlass(date: date)
         return newValue
     }
 
@@ -128,6 +130,7 @@ public final class HealthStore {
             content: "Logged weight \(String(format: "%.1f", kg)) kg",
             tags: ["log", "health", "weight"]
         )
+        await metricsProvider?.writeWeight(kg: kg, date: date)
     }
 
     public var latestWeight: WeightEntry? {
@@ -149,6 +152,10 @@ public final class HealthStore {
             agentId: SphereType.health.rawValue,
             content: "Logged \(workout.type.label) workout, \(workout.durationMinutes) min",
             tags: ["log", "health", "workout"]
+        )
+        await metricsProvider?.writeWorkout(
+            type: workout.type, minutes: workout.durationMinutes,
+            calories: workout.caloriesBurned, date: workout.date
         )
     }
 
@@ -214,6 +221,127 @@ public final class HealthStore {
     public func removeLabResult(id: String) async throws {
         _ = try await database.writer.write { db in try LabResult.deleteOne(db, key: id) }
         labResults.removeAll { $0.id == id }
+    }
+
+    // MARK: - Menstrual cycle
+
+    /// Period tracking is shown only for users whose profile gender is female;
+    /// the store keeps the data regardless so a profile change never loses it.
+
+    public var sortedCycleEntries: [CycleEntry] {
+        cycleEntries.sorted { $0.startDate > $1.startDate }
+    }
+
+    /// Cycle-day, phase, next-period and fertile-window projection, or nil
+    /// until at least one period is logged.
+    public func cyclePrediction(asOf now: Date = Date()) -> CyclePrediction? {
+        CyclePredictor.predict(cycleEntries, asOf: now)
+    }
+
+    /// Logs a new period start (or updates the same-day entry). Keeps the list
+    /// newest-first in memory.
+    public func logPeriod(
+        start: Date = Date(),
+        end: Date? = nil,
+        flow: FlowLevel = .medium,
+        symptoms: [String] = [],
+        note: String = ""
+    ) async throws {
+        let key = DayKey.make(start)
+        let existingID = cycleEntries.first { $0.startKey == key }?.id
+        let entry = CycleEntry(
+            id: existingID ?? CycleEntry.newID(),
+            startDate: start, endDate: end, flow: flow, symptoms: symptoms, note: note
+        )
+        try await database.writer.write { db in try entry.save(db) }
+        cycleEntries.removeAll { $0.startKey == key }
+        cycleEntries.append(entry)
+        cycleEntries.sort { $0.startDate > $1.startDate }
+        engram?.note(
+            agentId: SphereType.health.rawValue,
+            content: "Logged period start (\(flow.label.lowercased()) flow)",
+            tags: ["log", "health", "cycle"]
+        )
+    }
+
+    /// Sets the end date of a logged period (marks it finished).
+    public func endPeriod(id: String, end: Date = Date()) async throws {
+        guard let existing = cycleEntries.first(where: { $0.id == id }) else { return }
+        let updated = CycleEntry(
+            id: existing.id, startDate: existing.startDate, endDate: end,
+            flow: existing.flow, symptoms: existing.symptoms, note: existing.note
+        )
+        try await database.writer.write { db in try updated.save(db) }
+        cycleEntries = cycleEntries.map { $0.id == id ? updated : $0 }
+    }
+
+    public func removeCycleEntry(id: String) async throws {
+        _ = try await database.writer.write { db in try CycleEntry.deleteOne(db, key: id) }
+        cycleEntries.removeAll { $0.id == id }
+    }
+
+    public var hasHealthProvider: Bool { metricsProvider != nil }
+
+    /// Reads menstrual flow from HealthKit, groups it into periods, and logs any
+    /// whose start day isn't already recorded (manual entries are untouched).
+    /// Returns how many periods were imported.
+    @discardableResult
+    public func importCycleFromHealth(days: Int = 120) async -> Int {
+        guard let metricsProvider else { return 0 }
+        _ = await metricsProvider.requestAuthorization()
+        let flowDays = await metricsProvider.recentCycleFlow(days: days)
+        let periods = CycleImport.periods(from: flowDays)
+        guard !periods.isEmpty else { return 0 }
+
+        var imported = 0
+        for period in periods {
+            // Skip any period whose date range overlaps an already-logged one, so
+            // a manual entry starting a day off from Health isn't duplicated.
+            let overlaps = cycleEntries.contains { existing in
+                let existingEnd = existing.endDate ?? existing.startDate
+                return period.start <= existingEnd && period.end >= existing.startDate
+            }
+            guard !overlaps else { continue }
+            try? await logPeriod(
+                start: period.start,
+                end: period.end == period.start ? nil : period.end,
+                flow: period.flow, note: "From Apple Health"
+            )
+            imported += 1
+        }
+        return imported
+    }
+
+    // MARK: - Energy & meal (one-tap 1–5 logs)
+
+    public func todayEnergy(asOf now: Date = Date()) -> Int? { energyLevels[DayKey.make(now)] }
+    public func todayMeal(asOf now: Date = Date()) -> Int? { mealQuality[DayKey.make(now)] }
+
+    public func logEnergy(_ level: Int, on date: Date = Date()) async throws {
+        try await upsertDayValue(table: "energy_levels", column: "level", value: level, date: date)
+        energyLevels[DayKey.make(date)] = level
+    }
+
+    public func logMeal(_ quality: Int, on date: Date = Date()) async throws {
+        try await upsertDayValue(table: "meal_quality", column: "quality", value: quality, date: date)
+        mealQuality[DayKey.make(date)] = quality
+    }
+
+    /// Trailing-7-day series (oldest first, nil = no entry) for the insight
+    /// engine (Stage 6).
+    public func last7Energy(asOf now: Date = Date()) -> [Int?] {
+        (0..<7).reversed().map { energyLevels[DayKey.make(now.addingTimeInterval(Double(-$0) * 86_400))] }
+    }
+
+    private func upsertDayValue(table: String, column: String, value: Int, date: Date) async throws {
+        let key = DayKey.make(date)
+        try await database.writer.write { db in
+            try db.execute(
+                sql: "INSERT INTO \(table) (dateKey, \(column)) VALUES (?, ?) "
+                    + "ON CONFLICT(dateKey) DO UPDATE SET \(column) = excluded.\(column)",
+                arguments: [key, value]
+            )
+        }
     }
 
     // MARK: - Agent tools
@@ -286,6 +414,86 @@ public final class HealthStore {
             ),
             SphereTool(
                 definition: LLMTool(
+                    name: "log_period",
+                    description: "Record the start of the user's menstrual period today. "
+                        + "flow is light, medium, or heavy (default medium). Use when the "
+                        + "user mentions their period started.",
+                    inputSchema: [
+                        "type": "object",
+                        "properties": [
+                            "flow": [
+                                "type": "string",
+                                "enum": ["light", "medium", "heavy"],
+                                "description": "Flow intensity",
+                            ],
+                        ],
+                        "required": [],
+                    ]
+                ),
+                spheres: [.health],
+                confirmation: { input in
+                    let flow = input["flow"]?.stringValue ?? "medium"
+                    return "Logged period start (\(flow) flow)"
+                },
+                handler: { [weak self] input in
+                    guard let self else { throw CancellationError() }
+                    let flow = FlowLevel(rawValue: input["flow"]?.stringValue ?? "medium") ?? .medium
+                    try await self.logPeriod(flow: flow)
+                    let prediction = await self.cyclePrediction()
+                    var result: [String: JSONValue] = ["ok": true]
+                    if let prediction {
+                        result["cycleDay"] = .number(Double(prediction.currentCycleDay))
+                        result["nextPeriodInDays"] = .number(Double(prediction.daysUntilNextPeriod))
+                    }
+                    return JSONValue.object(result).encodedString()
+                }
+            ),
+            SphereTool(
+                definition: LLMTool(
+                    name: "log_energy",
+                    description: "Record the user's energy level today on a 1–5 scale "
+                        + "(1 = drained, 5 = energized).",
+                    inputSchema: [
+                        "type": "object",
+                        "properties": ["level": ["type": "integer", "minimum": 1, "maximum": 5]],
+                        "required": ["level"],
+                    ]
+                ),
+                spheres: [.health],
+                confirmation: { input in "Logged energy \(input["level"]?.intValue ?? 0)/5" },
+                handler: { [weak self] input in
+                    guard let self else { throw CancellationError() }
+                    guard let level = input["level"]?.intValue, (1...5).contains(level) else {
+                        throw AgentToolInputError("level is required (1–5)")
+                    }
+                    try await self.logEnergy(level)
+                    return JSONValue.object(["ok": true, "level": .number(Double(level))]).encodedString()
+                }
+            ),
+            SphereTool(
+                definition: LLMTool(
+                    name: "log_meal",
+                    description: "Record how well the user ate today on a 1–5 quality scale "
+                        + "(1 = poor, 5 = great). Not calorie counting.",
+                    inputSchema: [
+                        "type": "object",
+                        "properties": ["quality": ["type": "integer", "minimum": 1, "maximum": 5]],
+                        "required": ["quality"],
+                    ]
+                ),
+                spheres: [.health],
+                confirmation: { input in "Logged meal quality \(input["quality"]?.intValue ?? 0)/5" },
+                handler: { [weak self] input in
+                    guard let self else { throw CancellationError() }
+                    guard let quality = input["quality"]?.intValue, (1...5).contains(quality) else {
+                        throw AgentToolInputError("quality is required (1–5)")
+                    }
+                    try await self.logMeal(quality)
+                    return JSONValue.object(["ok": true, "quality": .number(Double(quality))]).encodedString()
+                }
+            ),
+            SphereTool(
+                definition: LLMTool(
                     name: "get_health_today",
                     description: "Look up the user's health snapshot: today's metrics (steps, "
                         + "sleep, resting heart rate, calories, HRV), water glasses, latest "
@@ -330,6 +538,17 @@ public final class HealthStore {
                 "total": .number(Double(medications.count)),
                 "takenToday": .number(Double(medicationsTakenToday())),
                 "names": .array(medications.map { .string($0.name) }),
+            ])
+        }
+        if let energy = todayEnergy() { snapshot["energyToday"] = .number(Double(energy)) }
+        if let meal = todayMeal() { snapshot["mealQualityToday"] = .number(Double(meal)) }
+        if let cycle = cyclePrediction() {
+            snapshot["cycle"] = .object([
+                "day": .number(Double(cycle.currentCycleDay)),
+                "phase": .string(cycle.phase.label),
+                "onPeriod": .bool(cycle.isOnPeriod),
+                "nextPeriodInDays": .number(Double(cycle.daysUntilNextPeriod)),
+                "averageCycleLength": .number(Double(cycle.averageCycleLength)),
             ])
         }
         return JSONValue.object(snapshot).encodedString()

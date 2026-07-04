@@ -104,7 +104,14 @@ passes, screen compiles in `swift build`.
 
 All 12 sphere stores + screens, the Home tab, the chat, AND the app target
 are done. The Xcode project is generated from `project.yml` — run
-`xcodegen generate` after cloning (Sphere.xcodeproj is gitignored). The
+`xcodegen generate` after cloning (Sphere.xcodeproj is gitignored).
+**GOTCHA: after ADDING a new .swift file under `Sphere/Sources/`, re-run
+`xcodegen generate` before building** — the generated project lists sources
+explicitly, so a new file is "not in scope" until regenerated (and
+`xcodebuild` fails on the app target while `swift build` on SphereCore still
+passes). Also: don't trust a bare `simctl launch` as proof of a rebuild — it
+happily relaunches the previously-installed bundle even if the new build
+failed; always confirm `** BUILD SUCCEEDED **` first. The
 composition root lives in `Sphere/Sources/AppContainer.swift`; the shell in
 `SphereApp.swift` (4 tabs, minimal Settings = provider keys, minimal
 Profile = name). Verified to build and run in the iOS Simulator; CI builds

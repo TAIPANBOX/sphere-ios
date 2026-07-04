@@ -3,6 +3,8 @@ import SphereCore
 
 public struct CareerScreen: View {
     private let store: CareerStore
+    private let agent: AgentService?
+    private let onConfigureProvider: (() -> Void)?
     @State private var showingAddTask = false
     @State private var showingAddInterview = false
     @State private var showingAddAchievement = false
@@ -10,8 +12,14 @@ public struct CareerScreen: View {
 
     private let accent = SphereTheme.accent(for: .career)
 
-    public init(store: CareerStore) {
+    public init(
+        store: CareerStore,
+        agent: AgentService? = nil,
+        onConfigureProvider: (() -> Void)? = nil
+    ) {
         self.store = store
+        self.agent = agent
+        self.onConfigureProvider = onConfigureProvider
     }
 
     public var body: some View {
@@ -23,6 +31,7 @@ public struct CareerScreen: View {
                 interviewsSection
                 achievementsSection
                 networkSection
+                moreSection
             }
             .padding()
         }
@@ -59,6 +68,151 @@ public struct CareerScreen: View {
         }
         .task {
             try? await store.load()
+        }
+    }
+
+    // MARK: - More (skills, salary, goals, 1:1s, brag doc)
+
+    private var moreSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("More").font(.title3.weight(.semibold))
+            VStack(spacing: 0) {
+                MoreLink("Skills", systemImage: "star.fill",
+                         count: store.careerSkills.isEmpty ? nil : store.careerSkills.count) { skillsList }
+                Divider().padding(.leading, 38)
+                MoreLink("Salary history", systemImage: "banknote.fill",
+                         count: store.salaryHistory.isEmpty ? nil : store.salaryHistory.count) { salaryList }
+                Divider().padding(.leading, 38)
+                MoreLink("Career goals", systemImage: "target",
+                         count: store.careerGoals.isEmpty ? nil : store.careerGoals.count) { goalsList }
+                Divider().padding(.leading, 38)
+                MoreLink("1:1 notes", systemImage: "person.2.fill",
+                         count: store.oneOnOnes.isEmpty ? nil : store.oneOnOnes.count) { oneOnOnesList }
+                Divider().padding(.leading, 38)
+                MoreLink("Brag document", systemImage: "doc.text.fill") { bragDocumentView }
+                if agent != nil {
+                    Divider().padding(.leading, 38)
+                    MoreLink("Interview prep", systemImage: "person.crop.rectangle.badge.plus") {
+                        InterviewPrepView(
+                            accent: accent, agent: agent,
+                            onConfigureProvider: onConfigureProvider
+                        )
+                    }
+                }
+            }
+            .sphereCard()
+        }
+    }
+
+    private var skillsList: some View {
+        CRUDListScreen(
+            title: "Skills",
+            items: store.careerSkills,
+            emptyTitle: "No skills tracked",
+            emptySystemImage: "star",
+            addSheet: { AddCareerSkillSheet { s in Task { try? await store.addSkill(s) } } },
+            row: { skill in
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(skill.name).font(.body.weight(.medium))
+                        Text(skill.category).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Text(String(repeating: "●", count: skill.level)
+                        + String(repeating: "○", count: max(5 - skill.level, 0)))
+                        .font(.caption).foregroundStyle(accent)
+                }
+            },
+            onDelete: { s in Task { try? await store.removeSkill(id: s.id) } },
+            onRestore: { s in Task { try? await store.addSkill(s) } }
+        )
+    }
+
+    private var salaryList: some View {
+        CRUDListScreen(
+            title: "Salary history",
+            items: store.salaryHistory,
+            emptyTitle: "No entries",
+            emptySystemImage: "banknote",
+            addSheet: { AddSalarySheet { e in Task { try? await store.addSalary(e) } } },
+            row: { entry in
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(String(format: "%.0f", entry.amount)).font(.body.weight(.medium))
+                        if !entry.role.isEmpty || !entry.company.isEmpty {
+                            Text([entry.role, entry.company].filter { !$0.isEmpty }.joined(separator: " · "))
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer()
+                    Text(entry.date, format: .dateTime.month().year())
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            },
+            onDelete: { e in Task { try? await store.removeSalary(id: e.id) } },
+            onRestore: { e in Task { try? await store.addSalary(e) } }
+        )
+    }
+
+    private var goalsList: some View {
+        CRUDListScreen(
+            title: "Career goals",
+            items: store.careerGoals,
+            emptyTitle: "No career goals",
+            emptySystemImage: "target",
+            addSheet: { AddCareerGoalSheet { g in Task { try? await store.addCareerGoal(g) } } },
+            row: { goal in
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(goal.title).font(.body.weight(.medium))
+                        Spacer()
+                        Text(goal.status.label).font(.caption).foregroundStyle(.secondary)
+                    }
+                    ProgressView(value: Double(goal.progressPercent) / 100).tint(accent)
+                }
+            },
+            onDelete: { g in Task { try? await store.removeCareerGoal(id: g.id) } },
+            onRestore: { g in Task { try? await store.addCareerGoal(g) } }
+        )
+    }
+
+    private var oneOnOnesList: some View {
+        CRUDListScreen(
+            title: "1:1 notes",
+            items: store.oneOnOnes,
+            emptyTitle: "No notes yet",
+            emptySystemImage: "person.2",
+            addSheet: { AddOneOnOneSheet { n in Task { try? await store.addOneOnOne(n) } } },
+            row: { note in
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack {
+                        Text(note.person).font(.body.weight(.medium))
+                        Spacer()
+                        Text(note.date, style: .date).font(.caption).foregroundStyle(.secondary)
+                    }
+                    if !note.talkingPoints.isEmpty {
+                        Text("Next: " + note.talkingPoints.joined(separator: ", "))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+            },
+            onDelete: { n in Task { try? await store.removeOneOnOne(id: n.id) } },
+            onRestore: { n in Task { try? await store.addOneOnOne(n) } }
+        )
+    }
+
+    private var bragDocumentView: some View {
+        let text = store.bragDocument()
+        return ScrollView {
+            Text(text)
+                .font(.system(.footnote, design: .monospaced))
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+        }
+        .navigationTitle("Brag document")
+        .toolbar {
+            ShareLink(item: text)
         }
     }
 
@@ -461,6 +615,206 @@ struct AddInterviewSheet: View {
                     .disabled(company.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
+        }
+    }
+}
+
+struct AddCareerSkillSheet: View {
+    let onAdd: (CareerSkill) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var category = "General"
+    @State private var level = 3
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Skill", text: $name)
+                TextField("Category", text: $category)
+                Stepper("Level: \(level)/5", value: $level, in: 1...5)
+            }
+            .navigationTitle("Add Skill")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(CareerSkill(
+                            id: CareerSkill.newID(),
+                            name: name.trimmingCharacters(in: .whitespaces),
+                            category: category.trimmingCharacters(in: .whitespaces).isEmpty
+                                ? "General" : category.trimmingCharacters(in: .whitespaces),
+                            level: level
+                        ))
+                        dismiss()
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+struct AddSalarySheet: View {
+    let onAdd: (SalaryEntry) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var amountText = ""
+    @State private var role = ""
+    @State private var company = ""
+    @State private var date = Date()
+
+    private var amount: Double? { Double(amountText.replacingOccurrences(of: ",", with: ".")) }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Amount", text: $amountText)
+                TextField("Role", text: $role)
+                TextField("Company", text: $company)
+                DatePicker("Date", selection: $date, displayedComponents: .date)
+            }
+            .navigationTitle("Add Salary")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(SalaryEntry(
+                            id: SalaryEntry.newID(),
+                            amount: amount ?? 0,
+                            role: role.trimmingCharacters(in: .whitespaces),
+                            company: company.trimmingCharacters(in: .whitespaces),
+                            date: date
+                        ))
+                        dismiss()
+                    }
+                    .disabled(amount == nil)
+                }
+            }
+        }
+    }
+}
+
+struct AddCareerGoalSheet: View {
+    let onAdd: (CareerGoal) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var title = ""
+    @State private var progress = 0.0
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Goal (e.g. Become a staff engineer)", text: $title)
+                VStack(alignment: .leading) {
+                    Text("Progress: \(Int(progress))%")
+                    Slider(value: $progress, in: 0...100, step: 5)
+                }
+            }
+            .navigationTitle("Add Goal")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(CareerGoal(
+                            id: CareerGoal.newID(),
+                            title: title.trimmingCharacters(in: .whitespaces),
+                            progressPercent: Int(progress)
+                        ))
+                        dismiss()
+                    }
+                    .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+struct AddOneOnOneSheet: View {
+    let onAdd: (OneOnOne) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var person = ""
+    @State private var role = ""
+    @State private var notes = ""
+    @State private var talkingPoints = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Person", text: $person)
+                TextField("Role (e.g. Manager)", text: $role)
+                TextField("Notes", text: $notes, axis: .vertical).lineLimit(2...5)
+                TextField("Talking points (comma-separated)", text: $talkingPoints, axis: .vertical)
+            }
+            .navigationTitle("Add 1:1 Note")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        let points = talkingPoints
+                            .split(separator: ",")
+                            .map { $0.trimmingCharacters(in: .whitespaces) }
+                            .filter { !$0.isEmpty }
+                        onAdd(OneOnOne(
+                            id: OneOnOne.newID(),
+                            person: person.trimmingCharacters(in: .whitespaces),
+                            role: role.trimmingCharacters(in: .whitespaces),
+                            date: Date(),
+                            notes: notes.trimmingCharacters(in: .whitespaces),
+                            talkingPoints: points
+                        ))
+                        dismiss()
+                    }
+                    .disabled(person.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+/// Paste a role and job description → the assistant drafts tailored interview
+/// questions (EXPANSION_PLAN §4.4).
+struct InterviewPrepView: View {
+    let accent: Color
+    var agent: AgentService?
+    var onConfigureProvider: (() -> Void)?
+
+    @State private var role = ""
+    @State private var jobDescription = ""
+    @State private var showingResult = false
+
+    private var canGenerate: Bool {
+        !jobDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var body: some View {
+        Form {
+            Section("Role") {
+                TextField("e.g. Senior iOS Engineer", text: $role)
+            }
+            Section("Job description") {
+                TextField("Paste the posting here", text: $jobDescription, axis: .vertical)
+                    .lineLimit(4...12)
+            }
+            Section {
+                Button {
+                    showingResult = true
+                } label: {
+                    Label("Get likely questions", systemImage: "sparkles")
+                }
+                .disabled(!canGenerate)
+            } footer: {
+                Text("The assistant drafts questions tailored to this description. Nothing is sent anywhere but your chosen assistant.")
+            }
+        }
+        .navigationTitle("Interview prep")
+        .sheet(isPresented: $showingResult) {
+            AgentResultSheet(
+                title: "Likely questions",
+                subtitle: role.isEmpty ? nil : role,
+                systemImage: "person.crop.rectangle.badge.plus",
+                tint: accent,
+                agent: agent,
+                task: .interviewQuestions(role: role, jobDescription: jobDescription),
+                onConfigureProvider: onConfigureProvider
+            )
         }
     }
 }

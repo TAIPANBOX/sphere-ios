@@ -10,6 +10,8 @@ import Observation
 public final class CreativityStore {
     public private(set) var projects: [CreativeProject] = []
     public private(set) var ideas: [InspirationItem] = []
+    public private(set) var portfolio: [PortfolioItem] = []
+    public private(set) var sessions: [ProjectSession] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
@@ -20,11 +22,76 @@ public final class CreativityStore {
     }
 
     public func load() async throws {
-        let (projects, ideas) = try await database.writer.read { db in
-            (try CreativeProject.fetchAll(db), try InspirationItem.fetchAll(db))
+        let (projects, ideas, portfolio, sessions) = try await database.writer.read { db in
+            (
+                try CreativeProject.fetchAll(db),
+                try InspirationItem.fetchAll(db),
+                try PortfolioItem.fetchAll(db, sql: "SELECT * FROM portfolio_items ORDER BY date DESC"),
+                try ProjectSession.fetchAll(db, sql: "SELECT * FROM project_sessions ORDER BY date DESC")
+            )
         }
         self.projects = projects
         self.ideas = ideas
+        self.portfolio = portfolio
+        self.sessions = sessions
+    }
+
+    // MARK: - Portfolio
+
+    public func addPortfolioItem(_ item: PortfolioItem) async throws {
+        try await database.writer.write { db in try item.insert(db) }
+        portfolio.insert(item, at: 0)
+    }
+
+    public func removePortfolioItem(id: String) async throws {
+        _ = try await database.writer.write { db in try PortfolioItem.deleteOne(db, key: id) }
+        portfolio.removeAll { $0.id == id }
+    }
+
+    // MARK: - Work sessions
+
+    public func sessions(for projectId: String) -> [ProjectSession] {
+        sessions.filter { $0.projectId == projectId }
+    }
+
+    /// Logs a work session and stamps the project's `lastWorkedOn`.
+    public func logSession(projectId: String, minutes: Int, on date: Date = Date()) async throws {
+        let session = ProjectSession(
+            id: ProjectSession.newID(), projectId: projectId, date: date, minutes: max(minutes, 1)
+        )
+        try await database.writer.write { db in try session.insert(db) }
+        sessions.insert(session, at: 0)
+        if var project = projects.first(where: { $0.id == projectId }) {
+            project.lastWorkedOn = date
+            try? await update(project)
+        }
+    }
+
+    public func removeSession(id: String) async throws {
+        _ = try await database.writer.write { db in try ProjectSession.deleteOne(db, key: id) }
+        sessions.removeAll { $0.id == id }
+    }
+
+    public func totalMinutes(for projectId: String) -> Int {
+        sessions(for: projectId).reduce(0) { $0 + $1.minutes }
+    }
+
+    /// Total creative minutes logged this ISO week.
+    public func minutesThisWeek(asOf now: Date = Date()) -> Int {
+        var calendar = Calendar(identifier: .iso8601)
+        calendar.timeZone = .current
+        guard let week = calendar.dateInterval(of: .weekOfYear, for: now) else { return 0 }
+        return sessions
+            .filter { $0.date >= week.start && $0.date < week.end }
+            .reduce(0) { $0 + $1.minutes }
+    }
+
+    /// Minutes logged per day for the trailing 7 days (oldest first).
+    public func weeklyMinutes(asOf now: Date = Date()) -> [Int] {
+        (0..<7).reversed().map { daysAgo in
+            let key = DayKey.make(now.addingTimeInterval(Double(-daysAgo) * 86_400))
+            return sessions.filter { DayKey.make($0.date) == key }.reduce(0) { $0 + $1.minutes }
+        }
     }
 
     // MARK: - Projects

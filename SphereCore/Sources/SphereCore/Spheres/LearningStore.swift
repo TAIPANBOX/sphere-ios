@@ -10,6 +10,10 @@ import Observation
 public final class LearningStore {
     public private(set) var books: [Book] = []
     public private(set) var skills: [LearningSkill] = []
+    public private(set) var courses: [Course] = []
+    public private(set) var languages: [LanguageStudy] = []
+    public private(set) var queueItems: [LearningQueueItem] = []
+    public private(set) var flashcards: [Flashcard] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
@@ -20,11 +24,22 @@ public final class LearningStore {
     }
 
     public func load() async throws {
-        let (books, skills) = try await database.writer.read { db in
-            (try Book.fetchAll(db), try LearningSkill.fetchAll(db))
+        let (books, skills, courses, languages, queue, cards) = try await database.writer.read { db in
+            (
+                try Book.fetchAll(db),
+                try LearningSkill.fetchAll(db),
+                try Course.fetchAll(db),
+                try LanguageStudy.fetchAll(db),
+                try LearningQueueItem.fetchAll(db, sql: "SELECT * FROM learning_queue ORDER BY createdAt DESC"),
+                try Flashcard.fetchAll(db)
+            )
         }
         self.books = books
         self.skills = skills
+        self.courses = courses
+        self.languages = languages
+        self.queueItems = queue
+        self.flashcards = cards
     }
 
     // MARK: - Books
@@ -137,6 +152,84 @@ public final class LearningStore {
 
     public var skillCategories: [String] {
         Set(skills.map(\.category)).sorted()
+    }
+
+    // MARK: - Courses
+
+    public func addCourse(_ course: Course) async throws {
+        try await database.writer.write { db in try course.insert(db) }
+        courses.append(course)
+    }
+
+    public func updateCourse(_ course: Course) async throws {
+        try await database.writer.write { db in try course.save(db) }
+        courses = courses.map { $0.id == course.id ? course : $0 }
+    }
+
+    public func removeCourse(id: String) async throws {
+        _ = try await database.writer.write { db in try Course.deleteOne(db, key: id) }
+        courses.removeAll { $0.id == id }
+    }
+
+    // MARK: - Languages
+
+    public func addLanguage(_ language: LanguageStudy) async throws {
+        try await database.writer.write { db in try language.insert(db) }
+        languages.append(language)
+    }
+
+    public func removeLanguage(id: String) async throws {
+        _ = try await database.writer.write { db in try LanguageStudy.deleteOne(db, key: id) }
+        languages.removeAll { $0.id == id }
+    }
+
+    // MARK: - Read/watch queue
+
+    public var pendingQueue: [LearningQueueItem] { queueItems.filter { !$0.done } }
+
+    public func addQueueItem(_ item: LearningQueueItem) async throws {
+        try await database.writer.write { db in try item.insert(db) }
+        queueItems.insert(item, at: 0)
+    }
+
+    public func toggleQueueItem(id: String) async throws {
+        guard let item = queueItems.first(where: { $0.id == id }) else { return }
+        let updated = LearningQueueItem(
+            id: item.id, title: item.title, kind: item.kind, url: item.url,
+            done: !item.done, createdAt: item.createdAt
+        )
+        try await database.writer.write { db in try updated.save(db) }
+        queueItems = queueItems.map { $0.id == id ? updated : $0 }
+    }
+
+    public func removeQueueItem(id: String) async throws {
+        _ = try await database.writer.write { db in try LearningQueueItem.deleteOne(db, key: id) }
+        queueItems.removeAll { $0.id == id }
+    }
+
+    // MARK: - Flashcards (spaced repetition)
+
+    public func addFlashcard(_ card: Flashcard) async throws {
+        try await database.writer.write { db in try card.insert(db) }
+        flashcards.append(card)
+    }
+
+    public func removeFlashcard(id: String) async throws {
+        _ = try await database.writer.write { db in try Flashcard.deleteOne(db, key: id) }
+        flashcards.removeAll { $0.id == id }
+    }
+
+    /// Cards due for review now, soonest-due first.
+    public func dueFlashcards(asOf now: Date = Date()) -> [Flashcard] {
+        flashcards.filter { $0.isDue(asOf: now) }.sorted { $0.dueDate < $1.dueDate }
+    }
+
+    /// Grades a card and reschedules it via the spaced-repetition curve.
+    public func reviewFlashcard(id: String, grade: ReviewGrade, now: Date = Date()) async throws {
+        guard let card = flashcards.first(where: { $0.id == id }) else { return }
+        let updated = SpacedRepetition.schedule(card, grade: grade, now: now)
+        try await database.writer.write { db in try updated.save(db) }
+        flashcards = flashcards.map { $0.id == id ? updated : $0 }
     }
 
     // MARK: - Agent tools

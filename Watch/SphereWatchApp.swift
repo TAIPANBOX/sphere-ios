@@ -58,9 +58,57 @@ struct WatchRootView: View {
                 }
 
                 quickLog
+
+                if !snapshot.shopping.isEmpty {
+                    shoppingList
+                }
+
+                askAgent
             }
             .padding()
         }
+    }
+
+    private var shoppingList: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Shopping")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+            ForEach(snapshot.shopping) { item in
+                Button {
+                    model.send(.checkShopping(id: item.id))
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "circle")
+                        Text(item.title).font(.caption2).lineLimit(1)
+                        Spacer()
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var askAgent: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            TextFieldLink(prompt: Text("Ask your agent")) {
+                Label("Ask", systemImage: "mic.fill")
+            } onSubmit: { text in
+                let query = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !query.isEmpty { model.send(.askAgent(query: query)) }
+            }
+            .font(.caption2)
+            .tint(accent)
+
+            if let reply = snapshot.agentReply, !reply.isEmpty {
+                Text(reply)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var quickLog: some View {

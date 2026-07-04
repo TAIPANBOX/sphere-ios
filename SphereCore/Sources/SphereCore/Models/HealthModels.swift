@@ -36,6 +36,23 @@ public struct HealthMetrics: Sendable, Equatable {
 public protocol HealthMetricsProviding: Sendable {
     func requestAuthorization() async -> Bool
     func todayMetrics() async -> HealthMetrics
+    /// Per-night sleep for the trailing `days`, newest last. Default returns
+    /// nothing so providers without sleep access (and test stubs) still compile.
+    func recentSleepNights(days: Int) async -> [SleepNight]
+    /// Per-day menstrual flow for the trailing `days`.
+    func recentCycleFlow(days: Int) async -> [CycleFlowDay]
+    /// Write-back: mirror a Sphere log into Apple Health (no-op when unavailable).
+    func writeWeight(kg: Double, date: Date) async
+    func writeWaterGlass(date: Date) async
+    func writeWorkout(type: WorkoutType, minutes: Int, calories: Int?, date: Date) async
+}
+
+public extension HealthMetricsProviding {
+    func recentSleepNights(days: Int) async -> [SleepNight] { [] }
+    func recentCycleFlow(days: Int) async -> [CycleFlowDay] { [] }
+    func writeWeight(kg: Double, date: Date) async {}
+    func writeWaterGlass(date: Date) async {}
+    func writeWorkout(type: WorkoutType, minutes: Int, calories: Int?, date: Date) async {}
 }
 
 public enum WorkoutType: String, Codable, CaseIterable, Sendable {
@@ -235,5 +252,19 @@ public enum DayKey {
     public static func make(_ date: Date = Date()) -> String {
         let parts = calendar.dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+    }
+
+    /// Parses a "yyyy-MM-dd" key back to the start of that day.
+    public static func date(from key: String) -> Date? {
+        let parts = key.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
+    }
+
+    /// Shifts a day key by `days` (negative = earlier).
+    public static func shift(_ key: String, byDays days: Int) -> String? {
+        guard let date = date(from: key),
+              let shifted = calendar.date(byAdding: .day, value: days, to: date) else { return nil }
+        return make(shifted)
     }
 }

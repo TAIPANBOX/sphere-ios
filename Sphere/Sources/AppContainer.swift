@@ -29,39 +29,67 @@ final class AppContainer {
     let profile: ProfileStore
     let toolRegistry: SphereToolRegistry
     let home: HomeStore
+    let ritual: RitualStore
+    let insights: InsightsStore
+    let nudges: NudgeStore
+    let reviews: ReviewStore
+    let experiments: ExperimentStore
+    let readiness: ReadinessStore
+    let search: SearchStore
+    let models: ModelManager
+    let recap: RecapStore
 
     private var chatSessions: [String: ChatSession] = [:]
 
     init() {
-        let supportDir = FileManager.default.urls(
-            for: .applicationSupportDirectory, in: .userDomainMask
-        )[0].appendingPathComponent("Sphere", isDirectory: true)
-        try? FileManager.default.createDirectory(at: supportDir, withIntermediateDirectories: true)
+        // Databases live in the App Group container (shared with the widget /
+        // App Intents / watch), migrated from the legacy Application Support
+        // path on first run. Falls back to Application Support when there is
+        // no App Group entitlement (unsigned / CI).
+        let dbDir = DatabaseLocation.resolve()
 
         // Fail-fast by design: if local storage cannot open, the app has
         // nothing meaningful to show.
-        database = try! AppDatabase(path: supportDir.appendingPathComponent("sphere.db").path)
-        engram = try! EngramStore(path: supportDir.appendingPathComponent("sphere.engram.db").path)
+        database = try! AppDatabase(path: dbDir.appendingPathComponent("sphere.db").path)
+        engram = try! EngramStore(path: dbDir.appendingPathComponent("sphere.engram.db").path)
 
         keyStore = KeychainAPIKeyStore()
-        let cache = FileOfflineCache(directory: supportDir.appendingPathComponent("cache"))
-        agent = AgentService(keyStore: keyStore, engram: engram, cache: cache)
+        let cache = FileOfflineCache(directory: dbDir.appendingPathComponent("cache"))
+        agent = AgentService(
+            keyStore: keyStore,
+            engram: engram,
+            cache: cache,
+            onDeviceEngine: { OnDeviceAI.makeEngineIfAvailable() },
+            preferredBackend: { AppBackendPreference.current }
+        )
 
         goals = GoalsStore(database: database, engram: engram)
+        let healthKit = HealthKitService()
         health = HealthStore(
-            database: database, engram: engram, metricsProvider: HealthKitService()
+            database: database, engram: engram, metricsProvider: healthKit
         )
         finance = FinanceStore(database: database, engram: engram)
         learning = LearningStore(database: database, engram: engram)
         career = CareerStore(database: database, engram: engram)
-        rest = RestStore(database: database, engram: engram)
-        travel = TravelStore(database: database, engram: engram)
+        rest = RestStore(database: database, engram: engram, metricsProvider: healthKit)
+        travel = TravelStore(database: database, engram: engram, photoStore: TripPhotoStorage())
         mindfulness = MindfulnessStore(database: database, engram: engram)
         homeSphere = HomeSphereStore(database: database, engram: engram)
         creativity = CreativityStore(database: database, engram: engram)
         hobbies = HobbiesStore(database: database, engram: engram)
-        relationships = RelationshipsStore(database: database, engram: engram)
+        relationships = RelationshipsStore(
+            database: database, engram: engram, contactsProvider: ContactsService()
+        )
         profile = ProfileStore(database: database)
+        ritual = RitualStore(database: database)
+        insights = InsightsStore(
+            health: health, mindfulness: mindfulness, rest: rest,
+            finance: finance, hobbies: hobbies
+        )
+        nudges = NudgeStore(
+            database: database, mindfulness: mindfulness, finance: finance,
+            career: career, homeSphere: homeSphere, rest: rest
+        )
 
         toolRegistry = SphereToolRegistry(tools:
             goals.tools + health.tools + finance.tools + learning.tools
@@ -83,7 +111,29 @@ final class AppContainer {
             homeSphere: homeSphere,
             agent: agent,
             weatherService: WeatherService(),
-            location: CoreLocationProvider()
+            location: CoreLocationProvider(),
+            calendarProvider: EventKitService()
+        )
+        reviews = ReviewStore(
+            database: database, home: home, mindfulness: mindfulness,
+            health: health, rest: rest, finance: finance, insights: insights, agent: agent
+        )
+        experiments = ExperimentStore(database: database, insights: insights)
+        readiness = ReadinessStore(
+            database: database, rest: rest, mindfulness: mindfulness, health: health
+        )
+        models = ModelManager(
+            downloader: ModelDownloadService(), preferences: ModelPreferences()
+        )
+        recap = RecapStore(
+            mindfulness: mindfulness, health: health, learning: learning,
+            travel: travel, goals: goals, creativity: creativity, hobbies: hobbies
+        )
+        search = SearchStore(
+            goals: goals, health: health, finance: finance, learning: learning,
+            career: career, relationships: relationships, homeSphere: homeSphere,
+            travel: travel, hobbies: hobbies, creativity: creativity,
+            mindfulness: mindfulness, engram: engram
         )
 
         WatchBridge.shared.onCommand = { [weak self] command in
@@ -95,6 +145,7 @@ final class AppContainer {
     /// agent lookup tools see data without visiting each screen first.
     func loadAll() async {
         try? await profile.load()
+        try? await ritual.load()
         try? await goals.load()
         try? await health.load()
         try? await finance.load()
@@ -107,13 +158,62 @@ final class AppContainer {
         try? await creativity.load()
         try? await hobbies.load()
         try? await relationships.load()
-        await BirthdayReminders.sync(contacts: relationships.contacts)
+        applyWellbeing()
+        try? await nudges.loadLedger()
+        nudges.refresh()
+        try? await reviews.load()
+        try? await experiments.load()
+        try? await readiness.loadLedger()
+        await readiness.recordPrediction()
+        await syncBirthdayReminders()
+        await syncHabitReminders()
+        refreshWidget()
+    }
+
+    /// Schedules per-habit weekday reminders (opt-in), reusing the general
+    /// notification engine.
+    func syncHabitReminders() async {
+        let enabled = profile.profile.notificationEnabled(
+            NotificationCategory.habit.rawValue, default: NotificationCategory.habit.defaultOn
+        )
+        let plans = enabled ? NotificationPlanBuilder.habitReminders(goals.habits) : []
+        await NotificationEngine.sync(plans, categories: [.habit])
+    }
+
+    /// Reflects the profile's sick/vacation state into the stores that honor
+    /// it: Home suppresses daily nags and Mindfulness bridges its streak.
+    func applyWellbeing(asOf now: Date = Date()) {
+        home.isPaused = profile.profile.isWellbeingPaused(asOf: now)
+        mindfulness.excusedStreakDays = profile.profile.wellbeingExcusedDays(asOf: now)
+    }
+
+    /// Sets or clears forgiveness (sick/vacation) mode, then re-applies it.
+    func setWellbeing(_ mode: WellbeingMode, until: Date?) async {
+        let now = Date()
+        try? await profile.update { profile in
+            profile.wellbeingMode = mode
+            if mode == .normal {
+                profile.wellbeingSince = nil
+                profile.wellbeingUntil = nil
+            } else {
+                if profile.wellbeingSince == nil { profile.wellbeingSince = now }
+                profile.wellbeingUntil = until
+            }
+        }
+        applyWellbeing(asOf: now)
         refreshWidget()
     }
 
     /// Call after contact mutations so reminders track the latest birthdays.
     func refreshBirthdayReminders() async {
-        await BirthdayReminders.sync(contacts: relationships.contacts)
+        await syncBirthdayReminders()
+    }
+
+    private func syncBirthdayReminders() async {
+        let enabled = profile.profile.notificationEnabled(
+            NotificationCategory.birthday.rawValue, default: NotificationCategory.birthday.defaultOn
+        )
+        await BirthdayReminders.sync(contacts: relationships.contacts, enabled: enabled)
     }
 
     /// One conversation per sphere, kept alive for the app session. Name and
@@ -173,6 +273,15 @@ final class AppContainer {
         try? await profile.setSphereOrder(spheres)
     }
 
+    /// Runs universal quick capture: the rule parser routes each fact in the
+    /// text to its sphere tool, executes it, and returns confirmation chips.
+    /// Refreshes the widget so a captured log shows on the home screen too.
+    func quickCapture(_ text: String) async -> [CaptureResult] {
+        let results = await QuickCapture.run(text, registry: toolRegistry)
+        refreshWidget()
+        return results
+    }
+
     /// Applies a quick-log command sent from the watch, then pushes a fresh
     /// snapshot back. Reloads the affected store first so a background wake
     /// mutates the real persisted state, not a zeroed in-memory default.
@@ -194,9 +303,18 @@ final class AppContainer {
                 durationMinutes: minutes,
                 date: Date()
             ))
+        case .checkShopping(let id):
+            try? await homeSphere.load()
+            try? await homeSphere.toggleShoppingItem(id: id)
+        case .askAgent(let query):
+            lastAgentReply = (try? await agent.answer(query))
+                ?? "Couldn't reach the assistant."
         }
         refreshWidget()
     }
+
+    /// Last answer to a watch voice query, surfaced on the next snapshot.
+    private var lastAgentReply: String?
 
     /// Nightly-ish Engram maintenance; call on app background.
     func runMemoryMaintenance() async {
@@ -220,6 +338,10 @@ final class AppContainer {
             topFocus: home.focusItems.prefix(3).map {
                 WidgetSnapshot.FocusLine(emoji: $0.emoji, title: $0.title)
             },
+            shopping: homeSphere.shopping.filter { !$0.checked }.prefix(6).map {
+                WidgetSnapshot.ShoppingLine(id: $0.id, title: $0.name)
+            },
+            agentReply: lastAgentReply,
             updatedAt: Date()
         )
         store.write(snapshot)

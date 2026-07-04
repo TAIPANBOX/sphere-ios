@@ -7,12 +7,29 @@ public struct Habit: Codable, Equatable, Identifiable, Sendable {
     public var emoji: String
     /// Check-in days as "yyyy-MM-dd" keys in the user's current calendar.
     public var checkInDates: [String]
+    /// Who this habit makes you — "a vote for who you're becoming" (Atoms).
+    public var identity: String
+    /// Calendar weekdays (1 = Sun … 7 = Sat) to send a reminder; empty = none.
+    public var reminderWeekdays: [Int]
 
-    public init(id: String, name: String, emoji: String = "✅", checkInDates: [String] = []) {
+    public init(
+        id: String, name: String, emoji: String = "✅",
+        checkInDates: [String] = [], identity: String = "", reminderWeekdays: [Int] = []
+    ) {
         self.id = id
         self.name = name
         self.emoji = emoji
         self.checkInDates = checkInDates
+        self.identity = identity
+        self.reminderWeekdays = reminderWeekdays
+    }
+
+    /// Checked-in flags for the trailing `days` days (oldest first) — the
+    /// streak heatmap.
+    public func heatmap(days: Int = 28, asOf now: Date = Date()) -> [Bool] {
+        (0..<days).reversed().map { daysAgo in
+            checkedIn(on: now.addingTimeInterval(Double(-daysAgo) * 86_400))
+        }
     }
 
     public static func newID(now: Date = Date()) -> String {

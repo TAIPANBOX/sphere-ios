@@ -15,6 +15,10 @@ public final class CareerStore {
     /// Newest first.
     public private(set) var achievements: [Achievement] = []
     public private(set) var network: [NetworkContact] = []
+    public private(set) var careerSkills: [CareerSkill] = []
+    public private(set) var salaryHistory: [SalaryEntry] = []
+    public private(set) var careerGoals: [CareerGoal] = []
+    public private(set) var oneOnOnes: [OneOnOne] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
@@ -25,20 +29,29 @@ public final class CareerStore {
     }
 
     public func load() async throws {
-        let (tasks, projects, interviews, achievements, network) = try await database.writer.read { db in
-            (
-                try CareerTask.fetchAll(db, sql: "SELECT * FROM career_tasks ORDER BY createdAt DESC, rowid DESC"),
-                try CareerProject.fetchAll(db),
-                try Interview.fetchAll(db),
-                try Achievement.fetchAll(db, sql: "SELECT * FROM achievements ORDER BY date DESC"),
-                try NetworkContact.fetchAll(db)
-            )
-        }
+        let (tasks, projects, interviews, achievements, network, skills, salary, goals, oneOnOnes) =
+            try await database.writer.read { db in
+                (
+                    try CareerTask.fetchAll(db, sql: "SELECT * FROM career_tasks ORDER BY createdAt DESC, rowid DESC"),
+                    try CareerProject.fetchAll(db),
+                    try Interview.fetchAll(db),
+                    try Achievement.fetchAll(db, sql: "SELECT * FROM achievements ORDER BY date DESC"),
+                    try NetworkContact.fetchAll(db),
+                    try CareerSkill.fetchAll(db),
+                    try SalaryEntry.fetchAll(db, sql: "SELECT * FROM salary_entries ORDER BY date DESC"),
+                    try CareerGoal.fetchAll(db),
+                    try OneOnOne.fetchAll(db, sql: "SELECT * FROM one_on_ones ORDER BY date DESC")
+                )
+            }
         self.tasks = tasks
         self.projects = projects
         self.interviews = interviews
         self.achievements = achievements
         self.network = network
+        self.careerSkills = skills
+        self.salaryHistory = salary
+        self.careerGoals = goals
+        self.oneOnOnes = oneOnOnes
     }
 
     // MARK: - Tasks
@@ -175,6 +188,69 @@ public final class CareerStore {
         network
             .filter { $0.daysSinceContact(asOf: now) >= 60 }
             .sorted { $0.daysSinceContact(asOf: now) > $1.daysSinceContact(asOf: now) }
+    }
+
+    // MARK: - Skills
+
+    public func addSkill(_ skill: CareerSkill) async throws {
+        try await database.writer.write { db in try skill.insert(db) }
+        careerSkills.append(skill)
+    }
+
+    public func removeSkill(id: String) async throws {
+        _ = try await database.writer.write { db in try CareerSkill.deleteOne(db, key: id) }
+        careerSkills.removeAll { $0.id == id }
+    }
+
+    // MARK: - Salary history
+
+    public func addSalary(_ entry: SalaryEntry) async throws {
+        try await database.writer.write { db in try entry.insert(db) }
+        salaryHistory.insert(entry, at: 0)
+        salaryHistory.sort { $0.date > $1.date }
+    }
+
+    public func removeSalary(id: String) async throws {
+        _ = try await database.writer.write { db in try SalaryEntry.deleteOne(db, key: id) }
+        salaryHistory.removeAll { $0.id == id }
+    }
+
+    public var latestSalary: SalaryEntry? { salaryHistory.first }
+
+    // MARK: - Career goals
+
+    public func addCareerGoal(_ goal: CareerGoal) async throws {
+        try await database.writer.write { db in try goal.insert(db) }
+        careerGoals.append(goal)
+    }
+
+    public func removeCareerGoal(id: String) async throws {
+        _ = try await database.writer.write { db in try CareerGoal.deleteOne(db, key: id) }
+        careerGoals.removeAll { $0.id == id }
+    }
+
+    // MARK: - 1:1 notes
+
+    public func addOneOnOne(_ note: OneOnOne) async throws {
+        try await database.writer.write { db in try note.insert(db) }
+        oneOnOnes.insert(note, at: 0)
+        oneOnOnes.sort { $0.date > $1.date }
+    }
+
+    public func removeOneOnOne(id: String) async throws {
+        _ = try await database.writer.write { db in try OneOnOne.deleteOne(db, key: id) }
+        oneOnOnes.removeAll { $0.id == id }
+    }
+
+    // MARK: - Brag document (gem)
+
+    /// Review-ready markdown of achievements + completed work.
+    public func bragDocument(asOf now: Date = Date()) -> String {
+        BragDocument.build(
+            achievements: achievements,
+            doneTasks: tasks.filter { $0.status == .done },
+            now: now
+        )
     }
 
     // MARK: - Agent tools

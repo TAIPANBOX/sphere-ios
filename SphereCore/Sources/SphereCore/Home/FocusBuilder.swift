@@ -50,6 +50,7 @@ public enum FocusBuilder {
         homeTasks: [HomeTask] = [],
         hasMeditatedToday: Bool = false,
         stepsGoal: Int = HealthStore.stepsGoal,
+        isPaused: Bool = false,
         now: Date = Date()
     ) -> [FocusItem] {
         var items: [FocusItem] = []
@@ -163,6 +164,14 @@ public enum FocusBuilder {
                 urgency: .daily,
                 tag: "Today"
             ))
+        }
+
+        // In sick/vacation mode, drop the daily-habit nags (meditation, steps,
+        // and the generic fallbacks). Real commitments above — overdue tasks,
+        // birthdays, stuck goals — still show. This is the visible half of
+        // forgiveness: the app stops guilt-tripping while you recover.
+        if isPaused {
+            return items.sorted { $0.urgency < $1.urgency }
         }
 
         if !hasMeditatedToday {

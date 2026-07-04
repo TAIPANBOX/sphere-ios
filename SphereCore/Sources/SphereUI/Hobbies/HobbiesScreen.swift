@@ -5,6 +5,7 @@ public struct HobbiesScreen: View {
     private let store: HobbiesStore
     @State private var showingAddHobby = false
     @State private var showingLogSession = false
+    @State private var selectedHobby: Hobby?
 
     private let accent = SphereTheme.accent(for: .hobbies)
 
@@ -39,6 +40,9 @@ public struct HobbiesScreen: View {
             LogHobbySessionSheet(hobbies: store.hobbies) { session in
                 Task { try? await store.logSession(session) }
             }
+        }
+        .sheet(item: $selectedHobby) { hobby in
+            HobbyDetailSheet(store: store, hobby: hobby)
         }
         .task {
             try? await store.load()
@@ -79,16 +83,24 @@ public struct HobbiesScreen: View {
                 let weekly = store.weeklyMinutes(for: hobby.id)
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text(hobby.emoji)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(hobby.name)
-                                .font(.body.weight(.medium))
-                                .foregroundStyle(hobby.isActive ? .primary : .secondary)
-                            Text("\(weekly) / \(hobby.targetMinutesPerWeek) min · \(hobby.frequency.label)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        Button {
+                            selectedHobby = hobby
+                        } label: {
+                            HStack {
+                                Text(hobby.emoji)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(hobby.name)
+                                        .font(.body.weight(.medium))
+                                        .foregroundStyle(hobby.isActive ? .primary : .secondary)
+                                    Text("\(weekly) / \(hobby.targetMinutesPerWeek) min · \(hobby.frequency.label)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                            }
+                            .contentShape(Rectangle())
                         }
-                        Spacer()
+                        .buttonStyle(.plain)
                         Menu {
                             Button(hobby.isActive ? "Pause" : "Resume") {
                                 Task { try? await store.toggleActive(id: hobby.id) }
@@ -105,8 +117,16 @@ public struct HobbiesScreen: View {
                         total: Double(max(hobby.targetMinutesPerWeek, 1))
                     )
                     .tint(weekly >= hobby.targetMinutesPerWeek ? .green : accent)
-                    if !hobby.goal.isEmpty {
-                        Text("🎯 \(hobby.goal)").font(.caption).foregroundStyle(.secondary)
+                    HStack(spacing: 12) {
+                        if let cost = store.costPerSession(for: hobby.id) {
+                            Text("💸 \(Int(cost))/session").font(.caption2).foregroundStyle(.secondary)
+                        }
+                        if let rating = store.averageRating(for: hobby.id) {
+                            Text(String(format: "⭐ %.1f", rating)).font(.caption2).foregroundStyle(.secondary)
+                        }
+                        if !hobby.goal.isEmpty {
+                            Text("🎯 \(hobby.goal)").font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                        }
                     }
                 }
                 .sphereCard()
@@ -197,6 +217,7 @@ struct LogHobbySessionSheet: View {
     @State private var hobbyId: String?
     @State private var minutes = 30
     @State private var note = ""
+    @State private var rating = 0
 
     var body: some View {
         NavigationStack {
@@ -207,6 +228,15 @@ struct LogHobbySessionSheet: View {
                     }
                 }
                 Stepper("\(minutes) minutes", value: $minutes, in: 5...720, step: 5)
+                HStack {
+                    Text("Enjoyment")
+                    Spacer()
+                    ForEach(1...5, id: \.self) { star in
+                        Image(systemName: star <= rating ? "star.fill" : "star")
+                            .foregroundStyle(.yellow)
+                            .onTapGesture { rating = (rating == star) ? 0 : star }
+                    }
+                }
                 TextField("Note (optional)", text: $note)
             }
             .navigationTitle("Log Session")
@@ -225,13 +255,74 @@ struct LogHobbySessionSheet: View {
                                 hobbyId: hobbyId,
                                 durationMinutes: minutes,
                                 date: Date(),
-                                note: note
+                                note: note,
+                                rating: rating
                             ))
                         }
                         dismiss()
                     }
                     .disabled(hobbyId == nil)
                 }
+            }
+        }
+    }
+}
+
+struct HobbyDetailSheet: View {
+    let store: HobbiesStore
+    let hobby: Hobby
+    @Environment(\.dismiss) private var dismiss
+    @State private var newMilestone = ""
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Stats") {
+                    LabeledContent("Total time", value: "\(store.totalMinutes(for: hobby.id)) min")
+                    if let cost = store.costPerSession(for: hobby.id) {
+                        LabeledContent("Cost per session", value: "\(Int(cost))")
+                    }
+                    if let rating = store.averageRating(for: hobby.id) {
+                        LabeledContent("Avg enjoyment", value: String(format: "%.1f / 5", rating))
+                    }
+                }
+
+                Section("Milestones") {
+                    ForEach(store.milestones(for: hobby.id)) { milestone in
+                        Button {
+                            Task { try? await store.toggleMilestone(id: milestone.id) }
+                        } label: {
+                            HStack {
+                                Image(systemName: milestone.done ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(milestone.done ? .green : .secondary)
+                                Text(milestone.title)
+                                    .strikethrough(milestone.done)
+                                    .foregroundStyle(milestone.done ? .secondary : .primary)
+                                Spacer()
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    HStack {
+                        TextField("New milestone (e.g. Play a full song)", text: $newMilestone)
+                        Button {
+                            let title = newMilestone.trimmingCharacters(in: .whitespaces)
+                            newMilestone = ""
+                            Task {
+                                try? await store.addMilestone(HobbyMilestone(
+                                    id: HobbyMilestone.newID(), hobbyId: hobby.id, title: title
+                                ))
+                            }
+                        } label: {
+                            Image(systemName: "plus.circle.fill")
+                        }
+                        .disabled(newMilestone.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
+                }
+            }
+            .navigationTitle(hobby.name)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
             }
         }
     }

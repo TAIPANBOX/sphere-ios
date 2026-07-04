@@ -12,17 +12,92 @@ import Observation
 @Observable
 public final class RelationshipsStore {
     public private(set) var contacts: [Contact] = []
+    public private(set) var customDates: [CustomDate] = []
+    public private(set) var templates: [MessageTemplate] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
+    private let contactsProvider: (any ContactsProviding)?
 
-    public init(database: AppDatabase, engram: EngramStore? = nil) {
+    public init(
+        database: AppDatabase, engram: EngramStore? = nil,
+        contactsProvider: (any ContactsProviding)? = nil
+    ) {
         self.database = database
         self.engram = engram
+        self.contactsProvider = contactsProvider
     }
 
     public func load() async throws {
-        contacts = try await database.writer.read { db in try Contact.fetchAll(db) }
+        let (contacts, customDates, templates) = try await database.writer.read { db in
+            (
+                try Contact.fetchAll(db),
+                try CustomDate.fetchAll(db),
+                try MessageTemplate.fetchAll(db)
+            )
+        }
+        self.contacts = contacts
+        self.customDates = customDates
+        self.templates = templates
+    }
+
+    // MARK: - Custom dates
+
+    public func customDates(for contactId: String) -> [CustomDate] {
+        customDates.filter { $0.contactId == contactId }
+    }
+
+    public func addCustomDate(_ date: CustomDate) async throws {
+        try await database.writer.write { db in try date.insert(db) }
+        customDates.append(date)
+    }
+
+    public func removeCustomDate(id: String) async throws {
+        _ = try await database.writer.write { db in try CustomDate.deleteOne(db, key: id) }
+        customDates.removeAll { $0.id == id }
+    }
+
+    /// Contacts with a birthday or custom date within `days`, soonest first —
+    /// beyond just birthdays.
+    public func upcomingDates(within days: Int = 30, asOf now: Date = Date())
+        -> [(contact: Contact, label: String, days: Int)] {
+        var result: [(Contact, String, Int)] = []
+        for contact in contacts {
+            if let d = contact.daysUntilBirthday(asOf: now), d <= days {
+                result.append((contact, "Birthday", d))
+            }
+            for custom in customDates where custom.contactId == contact.id {
+                if let d = custom.daysUntil(asOf: now), d <= days {
+                    result.append((contact, custom.label, d))
+                }
+            }
+        }
+        return result.sorted { $0.2 < $1.2 }.map { (contact: $0.0, label: $0.1, days: $0.2) }
+    }
+
+    // MARK: - Message templates
+
+    public func addTemplate(_ template: MessageTemplate) async throws {
+        try await database.writer.write { db in try template.insert(db) }
+        templates.append(template)
+    }
+
+    public func removeTemplate(id: String) async throws {
+        _ = try await database.writer.write { db in try MessageTemplate.deleteOne(db, key: id) }
+        templates.removeAll { $0.id == id }
+    }
+
+    /// The user's templates, or the built-in seeds when they have none.
+    public var effectiveTemplates: [MessageTemplate] {
+        templates.isEmpty ? MessageTemplate.seeds : templates
+    }
+
+    // MARK: - Pre-meeting prep (gem)
+
+    /// Glanceable facts to review before seeing someone.
+    public func prepFacts(for contactId: String, asOf now: Date = Date()) -> [String] {
+        guard let contact = contacts.first(where: { $0.id == contactId }) else { return [] }
+        return MeetingPrep.facts(for: contact, customDates: customDates, asOf: now)
     }
 
     // MARK: - Contacts
@@ -40,6 +115,33 @@ public final class RelationshipsStore {
     public func update(_ contact: Contact) async throws {
         try await database.writer.write { db in try contact.save(db) }
         contacts = contacts.map { $0.id == contact.id ? contact : $0 }
+    }
+
+    // MARK: - Contacts import
+
+    public var hasContactsProvider: Bool { contactsProvider != nil }
+
+    /// Device contacts not yet in the sphere, ready for the user to pick from.
+    /// Empty if access is denied or the provider is absent.
+    public func importableContacts() async -> [ImportedContact] {
+        guard let contactsProvider else { return [] }
+        guard await contactsProvider.requestAccess() else { return [] }
+        let fetched = await contactsProvider.fetchContacts()
+        return ContactImport.newContacts(from: fetched, existing: contacts)
+    }
+
+    /// Adds the chosen imported contacts, skipping any that now duplicate an
+    /// existing name. Returns how many were added.
+    @discardableResult
+    public func importContacts(_ selected: [ImportedContact], now: Date = Date()) async -> Int {
+        let fresh = ContactImport.newContacts(from: selected, existing: contacts)
+        var added = 0
+        for imported in fresh {
+            let contact = ContactImport.makeContact(from: imported, now: now)
+            try? await add(contact)
+            added += 1
+        }
+        return added
     }
 
     public func remove(id: String) async throws {

@@ -35,6 +35,8 @@ public struct Goal: Codable, Equatable, Identifiable, Sendable {
     public var keyResults: [String]
     public var sphereType: SphereType?
     public var blockedByGoalId: String?
+    /// The reason this matters — resurfaced when the goal stalls.
+    public var why: String
 
     public init(
         id: String,
@@ -46,7 +48,8 @@ public struct Goal: Codable, Equatable, Identifiable, Sendable {
         progressPercent: Int = 0,
         keyResults: [String] = [],
         sphereType: SphereType? = nil,
-        blockedByGoalId: String? = nil
+        blockedByGoalId: String? = nil,
+        why: String = ""
     ) {
         self.id = id
         self.title = title
@@ -58,6 +61,7 @@ public struct Goal: Codable, Equatable, Identifiable, Sendable {
         self.keyResults = keyResults
         self.sphereType = sphereType
         self.blockedByGoalId = blockedByGoalId
+        self.why = why
     }
 
     public static func newID(now: Date = Date()) -> String {
@@ -67,4 +71,24 @@ public struct Goal: Codable, Equatable, Identifiable, Sendable {
 
 extension Goal: FetchableRecord, PersistableRecord {
     public static let databaseTableName = "goals"
+}
+
+/// Something to deliberately say no to — a boundary, not a target. Clarity on
+/// what you won't do frees focus for what you will.
+public struct AntiGoal: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var title: String
+    public var note: String
+
+    public init(id: String, title: String, note: String = "") {
+        self.id = id
+        self.title = title
+        self.note = note
+    }
+
+    public static func newID(now: Date = Date()) -> String { EntityID.make("antigoal", now: now) }
+}
+
+extension AntiGoal: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "anti_goals"
 }

@@ -145,3 +145,59 @@ public struct WeekendPlan: Codable, Equatable, Identifiable, Sendable {
 extension WeekendPlan: FetchableRecord, PersistableRecord {
     public static let databaseTableName = "weekend_plans"
 }
+
+// MARK: - rest-v2 (naps, recovery activities, vacation ledger)
+
+public struct Nap: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var date: Date
+    public var minutes: Int
+    public var note: String
+
+    public init(id: String, date: Date, minutes: Int, note: String = "") {
+        self.id = id
+        self.date = date
+        self.minutes = minutes
+        self.note = note
+    }
+
+    public static func newID(now: Date = Date()) -> String { EntityID.make("nap", now: now) }
+}
+
+extension Nap: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "naps"
+}
+
+/// A restorative activity with the user's own effectiveness rating — so the
+/// app learns what actually recharges *you*, not a generic list.
+public struct RecoveryActivity: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var name: String
+    public var emoji: String
+    /// How well it restores you, 1–5.
+    public var rating: Int
+    public var note: String
+
+    public init(id: String, name: String, emoji: String = "🌿", rating: Int = 3, note: String = "") {
+        self.id = id
+        self.name = name
+        self.emoji = emoji
+        self.rating = rating
+        self.note = note
+    }
+
+    public static func newID(now: Date = Date()) -> String { EntityID.make("recovery", now: now) }
+}
+
+extension RecoveryActivity: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "recovery_activities"
+}
+
+/// Pure sleep-debt math.
+public enum SleepMath {
+    /// Accumulated deficit vs the nightly goal (0 on nights at/above goal).
+    public static func sleepDebt(hoursByNight: [Double], goal: Double) -> Double {
+        guard goal > 0 else { return 0 }
+        return hoursByNight.reduce(0) { $0 + max(goal - $1, 0) }
+    }
+}

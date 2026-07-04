@@ -41,16 +41,26 @@ targets:
         NSLocationWhenInUseUsageDescription: >-
           Sphere uses your location to show local weather on the Home tab.
         NSHealthShareUsageDescription: >-
-          Sphere reads your steps, heart rate, sleep, energy, and HRV from
+          Sphere reads your steps, heart rate, sleep, energy, HRV, and cycle from
           Apple Health so your Health agent can work with real data.
         NSHealthUpdateUsageDescription: >-
-          Sphere does not write health data; this is required by HealthKit.
+          Sphere can save the weight, water, and workouts you log back to Apple
+          Health, so your data stays in one place.
+        NSContactsUsageDescription: >-
+          Sphere can import names and birthdays from your contacts to set up
+          your Relationships sphere. Nothing is shared or uploaded.
+        NSCalendarsFullAccessUsageDescription: >-
+          Sphere reads today's events to show your agenda and give your morning
+          brief context. Nothing is shared or uploaded.
         NSPhotoLibraryUsageDescription: >-
           Attach photos to your agent conversations.
         NSMicrophoneUsageDescription: >-
           Dictate messages to your agents by voice.
         NSSpeechRecognitionUsageDescription: >-
           Transcribe your voice into chat messages, on-device where possible.
+        NSFaceIDUsageDescription: >-
+          Unlock Sphere with Face ID so your health, finance, and journal
+          data stays private.
     entitlements:
       path: Sphere/Sphere.entitlements
       properties:

@@ -5,8 +5,11 @@ import CoreLocation
 
 public struct DayForecast: Sendable, Equatable {
     public let dayLabel: String
-    public let emoji: String
+    public let weatherCode: Int
     public let maxTemperatureC: Double
+
+    public var emoji: String { Weather.emoji(for: weatherCode) }
+    public var symbolName: String { Weather.symbolName(for: weatherCode) }
 }
 
 public struct Weather: Sendable, Equatable {
@@ -34,6 +37,22 @@ public struct Weather: Sendable, Equatable {
         case 71...77, 85, 86: "❄️"
         case 95...99: "⛈️"
         default: "🌡️"
+        }
+    }
+
+    /// SF Symbol for compact UI (emoji like 🌫️ degrade into blurry squares
+    /// at caption sizes; multicolor symbols stay crisp).
+    static func symbolName(for code: Int) -> String {
+        switch code {
+        case 0: "sun.max.fill"
+        case 1, 2: "cloud.sun.fill"
+        case 3: "cloud.fill"
+        case 45, 48: "cloud.fog.fill"
+        case 51...57: "cloud.drizzle.fill"
+        case 61...67, 80...82: "cloud.rain.fill"
+        case 71...77, 85, 86: "snowflake"
+        case 95...99: "cloud.bolt.rain.fill"
+        default: "thermometer.medium"
         }
     }
 
@@ -119,7 +138,7 @@ public struct WeatherService: Sendable {
                 else { continue }
                 forecast.append(DayForecast(
                     dayLabel: dayFormatter.string(from: date),
-                    emoji: Weather.emoji(for: dayCode),
+                    weatherCode: dayCode,
                     maxTemperatureC: max
                 ))
             }

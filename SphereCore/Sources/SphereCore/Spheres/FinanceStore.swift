@@ -13,6 +13,9 @@ public final class FinanceStore {
     public private(set) var subscriptions: [Subscription] = []
     public private(set) var accounts: [Account] = []
     public private(set) var savingsGoals: [SavingsGoal] = []
+    public private(set) var debts: [Debt] = []
+    public private(set) var investments: [Investment] = []
+    public private(set) var wishlist: [WishlistItem] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
@@ -23,20 +26,27 @@ public final class FinanceStore {
     }
 
     public func load() async throws {
-        let (transactions, budgets, subscriptions, accounts, savings) = try await database.writer.read { db in
-            (
-                try Transaction.fetchAll(db, sql: "SELECT * FROM transactions ORDER BY date DESC, rowid DESC"),
-                try Budget.fetchAll(db),
-                try Subscription.fetchAll(db),
-                try Account.fetchAll(db),
-                try SavingsGoal.fetchAll(db)
-            )
-        }
+        let (transactions, budgets, subscriptions, accounts, savings, debts, investments, wishlist) =
+            try await database.writer.read { db in
+                (
+                    try Transaction.fetchAll(db, sql: "SELECT * FROM transactions ORDER BY date DESC, rowid DESC"),
+                    try Budget.fetchAll(db),
+                    try Subscription.fetchAll(db),
+                    try Account.fetchAll(db),
+                    try SavingsGoal.fetchAll(db),
+                    try Debt.fetchAll(db),
+                    try Investment.fetchAll(db),
+                    try WishlistItem.fetchAll(db, sql: "SELECT * FROM wishlist ORDER BY createdAt DESC")
+                )
+            }
         self.transactions = transactions
         self.budgets = budgets
         self.subscriptions = subscriptions
         self.accounts = accounts
         self.savingsGoals = savings
+        self.debts = debts
+        self.investments = investments
+        self.wishlist = wishlist
     }
 
     // MARK: - Transactions
@@ -173,6 +183,90 @@ public final class FinanceStore {
         savingsGoals = savingsGoals.map { $0.id == id ? goal : $0 }
     }
 
+    // MARK: - Debts
+
+    public func addDebt(_ debt: Debt) async throws {
+        try await database.writer.write { db in try debt.insert(db) }
+        debts.append(debt)
+    }
+
+    public func removeDebt(id: String) async throws {
+        _ = try await database.writer.write { db in try Debt.deleteOne(db, key: id) }
+        debts.removeAll { $0.id == id }
+    }
+
+    public var totalDebt: Double { debts.reduce(0) { $0 + $1.remaining } }
+
+    // MARK: - Investments
+
+    public func addInvestment(_ investment: Investment) async throws {
+        try await database.writer.write { db in try investment.insert(db) }
+        investments.append(investment)
+    }
+
+    public func removeInvestment(id: String) async throws {
+        _ = try await database.writer.write { db in try Investment.deleteOne(db, key: id) }
+        investments.removeAll { $0.id == id }
+    }
+
+    public var totalInvestments: Double { investments.reduce(0) { $0 + $1.value } }
+
+    // MARK: - Wishlist (72h cooling-off)
+
+    public func addWishlistItem(_ item: WishlistItem) async throws {
+        try await database.writer.write { db in try item.insert(db) }
+        wishlist.insert(item, at: 0)
+    }
+
+    public func removeWishlistItem(id: String) async throws {
+        _ = try await database.writer.write { db in try WishlistItem.deleteOne(db, key: id) }
+        wishlist.removeAll { $0.id == id }
+    }
+
+    // MARK: - Insights (gems)
+
+    /// Net worth = accounts + investments − debts.
+    public var netWorth: Double {
+        totalAccountBalance + totalInvestments - totalDebt
+    }
+
+    public var monthlyBudgetTotal: Double {
+        budgets.reduce(0) { $0 + $1.limit }
+    }
+
+    public func spentThisMonthTotal(asOf now: Date = Date()) -> Double {
+        let calendar = Calendar.current
+        guard let month = calendar.dateInterval(of: .month, for: now) else { return 0 }
+        return transactions
+            .filter { $0.type == .expense && $0.date >= month.start && $0.date < month.end }
+            .reduce(0) { $0 + $1.amount }
+    }
+
+    /// Discretionary money you can spend today (nil until budgets are set).
+    public func safeToSpendToday(asOf now: Date = Date()) -> Double? {
+        FinanceMath.safeToSpendToday(
+            budgetTotal: monthlyBudgetTotal,
+            spentThisMonth: spentThisMonthTotal(asOf: now),
+            committed: totalMonthlySubscriptions,
+            asOf: now
+        )
+    }
+
+    /// Active subscriptions billing within `days` — the "renewing soon" radar.
+    public func upcomingRenewals(within days: Int = 7, asOf now: Date = Date()) -> [Subscription] {
+        subscriptions
+            .filter { $0.isActive && $0.daysUntilBilling(asOf: now) <= days }
+            .sorted { $0.daysUntilBilling(asOf: now) < $1.daysUntilBilling(asOf: now) }
+    }
+
+    /// This month's expense totals per category, largest first (non-zero only).
+    public func categorySpendingThisMonth(asOf now: Date = Date()) -> [(TransactionCategory, Double)] {
+        TransactionCategory.allCases
+            .map { ($0, spentThisMonth(in: $0, asOf: now)) }
+            .filter { $0.1 > 0 }
+            .sorted { $0.1 > $1.1 }
+    }
+
     // MARK: - Agent tools
 
     public nonisolated var tools: [SphereTool] {
@@ -288,6 +382,14 @@ public final class FinanceStore {
         ]
         if !accounts.isEmpty {
             summary["totalAccountBalance"] = .number(totalAccountBalance)
+        }
+        if let safe = safeToSpendToday() {
+            summary["safeToSpendToday"] = .number((safe * 100).rounded() / 100)
+        }
+        if !debts.isEmpty || !investments.isEmpty {
+            summary["netWorth"] = .number((netWorth * 100).rounded() / 100)
+            if !debts.isEmpty { summary["totalDebt"] = .number(totalDebt) }
+            if !investments.isEmpty { summary["totalInvestments"] = .number(totalInvestments) }
         }
         if !savingsGoals.isEmpty {
             summary["savingsGoals"] = .array(savingsGoals.map { goal in

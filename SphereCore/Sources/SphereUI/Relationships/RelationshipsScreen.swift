@@ -1,14 +1,29 @@
 import SwiftUI
 import SphereCore
+#if canImport(UIKit)
+import UIKit
+#endif
 
 public struct RelationshipsScreen: View {
     private let store: RelationshipsStore
+    private let agent: AgentService?
+    private let onConfigureProvider: (() -> Void)?
     @State private var showingAddContact = false
+    @State private var selectedContact: Contact?
+    @State private var showingImport = false
+    @State private var importCandidates: [ImportedContact] = []
+    @State private var loadingImport = false
 
     private let accent = SphereTheme.accent(for: .relationships)
 
-    public init(store: RelationshipsStore) {
+    public init(
+        store: RelationshipsStore,
+        agent: AgentService? = nil,
+        onConfigureProvider: (() -> Void)? = nil
+    ) {
         self.store = store
+        self.agent = agent
+        self.onConfigureProvider = onConfigureProvider
     }
 
     public var body: some View {
@@ -21,15 +36,31 @@ public struct RelationshipsScreen: View {
                     checkinSection
                 }
                 contactsSection
+                templatesSection
             }
             .padding()
         }
         .navigationTitle("Relationships")
         .toolbar {
-            Button {
-                showingAddContact = true
-            } label: {
-                Image(systemName: "plus")
+            if store.hasContactsProvider {
+                Menu {
+                    Button("New contact", systemImage: "plus") { showingAddContact = true }
+                    Button("Import from Contacts", systemImage: "person.crop.circle.badge.plus") {
+                        Task { await loadImportCandidates() }
+                    }
+                } label: {
+                    if loadingImport {
+                        ProgressView()
+                    } else {
+                        Image(systemName: "plus")
+                    }
+                }
+            } else {
+                Button {
+                    showingAddContact = true
+                } label: {
+                    Image(systemName: "plus")
+                }
             }
         }
         .sheet(isPresented: $showingAddContact) {
@@ -37,9 +68,58 @@ public struct RelationshipsScreen: View {
                 Task { try? await store.add(contact) }
             }
         }
+        .sheet(isPresented: $showingImport) {
+            ContactPickerSheet(candidates: importCandidates) { selected in
+                Task { await store.importContacts(selected) }
+            }
+        }
+        .sheet(item: $selectedContact) { contact in
+            ContactDetailSheet(
+                store: store, contact: contact,
+                agent: agent, onConfigureProvider: onConfigureProvider
+            )
+        }
         .task {
             try? await store.load()
         }
+    }
+
+    private func loadImportCandidates() async {
+        loadingImport = true
+        importCandidates = await store.importableContacts()
+        loadingImport = false
+        showingImport = true
+    }
+
+    // MARK: - Templates (More)
+
+    private var templatesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("More").font(.title3.weight(.semibold))
+            VStack(spacing: 0) {
+                MoreLink("Message templates", systemImage: "text.bubble.fill",
+                         count: store.templates.isEmpty ? nil : store.templates.count) { templatesList }
+            }
+            .sphereCard()
+        }
+    }
+
+    private var templatesList: some View {
+        CRUDListScreen(
+            title: "Message templates",
+            items: store.effectiveTemplates,
+            emptyTitle: "No templates",
+            emptySystemImage: "text.bubble",
+            addSheet: { AddTemplateSheet { t in Task { try? await store.addTemplate(t) } } },
+            row: { template in
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(template.title).font(.body.weight(.medium))
+                    Text(template.body).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                }
+            },
+            onDelete: { t in Task { try? await store.removeTemplate(id: t.id) } },
+            onRestore: { t in Task { try? await store.addTemplate(t) } }
+        )
     }
 
     // MARK: - Birthdays
@@ -108,19 +188,27 @@ public struct RelationshipsScreen: View {
             }
             ForEach(store.contacts) { contact in
                 HStack(spacing: 12) {
-                    Text(contact.emoji).font(.title3)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(contact.name).font(.body.weight(.medium))
-                        HStack(spacing: 6) {
-                            Text(contact.type.label)
-                            if !contact.note.isEmpty {
-                                Text("· \(contact.note)").lineLimit(1)
+                    Button {
+                        selectedContact = contact
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text(contact.emoji).font(.title3)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(contact.name).font(.body.weight(.medium))
+                                HStack(spacing: 6) {
+                                    Text(contact.type.label)
+                                    if !contact.note.isEmpty {
+                                        Text("· \(contact.note)").lineLimit(1)
+                                    }
+                                }
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                             }
+                            Spacer()
                         }
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .contentShape(Rectangle())
                     }
-                    Spacer()
+                    .buttonStyle(.plain)
                     Menu {
                         Button("Reached out") {
                             Task { try? await store.markContacted(id: contact.id) }
@@ -187,5 +275,251 @@ struct AddContactSheet: View {
                 }
             }
         }
+    }
+}
+
+struct ContactDetailSheet: View {
+    let store: RelationshipsStore
+    let contact: Contact
+    var agent: AgentService? = nil
+    var onConfigureProvider: (() -> Void)? = nil
+    @Environment(\.dismiss) private var dismiss
+    @State private var showingAddDate = false
+    @State private var showingBriefing = false
+    @State private var copied = false
+
+    private let accent = SphereTheme.accent(for: .relationships)
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(store.prepFacts(for: contact.id), id: \.self) { fact in
+                        Label(fact, systemImage: "sparkle").labelStyle(.titleAndIcon)
+                    }
+                    if agent != nil {
+                        Button {
+                            showingBriefing = true
+                        } label: {
+                            Label("Prep me with the assistant", systemImage: "sparkles")
+                        }
+                    }
+                } header: {
+                    Label("Prep — before you see \(contact.name)", systemImage: "eyes")
+                }
+
+                Section {
+                    Button {
+                        Task { try? await store.markContacted(id: contact.id) }
+                    } label: {
+                        Label("Reached out today", systemImage: "checkmark.circle.fill")
+                    }
+                }
+
+                Section {
+                    ForEach(store.customDates(for: contact.id)) { date in
+                        HStack {
+                            Text(date.label)
+                            Spacer()
+                            if let days = date.daysUntil() {
+                                Text("in \(days)d").foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    Button("Add a date") { showingAddDate = true }
+                } header: {
+                    Text("Dates")
+                }
+
+                if !contact.giftIdeas.isEmpty {
+                    Section("Gift ideas") {
+                        ForEach(contact.giftIdeas, id: \.self) { Text($0) }
+                    }
+                }
+
+                Section {
+                    ForEach(store.effectiveTemplates) { template in
+                        Button {
+                            copyToClipboard(template.body)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(template.title).font(.subheadline.weight(.medium)).foregroundStyle(.primary)
+                                Text(template.body).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                            }
+                        }
+                    }
+                } header: {
+                    Text(copied ? "Copied!" : "Copy a message")
+                }
+            }
+            .navigationTitle(contact.name)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+            }
+            .sheet(isPresented: $showingAddDate) {
+                AddCustomDateSheet(contactId: contact.id) { date in
+                    Task { try? await store.addCustomDate(date) }
+                }
+            }
+            .sheet(isPresented: $showingBriefing) {
+                AgentResultSheet(
+                    title: "Prep for \(contact.name)",
+                    systemImage: "person.text.rectangle",
+                    tint: accent,
+                    agent: agent,
+                    task: .prepBriefing(contact: contact.name, facts: store.prepFacts(for: contact.id)),
+                    onConfigureProvider: onConfigureProvider
+                )
+            }
+        }
+    }
+
+    private func copyToClipboard(_ text: String) {
+        #if os(iOS)
+        UIPasteboard.general.string = text
+        #endif
+        copied = true
+    }
+}
+
+struct AddCustomDateSheet: View {
+    let contactId: String
+    let onAdd: (CustomDate) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var label = ""
+    @State private var date = Date()
+    @State private var recurs = true
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Label (e.g. Anniversary)", text: $label)
+                DatePicker("Date", selection: $date, displayedComponents: .date)
+                Toggle("Repeats yearly", isOn: $recurs)
+            }
+            .navigationTitle("Add Date")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(CustomDate(
+                            id: CustomDate.newID(),
+                            contactId: contactId,
+                            label: label.trimmingCharacters(in: .whitespaces),
+                            date: date,
+                            recursYearly: recurs
+                        ))
+                        dismiss()
+                    }
+                    .disabled(label.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+struct AddTemplateSheet: View {
+    let onAdd: (MessageTemplate) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var title = ""
+    @State private var message = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Title", text: $title)
+                TextField("Message", text: $message, axis: .vertical).lineLimit(3...8)
+            }
+            .navigationTitle("Add Template")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(MessageTemplate(
+                            id: MessageTemplate.newID(),
+                            title: title.trimmingCharacters(in: .whitespaces),
+                            body: message.trimmingCharacters(in: .whitespaces)
+                        ))
+                        dismiss()
+                    }
+                    .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty
+                        || message.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+/// Multi-select list of importable device contacts.
+struct ContactPickerSheet: View {
+    let candidates: [ImportedContact]
+    let onImport: ([ImportedContact]) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var selected: Set<String>
+
+    init(candidates: [ImportedContact], onImport: @escaping ([ImportedContact]) -> Void) {
+        self.candidates = candidates
+        self.onImport = onImport
+        // Pre-select everyone — importing all is the common case.
+        _selected = State(initialValue: Set(candidates.map(\.id)))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if candidates.isEmpty {
+                    VStack(spacing: 10) {
+                        Image(systemName: "person.crop.circle.badge.checkmark")
+                            .font(.largeTitle).foregroundStyle(.secondary)
+                        Text("Nothing new to import").font(.headline)
+                        Text("Everyone in your contacts is already here, or access was denied.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(32)
+                } else {
+                    List {
+                        Section {
+                            ForEach(candidates) { candidate in
+                                Button {
+                                    toggle(candidate.id)
+                                } label: {
+                                    HStack {
+                                        Image(systemName: selected.contains(candidate.id)
+                                              ? "checkmark.circle.fill" : "circle")
+                                            .foregroundStyle(selected.contains(candidate.id)
+                                                             ? SphereTheme.accent(for: .relationships) : .secondary)
+                                        Text(candidate.name).foregroundStyle(.primary)
+                                        Spacer()
+                                        if candidate.birthday != nil {
+                                            Image(systemName: "gift").font(.caption).foregroundStyle(.secondary)
+                                        }
+                                    }
+                                }
+                            }
+                        } header: {
+                            Text("\(selected.count) of \(candidates.count) selected")
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Import contacts")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Import \(selected.count)") {
+                        onImport(candidates.filter { selected.contains($0.id) })
+                        dismiss()
+                    }
+                    .disabled(selected.isEmpty)
+                }
+            }
+        }
+    }
+
+    private func toggle(_ id: String) {
+        if selected.contains(id) { selected.remove(id) } else { selected.insert(id) }
     }
 }

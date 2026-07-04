@@ -11,26 +11,101 @@ public final class TravelStore {
     public private(set) var plans: [TravelPlan] = []
     public private(set) var visited: [VisitedCountry] = []
     public private(set) var wishlist: [WishlistDestination] = []
+    public private(set) var journal: [TripJournalEntry] = []
+    public private(set) var tripPhotos: [TripPhoto] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
+    private let photoStore: (any TripPhotoStoring)?
 
-    public init(database: AppDatabase, engram: EngramStore? = nil) {
+    public init(
+        database: AppDatabase, engram: EngramStore? = nil,
+        photoStore: (any TripPhotoStoring)? = nil
+    ) {
         self.database = database
         self.engram = engram
+        self.photoStore = photoStore
     }
 
     public func load() async throws {
-        let (plans, visited, wishlist) = try await database.writer.read { db in
+        let (plans, visited, wishlist, journal, photos) = try await database.writer.read { db in
             (
                 try TravelPlan.fetchAll(db),
                 try VisitedCountry.fetchAll(db),
-                try WishlistDestination.fetchAll(db)
+                try WishlistDestination.fetchAll(db),
+                try TripJournalEntry.fetchAll(db, sql: "SELECT * FROM trip_journal ORDER BY date DESC"),
+                try TripPhoto.fetchAll(db, sql: "SELECT * FROM trip_photos ORDER BY createdAt DESC")
             )
         }
         self.plans = plans
         self.visited = visited
         self.wishlist = wishlist
+        self.journal = journal
+        self.tripPhotos = photos
+    }
+
+    // MARK: - Trip photos
+
+    public var hasPhotoStore: Bool { photoStore != nil }
+
+    public func photos(for planId: String) -> [TripPhoto] {
+        tripPhotos.filter { $0.planId == planId }
+    }
+
+    public func photoURL(for photo: TripPhoto) -> URL? {
+        photoStore?.fileURL(for: photo.filename)
+    }
+
+    /// Saves image data to the photo store and records it against the trip.
+    @discardableResult
+    public func addPhoto(planId: String, data: Data, caption: String = "", now: Date = Date()) async -> TripPhoto? {
+        guard let photoStore, let filename = photoStore.save(data) else { return nil }
+        let photo = TripPhoto(
+            id: TripPhoto.newID(now: now), planId: planId,
+            filename: filename, caption: caption, createdAt: now
+        )
+        try? await database.writer.write { db in try photo.insert(db) }
+        tripPhotos.insert(photo, at: 0)
+        return photo
+    }
+
+    public func removePhoto(id: String) async {
+        guard let photo = tripPhotos.first(where: { $0.id == id }) else { return }
+        photoStore?.delete(photo.filename)
+        try? await database.writer.write { db in _ = try TripPhoto.deleteOne(db, key: id) }
+        tripPhotos.removeAll { $0.id == id }
+    }
+
+    // MARK: - Trip journal, budget, jet-lag
+
+    public func journal(for tripId: String) -> [TripJournalEntry] {
+        journal.filter { $0.tripId == tripId }
+    }
+
+    public func addJournalEntry(tripId: String, text: String, on date: Date = Date()) async throws {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let entry = TripJournalEntry(id: TripJournalEntry.newID(), tripId: tripId, date: date, text: trimmed)
+        try await database.writer.write { db in try entry.insert(db) }
+        journal.insert(entry, at: 0)
+    }
+
+    public func removeJournalEntry(id: String) async throws {
+        _ = try await database.writer.write { db in try TripJournalEntry.deleteOne(db, key: id) }
+        journal.removeAll { $0.id == id }
+    }
+
+    /// Updates the amount actually spent on a trip (planned vs actual).
+    public func setSpent(planId: String, amount: Double) async throws {
+        guard let plan = plans.first(where: { $0.id == planId }) else { return }
+        var updated = plan
+        updated.spent = max(amount, 0)
+        try await update(updated)
+    }
+
+    /// A pre-trip circadian-shift plan for the given time-zone difference.
+    public func jetLagPlan(hoursDifference: Int) -> [JetLagStep] {
+        JetLagPlan.plan(hoursDifference: hoursDifference)
     }
 
     // MARK: - Trips

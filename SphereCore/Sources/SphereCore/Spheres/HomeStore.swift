@@ -17,6 +17,10 @@ public final class HomeStore {
     public private(set) var weather: Weather?
     public private(set) var briefText = ""
     public private(set) var briefState = BriefState.idle
+    /// True when the brief failed purely because no provider key is set, so
+    /// the UI can turn the Meta Agent card into a "configure provider" CTA
+    /// instead of an inert error line.
+    public private(set) var briefNeedsProviderKey = false
     public private(set) var insight: AgentInsight?
 
     private let health: HealthStore
@@ -32,6 +36,11 @@ public final class HomeStore {
     private let agent: AgentService?
     private let weatherService: WeatherService?
     private let location: (any LocationProviding)?
+    private let calendarProvider: (any CalendarProviding)?
+
+    /// Today's calendar events, populated by `refreshCalendar()`.
+    public private(set) var todayEvents: [CalendarEvent] = []
+    public var hasCalendarProvider: Bool { calendarProvider != nil }
 
     public init(
         health: HealthStore,
@@ -46,7 +55,8 @@ public final class HomeStore {
         homeSphere: HomeSphereStore? = nil,
         agent: AgentService? = nil,
         weatherService: WeatherService? = nil,
-        location: (any LocationProviding)? = nil
+        location: (any LocationProviding)? = nil,
+        calendarProvider: (any CalendarProviding)? = nil
     ) {
         self.health = health
         self.learning = learning
@@ -61,6 +71,7 @@ public final class HomeStore {
         self.agent = agent
         self.weatherService = weatherService
         self.location = location
+        self.calendarProvider = calendarProvider
     }
 
     // MARK: - Derived state
@@ -94,6 +105,27 @@ public final class HomeStore {
         LifeScore.needsFocus(scores)
     }
 
+    /// Sick/vacation mode — set by the app from the profile. Suppresses the
+    /// daily-habit nags in Today's Focus and shows a "paused" badge on Home.
+    public var isPaused = false
+
+    /// What the user actually logged today, for the evening ritual review.
+    public func todayHighlights(asOf now: Date = Date()) -> [String] {
+        let today = DayKey.make(now)
+        var lines: [String] = []
+        if health.waterToday > 0 {
+            lines.append("💧 \(health.waterToday) glass\(health.waterToday == 1 ? "" : "es") of water")
+        }
+        if let energy = health.todayEnergy(asOf: now) { lines.append("⚡ Energy \(energy)/5") }
+        let workouts = health.workouts.count { DayKey.make($0.date) == today }
+        if workouts > 0 { lines.append("🏋️ \(workouts) workout\(workouts == 1 ? "" : "s")") }
+        if mindfulness?.hasMeditated(on: now) == true { lines.append("🧘 Meditated") }
+        if let mood = mindfulness?.todaysMood(asOf: now) { lines.append("😊 Mood \(mood)/5") }
+        let gratitude = mindfulness?.gratitude.count { DayKey.make($0.date) == today } ?? 0
+        if gratitude > 0 { lines.append("🙏 \(gratitude) gratitude note\(gratitude == 1 ? "" : "s")") }
+        return lines
+    }
+
     public var focusItems: [FocusItem] {
         FocusBuilder.build(
             careerTasks: career.tasks,
@@ -101,7 +133,8 @@ public final class HomeStore {
             metrics: health.metricsAvailable ? health.metrics : nil,
             contacts: relationships?.contacts ?? [],
             homeTasks: homeSphere?.tasks ?? [],
-            hasMeditatedToday: mindfulness?.hasMeditated() ?? false
+            hasMeditatedToday: mindfulness?.hasMeditated() ?? false,
+            isPaused: isPaused
         )
     }
 
@@ -117,17 +150,33 @@ public final class HomeStore {
         }
     }
 
-    /// Streams the Meta Agent morning brief into `briefText`.
+    /// Fetches today's calendar events (requesting access on first use).
+    public func refreshCalendar(now: Date = Date()) async {
+        guard let calendarProvider else { return }
+        guard await calendarProvider.requestAccess() else { return }
+        let dayStart = Calendar.current.startOfDay(for: now)
+        let dayEnd = dayStart.addingTimeInterval(86_400)
+        let events = await calendarProvider.events(from: dayStart, to: dayEnd)
+        todayEvents = CalendarContext.today(events, now: now)
+    }
+
+    /// Streams the Meta Agent morning brief into `briefText`. When no context is
+    /// passed, today's calendar events are folded in automatically.
     public func streamBrief(calendarContext: String = "") async {
         guard let agent, briefState != .streaming else { return }
+        let context = calendarContext.isEmpty
+            ? CalendarContext.summary(todayEvents)
+            : calendarContext
         briefState = .streaming
+        briefNeedsProviderKey = false
         briefText = ""
         do {
-            for try await chunk in agent.brief(calendarContext: calendarContext) {
+            for try await chunk in agent.brief(calendarContext: context) {
                 briefText += chunk
             }
             briefState = .done
         } catch let error as AgentError {
+            if case .noApiKey = error { briefNeedsProviderKey = true }
             briefState = .failed(Self.message(for: error))
         } catch {
             briefState = .failed("\(error)")

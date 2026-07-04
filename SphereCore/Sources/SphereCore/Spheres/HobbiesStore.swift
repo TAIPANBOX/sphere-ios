@@ -10,6 +10,7 @@ public final class HobbiesStore {
     public private(set) var hobbies: [Hobby] = []
     /// Newest first.
     public private(set) var sessions: [HobbySession] = []
+    public private(set) var milestones: [HobbyMilestone] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
@@ -20,14 +21,60 @@ public final class HobbiesStore {
     }
 
     public func load() async throws {
-        let (hobbies, sessions) = try await database.writer.read { db in
+        let (hobbies, sessions, milestones) = try await database.writer.read { db in
             (
                 try Hobby.fetchAll(db),
-                try HobbySession.fetchAll(db, sql: "SELECT * FROM hobby_sessions ORDER BY date DESC, rowid DESC")
+                try HobbySession.fetchAll(db, sql: "SELECT * FROM hobby_sessions ORDER BY date DESC, rowid DESC"),
+                try HobbyMilestone.fetchAll(db)
             )
         }
         self.hobbies = hobbies
         self.sessions = sessions
+        self.milestones = milestones
+    }
+
+    // MARK: - Milestones, cost & taste (gems)
+
+    public func milestones(for hobbyId: String) -> [HobbyMilestone] {
+        milestones.filter { $0.hobbyId == hobbyId }
+    }
+
+    public func addMilestone(_ milestone: HobbyMilestone) async throws {
+        try await database.writer.write { db in try milestone.insert(db) }
+        milestones.append(milestone)
+    }
+
+    public func toggleMilestone(id: String) async throws {
+        guard let milestone = milestones.first(where: { $0.id == id }) else { return }
+        let updated = HobbyMilestone(
+            id: milestone.id, hobbyId: milestone.hobbyId, title: milestone.title, done: !milestone.done
+        )
+        try await database.writer.write { db in try updated.save(db) }
+        milestones = milestones.map { $0.id == id ? updated : $0 }
+    }
+
+    public func removeMilestone(id: String) async throws {
+        _ = try await database.writer.write { db in try HobbyMilestone.deleteOne(db, key: id) }
+        milestones.removeAll { $0.id == id }
+    }
+
+    public func sessions(for hobbyId: String) -> [HobbySession] {
+        sessions.filter { $0.hobbyId == hobbyId }
+    }
+
+    /// Cost per session so far (gear/lessons ÷ sessions logged), or nil when
+    /// nothing has been spent.
+    public func costPerSession(for hobbyId: String) -> Double? {
+        guard let hobby = hobbies.first(where: { $0.id == hobbyId }), hobby.costTotal > 0 else { return nil }
+        let count = sessions(for: hobbyId).count
+        return hobby.costTotal / Double(max(count, 1))
+    }
+
+    /// Average enjoyment rating from rated sessions (nil when none rated).
+    public func averageRating(for hobbyId: String) -> Double? {
+        let rated = sessions(for: hobbyId).map(\.rating).filter { $0 > 0 }
+        guard !rated.isEmpty else { return nil }
+        return Double(rated.reduce(0, +)) / Double(rated.count)
     }
 
     // MARK: - Hobbies

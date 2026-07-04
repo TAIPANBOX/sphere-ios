@@ -10,6 +10,7 @@ import Observation
 public final class GoalsStore {
     public private(set) var goals: [Goal] = []
     public private(set) var habits: [Habit] = []
+    public private(set) var antiGoals: [AntiGoal] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
@@ -20,11 +21,29 @@ public final class GoalsStore {
     }
 
     public func load() async throws {
-        let (goals, habits) = try await database.writer.read { db in
-            (try Goal.fetchAll(db), try Habit.fetchAll(db))
+        let (goals, habits, antiGoals) = try await database.writer.read { db in
+            (try Goal.fetchAll(db), try Habit.fetchAll(db), try AntiGoal.fetchAll(db))
         }
         self.goals = goals
         self.habits = habits
+        self.antiGoals = antiGoals
+    }
+
+    // MARK: - Anti-goals, why, stalled (gems)
+
+    public func addAntiGoal(_ antiGoal: AntiGoal) async throws {
+        try await database.writer.write { db in try antiGoal.insert(db) }
+        antiGoals.append(antiGoal)
+    }
+
+    public func removeAntiGoal(id: String) async throws {
+        _ = try await database.writer.write { db in try AntiGoal.deleteOne(db, key: id) }
+        antiGoals.removeAll { $0.id == id }
+    }
+
+    /// Active goals stuck under `threshold`% — their `why` is worth resurfacing.
+    public func stalledGoals(threshold: Int = 20) -> [Goal] {
+        goals.filter { $0.status == .active && $0.progressPercent < threshold }
     }
 
     // MARK: - Goals

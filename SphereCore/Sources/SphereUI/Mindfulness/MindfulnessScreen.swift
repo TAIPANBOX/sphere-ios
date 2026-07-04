@@ -7,6 +7,9 @@ public struct MindfulnessScreen: View {
     @State private var showingLogMeditation = false
     @State private var showingAddJournal = false
     @State private var showingBreathing = false
+    @State private var showingFocus = false
+    @State private var breathingPattern = BreathingPattern.fourSevenEight
+    @State private var gratitudeDraft = ""
 
     private let accent = SphereTheme.accent(for: .mindfulness)
 
@@ -17,7 +20,10 @@ public struct MindfulnessScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                affirmationCard
+                focusCard
                 moodCard
+                gratitudeCard
                 meditationCard
                 breathingCard
                 stressCard
@@ -37,7 +43,7 @@ public struct MindfulnessScreen: View {
             }
         }
         .sheet(isPresented: $showingBreathing) {
-            BreathingExerciseView(accent: accent) { minutes in
+            BreathingExerciseView(accent: accent, pattern: breathingPattern) { minutes in
                 Task {
                     try? await store.add(MeditationSession(
                         id: MeditationSession.newID(),
@@ -48,9 +54,98 @@ public struct MindfulnessScreen: View {
                 }
             }
         }
+        .sheet(isPresented: $showingFocus) {
+            FocusTimerSheet(accent: accent) { minutes in
+                Task { try? await store.logFocusSession(minutes: minutes) }
+            }
+        }
         .task {
             try? await store.load()
         }
+    }
+
+    // MARK: - Focus & discipline (Tysh-inspired)
+
+    private var focusCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Label("Focus", systemImage: "scope").font(.headline).foregroundStyle(accent)
+                Spacer()
+                Text("Discipline \(store.disciplineScore())/100")
+                    .font(.subheadline.weight(.semibold))
+            }
+            ProgressView(value: Double(store.disciplineScore()), total: 100).tint(accent)
+            HStack(spacing: 16) {
+                stat("\(store.focusMinutesToday())m", "focused today")
+                stat("\(store.focusStreak())d", "streak")
+            }
+            Button {
+                showingFocus = true
+            } label: {
+                Label("Start a focus session", systemImage: "play.fill").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(accent)
+        }
+        .sphereCard()
+    }
+
+    private func stat(_ value: String, _ label: String) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(value).font(.title3.weight(.bold))
+            Text(label).font(.caption2).foregroundStyle(.secondary)
+        }
+    }
+
+    // MARK: - Affirmation
+
+    private var affirmationCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label("Today's affirmation", systemImage: "quote.opening")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(accent)
+            Text(store.dailyAffirmation())
+                .font(.title3.weight(.medium))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .sphereCard()
+    }
+
+    // MARK: - Gratitude
+
+    private var gratitudeCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Gratitude", systemImage: "heart.fill")
+                .font(.headline)
+                .foregroundStyle(.pink)
+            HStack(spacing: 8) {
+                TextField("One thing you're grateful for", text: $gratitudeDraft, axis: .vertical)
+                    .textFieldStyle(.roundedBorder)
+                    .onSubmit(addGratitude)
+                Button(action: addGratitude) {
+                    Image(systemName: "plus.circle.fill").font(.title2)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.pink)
+                .disabled(gratitudeDraft.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            ForEach(store.gratitude.prefix(3)) { entry in
+                HStack(alignment: .top, spacing: 8) {
+                    Text("•").foregroundStyle(.pink)
+                    Text(entry.content).font(.subheadline)
+                    Spacer()
+                }
+            }
+        }
+        .sphereCard()
+    }
+
+    private func addGratitude() {
+        let text = gratitudeDraft
+        guard !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        gratitudeDraft = ""
+        Task { try? await store.addGratitude(text) }
     }
 
     // MARK: - Mood
@@ -110,14 +205,21 @@ public struct MindfulnessScreen: View {
     }
 
     private var breathingCard: some View {
-        Button {
-            showingBreathing = true
+        Menu {
+            ForEach(BreathingPattern.allCases) { pattern in
+                Button {
+                    breathingPattern = pattern
+                    showingBreathing = true
+                } label: {
+                    Text("\(pattern.label) · \(pattern.subtitle)")
+                }
+            }
         } label: {
             HStack {
                 Text("🌬️").font(.system(size: 30))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Breathing Exercise").font(.body.weight(.medium))
-                    Text("4-7-8 · one minute to calm down")
+                    Text("Breathing Exercise").font(.body.weight(.medium)).foregroundStyle(.primary)
+                    Text("Pick a pattern — 4-7-8, box, or coherent")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -269,54 +371,41 @@ struct AddJournalSheet: View {
     }
 }
 
-/// 4-7-8 breathing with an animated circle. On dismiss, elapsed whole
-/// minutes are logged as a breathing meditation session.
+/// Guided breathing with an animated circle, driven by the chosen pattern.
+/// On dismiss, elapsed whole minutes are logged as a breathing session.
 struct BreathingExerciseView: View {
     let accent: Color
+    let pattern: BreathingPattern
     let onFinish: (Int) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var phase = Phase.inhale
+    @State private var label = "Breathe in"
+    @State private var scale: CGFloat = 1.0
+    @State private var animationDuration: Double = 4
     @State private var startedAt = Date()
 
-    enum Phase: CaseIterable {
-        case inhale, hold, exhale
-
-        var label: String {
-            switch self {
-            case .inhale: "Breathe in"
-            case .hold: "Hold"
-            case .exhale: "Breathe out"
-            }
-        }
-
-        var seconds: Double {
-            switch self {
-            case .inhale: 4
-            case .hold: 7
-            case .exhale: 8
-            }
-        }
-
-        var scale: CGFloat {
-            switch self {
-            case .inhale, .hold: 1.0
-            case .exhale: 0.45
-            }
-        }
+    private var phases: [(label: String, seconds: Double, scale: CGFloat)] {
+        let timing = pattern.timing
+        var result: [(String, Double, CGFloat)] = []
+        if timing.inhale > 0 { result.append(("Breathe in", Double(timing.inhale), 1.0)) }
+        if timing.holdIn > 0 { result.append(("Hold", Double(timing.holdIn), 1.0)) }
+        if timing.exhale > 0 { result.append(("Breathe out", Double(timing.exhale), 0.45)) }
+        if timing.holdOut > 0 { result.append(("Hold", Double(timing.holdOut), 0.45)) }
+        return result.map { (label: $0.0, seconds: $0.1, scale: $0.2) }
     }
 
     var body: some View {
         VStack(spacing: 40) {
-            Text(phase.label)
+            Text(pattern.label).font(.headline).foregroundStyle(.secondary)
+            Text(label)
                 .font(.title2.weight(.semibold))
                 .contentTransition(.opacity)
             Circle()
                 .fill(accent.opacity(0.25))
                 .overlay(Circle().stroke(accent, lineWidth: 3))
                 .frame(width: 220, height: 220)
-                .scaleEffect(phase.scale)
-                .animation(.easeInOut(duration: phase.seconds), value: phase)
+                .scaleEffect(scale)
+                .animation(.easeInOut(duration: animationDuration), value: scale)
             Button("Done") {
                 onFinish(Int(Date().timeIntervalSince(startedAt) / 60))
                 dismiss()
@@ -328,12 +417,78 @@ struct BreathingExerciseView: View {
         .task {
             startedAt = Date()
             while !Task.isCancelled {
-                for next in Phase.allCases {
-                    phase = next
-                    try? await Task.sleep(for: .seconds(next.seconds))
+                for phase in phases {
+                    label = phase.label
+                    animationDuration = phase.seconds
+                    scale = phase.scale
+                    try? await Task.sleep(for: .seconds(phase.seconds))
                     if Task.isCancelled { return }
                 }
             }
         }
+    }
+}
+
+/// A distraction-free focus timer (Tysh-style). Pick a length, run a
+/// countdown, and the elapsed minutes log as a focus session.
+struct FocusTimerSheet: View {
+    let accent: Color
+    let onFinish: (Int) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var totalMinutes = 25
+    @State private var remaining = 0
+    @State private var running = false
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 28) {
+                Spacer()
+                if running {
+                    Text(timeString(remaining))
+                        .font(.system(size: 60, weight: .bold, design: .monospaced))
+                    Text("Stay with one thing.").foregroundStyle(.secondary)
+                    Button("Finish now") { finish() }
+                        .buttonStyle(.bordered).tint(accent)
+                } else {
+                    Image(systemName: "scope").font(.system(size: 44)).foregroundStyle(accent)
+                    Stepper("Focus for \(totalMinutes) min", value: $totalMinutes, in: 5...120, step: 5)
+                        .padding(.horizontal, 40)
+                    Button("Start") { start() }
+                        .buttonStyle(.borderedProminent).tint(accent)
+                }
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Focus session")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+            }
+            .task(id: running) {
+                guard running else { return }
+                while running, remaining > 0 {
+                    try? await Task.sleep(for: .seconds(1))
+                    if !running { return }
+                    remaining -= 1
+                }
+                if running, remaining <= 0 { finish() }
+            }
+        }
+    }
+
+    private func start() {
+        remaining = totalMinutes * 60
+        running = true
+    }
+
+    private func finish() {
+        let elapsed = max((totalMinutes * 60 - remaining) / 60, 1)
+        running = false
+        onFinish(elapsed)
+        dismiss()
+    }
+
+    private func timeString(_ seconds: Int) -> String {
+        String(format: "%02d:%02d", seconds / 60, seconds % 60)
     }
 }

@@ -23,38 +23,63 @@ public final class AgentService: Sendable {
     private let engram: EngramStore
     private let cache: any OfflineCache
     private let engineFactory: @Sendable (LLMProviderID) -> any LLMEngine
+    /// Returns a ready on-device engine (Apple Foundation Models) when the
+    /// system model is available, else nil. Injected by the app target so
+    /// SphereCore stays free of the FoundationModels framework.
+    private let onDeviceEngine: @Sendable () -> (any LLMEngine)?
+    /// The user's explicit backend choice, if any (else auto-resolve).
+    private let preferredBackend: @Sendable () -> AIBackend?
 
     public init(
         keyStore: any APIKeyStore,
         engram: EngramStore,
         cache: any OfflineCache,
-        engineFactory: @escaping @Sendable (LLMProviderID) -> any LLMEngine = { $0.makeEngine() }
+        engineFactory: @escaping @Sendable (LLMProviderID) -> any LLMEngine = { $0.makeEngine() },
+        onDeviceEngine: @escaping @Sendable () -> (any LLMEngine)? = { nil },
+        preferredBackend: @escaping @Sendable () -> AIBackend? = { nil }
     ) {
         self.keyStore = keyStore
         self.engram = engram
         self.cache = cache
         self.engineFactory = engineFactory
+        self.onDeviceEngine = onDeviceEngine
+        self.preferredBackend = preferredBackend
     }
 
-    // MARK: - Provider selection
+    // MARK: - Backend selection
 
-    /// First configured provider in priority order (Anthropic → OpenAI →
-    /// Gemini → OpenRouter).
-    private func pickProvider() throws -> (engine: any LLMEngine, apiKey: String, id: LLMProviderID) {
+    /// Resolves which backend answers this exchange. Order:
+    /// 1. the user's explicit choice, if usable;
+    /// 2. free on-device (Apple) when available;
+    /// 3. the first configured cloud key (Anthropic → OpenAI → Gemini →
+    ///    OpenRouter).
+    /// Throws `noApiKey` only when none of the above is available.
+    private func resolveBackend() throws -> (engine: any LLMEngine, apiKey: String, label: String) {
+        if let preferred = preferredBackend() {
+            switch preferred {
+            case .onDevice:
+                if let engine = onDeviceEngine() { return (engine, "", preferred.label) }
+            case .cloud(let provider):
+                if let key = keyStore.key(for: provider), !key.isEmpty {
+                    return (engineFactory(provider), key, provider.displayName)
+                }
+            }
+        }
+        if let engine = onDeviceEngine() { return (engine, "", AIBackend.onDevice.label) }
         for provider in LLMProviderID.allCases {
             if let key = keyStore.key(for: provider), !key.isEmpty {
-                return (engineFactory(provider), key, provider)
+                return (engineFactory(provider), key, provider.displayName)
             }
         }
         throw AgentError.noApiKey
     }
 
     public func isAvailable() -> Bool {
-        (try? pickProvider()) != nil
+        (try? resolveBackend()) != nil
     }
 
     public func activeProviderName() -> String? {
-        (try? pickProvider())?.id.displayName
+        (try? resolveBackend())?.label
     }
 
     // MARK: - Chat
@@ -76,7 +101,7 @@ public final class AgentService: Sendable {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
-                    let picked = try pickProvider()
+                    let picked = try resolveBackend()
 
                     let memories = try await engram.recall(message, agentId: sphere)
                     let memoryBlock = formatMemoriesAsContext(memories)
@@ -190,7 +215,7 @@ public final class AgentService: Sendable {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
-                    let picked = try pickProvider()
+                    let picked = try resolveBackend()
 
                     let memories = try await engram.crossAgentRecall(
                         "morning brief health sleep mood energy"
@@ -247,10 +272,119 @@ public final class AgentService: Sendable {
         }
     }
 
+    /// Streams a warm weekly reflection built from the digest facts, ending with
+    /// one open question. Non-clinical, encouraging, and grounded in the data.
+    public func weeklyNarrative(digest: [String]) -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let picked = try resolveBackend()
+                    let facts = digest.isEmpty
+                        ? "A quiet week — not much was logged."
+                        : digest.joined(separator: "\n")
+                    let system = "You are a warm, concise life coach reviewing someone's week. "
+                        + "Given the facts, write a short reflection of 3 to 4 sentences that "
+                        + "connects the dots, then end with exactly one open, gentle question on "
+                        + "its own line. No lists, no headers, no markdown. Ground every claim in "
+                        + "the facts; never invent numbers."
+
+                    var buffer = ""
+                    for try await event in picked.engine.stream(
+                        apiKey: picked.apiKey,
+                        system: system,
+                        messages: [.user("This week:\n\(facts)")],
+                        tools: [],
+                        maxTokens: 512
+                    ) {
+                        if case .textDelta(let text) = event {
+                            buffer += text
+                            continuation.yield(text)
+                        }
+                    }
+                    if !buffer.isEmpty {
+                        _ = try? await engram.observe(
+                            agentId: "meta", content: "Weekly review: \(buffer)",
+                            tags: ["review", "weekly", "meta"], salience: 0.85
+                        )
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: Self.mapError(error))
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    /// Streams one of the agent-powered helper features. Each case supplies its
+    /// own system role, user prompt, and (where useful) an Engram recall query,
+    /// then reuses the same streaming + observe pipeline.
+    public func assist(_ task: AgentTask) -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            let work = Task {
+                do {
+                    let picked = try resolveBackend()
+
+                    var contextBlock = ""
+                    if let query = task.recallQuery {
+                        let memories = try await engram.crossAgentRecall(query)
+                        contextBlock = formatMemoriesAsContext(memories)
+                    }
+                    let prompt = contextBlock.isEmpty
+                        ? task.prompt
+                        : "\(task.prompt)\n\nWhat I remember:\n\(contextBlock)"
+
+                    var buffer = ""
+                    for try await event in picked.engine.stream(
+                        apiKey: picked.apiKey,
+                        system: task.system,
+                        messages: [.user(prompt)],
+                        tools: [],
+                        maxTokens: task.maxTokens
+                    ) {
+                        if case .textDelta(let text) = event {
+                            buffer += text
+                            continuation.yield(text)
+                        }
+                    }
+                    if !buffer.isEmpty, let tag = task.observeTag {
+                        _ = try? await engram.observe(
+                            agentId: task.agentId, content: "\(tag.label): \(buffer)",
+                            tags: tag.tags, salience: 0.8
+                        )
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: Self.mapError(error))
+                }
+            }
+            continuation.onTermination = { _ in work.cancel() }
+        }
+    }
+
+    /// One-shot answer to a short question (e.g. a watch voice query). Concise
+    /// by design — the reply is shown on a tiny screen.
+    public func answer(_ question: String) async throws -> String {
+        let picked = try resolveBackend()
+        do {
+            let text = try await picked.engine.complete(
+                apiKey: picked.apiKey,
+                system: SpherePrompts.metaAgent(
+                    extraContext: "\nAnswer in one or two short sentences — this is read on a watch."
+                ),
+                prompt: question,
+                maxTokens: 256
+            )
+            return text.trimmingCharacters(in: .whitespacesAndNewlines)
+        } catch {
+            throw Self.mapError(error)
+        }
+    }
+
     /// Fetches a single cross-sphere insight (non-streaming), falling back to
     /// the cached insight when offline.
     public func insight() async throws -> AgentInsight {
-        let picked = try pickProvider()
+        let picked = try resolveBackend()
 
         let text: String
         do {

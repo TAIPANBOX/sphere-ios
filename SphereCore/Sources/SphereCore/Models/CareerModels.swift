@@ -274,3 +274,165 @@ public struct NetworkContact: Codable, Equatable, Identifiable, Sendable {
 extension NetworkContact: FetchableRecord, PersistableRecord {
     public static let databaseTableName = "network_contacts"
 }
+
+// MARK: - career-v3 (skills, salary, goals, 1:1s, brag doc)
+
+public struct CareerSkill: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var name: String
+    public var category: String
+    /// 1–5 proficiency.
+    public var level: Int
+
+    public init(id: String, name: String, category: String = "General", level: Int = 3) {
+        self.id = id
+        self.name = name
+        self.category = category
+        self.level = level
+    }
+
+    public static func newID(now: Date = Date()) -> String { EntityID.make("careerskill", now: now) }
+}
+
+extension CareerSkill: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "career_skills"
+}
+
+public struct SalaryEntry: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var amount: Double
+    public var role: String
+    public var company: String
+    public var date: Date
+    public var note: String
+
+    public init(
+        id: String, amount: Double, role: String = "", company: String = "",
+        date: Date, note: String = ""
+    ) {
+        self.id = id
+        self.amount = amount
+        self.role = role
+        self.company = company
+        self.date = date
+        self.note = note
+    }
+
+    public static func newID(now: Date = Date()) -> String { EntityID.make("salary", now: now) }
+}
+
+extension SalaryEntry: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "salary_entries"
+}
+
+public enum CareerGoalStatus: String, Codable, CaseIterable, Sendable {
+    case active, achieved, paused
+
+    public var label: String {
+        switch self {
+        case .active: "Active"
+        case .achieved: "Achieved"
+        case .paused: "Paused"
+        }
+    }
+}
+
+public struct CareerGoal: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var title: String
+    public var status: CareerGoalStatus
+    public var progressPercent: Int
+    public var targetDate: Date?
+    public var note: String
+
+    public init(
+        id: String, title: String, status: CareerGoalStatus = .active,
+        progressPercent: Int = 0, targetDate: Date? = nil, note: String = ""
+    ) {
+        self.id = id
+        self.title = title
+        self.status = status
+        self.progressPercent = progressPercent
+        self.targetDate = targetDate
+        self.note = note
+    }
+
+    public static func newID(now: Date = Date()) -> String { EntityID.make("careergoal", now: now) }
+}
+
+extension CareerGoal: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "career_goals"
+}
+
+/// Notes for a recurring 1:1 with a manager, report, or mentor, with the
+/// talking points to raise next time.
+public struct OneOnOne: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var person: String
+    public var role: String
+    public var date: Date
+    public var notes: String
+    public var talkingPoints: [String]
+
+    public init(
+        id: String, person: String, role: String = "", date: Date,
+        notes: String = "", talkingPoints: [String] = []
+    ) {
+        self.id = id
+        self.person = person
+        self.role = role
+        self.date = date
+        self.notes = notes
+        self.talkingPoints = talkingPoints
+    }
+
+    public static func newID(now: Date = Date()) -> String { EntityID.make("oneonone", now: now) }
+}
+
+extension OneOnOne: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "one_on_ones"
+}
+
+/// Builds a review-ready "brag document" from achievements + completed work —
+/// the thing everyone wishes they'd kept before a performance review.
+public enum BragDocument {
+    public static func build(
+        achievements: [Achievement], doneTasks: [CareerTask], now: Date = Date()
+    ) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+
+        var lines: [String] = ["# Brag document", "_As of \(formatter.string(from: now))_", ""]
+
+        if !achievements.isEmpty {
+            lines.append("## Achievements")
+            for achievement in achievements {
+                var line = "- **\(achievement.title)**"
+                if !achievement.impact.isEmpty { line += " — \(achievement.impact)" }
+                lines.append(line)
+            }
+            lines.append("")
+        }
+
+        if !doneTasks.isEmpty {
+            lines.append("## Completed work")
+            let byProject = Dictionary(grouping: doneTasks) {
+                $0.project.isEmpty ? "General" : $0.project
+            }
+            for project in byProject.keys.sorted() {
+                lines.append("### \(project)")
+                for task in byProject[project] ?? [] {
+                    lines.append("- \(task.title)")
+                }
+            }
+            lines.append("")
+        }
+
+        if achievements.isEmpty && doneTasks.isEmpty {
+            lines.append("Nothing logged yet — add achievements and complete tasks to fill this in.")
+        }
+
+        return lines.joined(separator: "\n")
+    }
+}

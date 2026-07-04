@@ -25,10 +25,16 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Sphere reads today's events to show your agenda and give your morning brief context. Nothing is shared or uploaded.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Sphere can import names and birthdays from your contacts to set up your Relationships sphere. Nothing is shared or uploaded.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Unlock Sphere with Face ID so your health, finance, and journal data stays private.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Sphere reads your steps, heart rate, sleep, energy, and HRV from Apple Health so your Health agent can work with real data.</string>
+	<string>Sphere reads your steps, heart rate, sleep, energy, HRV, and cycle from Apple Health so your Health agent can work with real data.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Sphere does not write health data; this is required by HealthKit.</string>
+	<string>Sphere can save the weight, water, and workouts you log back to Apple Health, so your data stays in one place.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Sphere uses your location to show local weather on the Home tab.</string>
 	<key>NSMicrophoneUsageDescription</key>

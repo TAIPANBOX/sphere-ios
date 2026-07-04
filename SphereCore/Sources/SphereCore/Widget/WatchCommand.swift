@@ -9,6 +9,10 @@ public enum WatchCommand: Equatable, Sendable {
     /// 1–5
     case logMood(Int)
     case logMeditation(minutes: Int)
+    /// Check off a shopping item by id.
+    case checkShopping(id: String)
+    /// Ask the agent a question; the answer comes back on the next snapshot.
+    case askAgent(query: String)
 
     static let key = "cmd"
 
@@ -20,6 +24,10 @@ public enum WatchCommand: Equatable, Sendable {
             return [Self.key: "mood", "value": score]
         case .logMeditation(let minutes):
             return [Self.key: "meditation", "minutes": minutes]
+        case .checkShopping(let id):
+            return [Self.key: "shopping", "id": id]
+        case .askAgent(let query):
+            return [Self.key: "ask", "query": query]
         }
     }
 
@@ -33,6 +41,12 @@ public enum WatchCommand: Equatable, Sendable {
         case "meditation":
             guard let minutes = dictionary["minutes"] as? Int else { return nil }
             return .logMeditation(minutes: minutes)
+        case "shopping":
+            guard let id = dictionary["id"] as? String, !id.isEmpty else { return nil }
+            return .checkShopping(id: id)
+        case "ask":
+            guard let query = dictionary["query"] as? String, !query.isEmpty else { return nil }
+            return .askAgent(query: query)
         default:
             return nil
         }

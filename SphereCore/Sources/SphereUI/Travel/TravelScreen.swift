@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 import SphereCore
 
 public struct TravelScreen: View {
@@ -109,6 +110,13 @@ public struct TravelScreen: View {
             HStack {
                 Text("Countries Visited").font(.title3.weight(.semibold))
                 Spacer()
+                if !store.visited.isEmpty {
+                    NavigationLink {
+                        VisitedMapScreen(visited: store.visited)
+                    } label: {
+                        Label("Map", systemImage: "map.fill").font(.caption.weight(.medium))
+                    }
+                }
                 Text("\(store.visited.count)")
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(accent)
@@ -195,6 +203,11 @@ struct TripDetailView: View {
     let store: TravelStore
     let planId: String
 
+    @State private var journalDraft = ""
+    @State private var spentText = ""
+    @State private var jetLagHours = 0
+    @State private var pickerItems: [PhotosPickerItem] = []
+
     private var plan: TravelPlan? {
         store.plans.first { $0.id == planId }
     }
@@ -202,6 +215,13 @@ struct TripDetailView: View {
     var body: some View {
         List {
             if let plan {
+                budgetSection(plan)
+                jetLagSection
+                if let info = CountryGuide.info(for: plan.country) {
+                    offlineSection(info, country: plan.country)
+                }
+                photosSection
+                journalSection
                 Section("Packing List") {
                     ForEach(plan.packingList.keys.sorted(), id: \.self) { item in
                         checkRow(item, checked: plan.packingList[item] ?? false) {
@@ -221,6 +241,118 @@ struct TripDetailView: View {
         .navigationTitle(plan?.destination ?? "Trip")
         .task {
             try? await store.initPackingAndDocs(planId: planId)
+            spentText = plan.map { $0.spent > 0 ? String(Int($0.spent)) : "" } ?? ""
+        }
+    }
+
+    @ViewBuilder private var photosSection: some View {
+        Section("Photo memories") {
+            if store.hasPhotoStore {
+                PhotosPicker(selection: $pickerItems, maxSelectionCount: 6, matching: .images) {
+                    Label("Add photos", systemImage: "photo.badge.plus")
+                }
+            }
+            let photos = store.photos(for: planId)
+            if !photos.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(photos) { photo in
+                            TripPhotoThumb(url: store.photoURL(for: photo))
+                                .contextMenu {
+                                    Button("Delete", systemImage: "trash", role: .destructive) {
+                                        Task { await store.removePhoto(id: photo.id) }
+                                    }
+                                }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                .listRowInsets(EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12))
+            }
+        }
+        .onChange(of: pickerItems) { _, items in
+            guard !items.isEmpty else { return }
+            Task { await addPicked(items) }
+        }
+    }
+
+    private func addPicked(_ items: [PhotosPickerItem]) async {
+        for item in items {
+            if let data = try? await item.loadTransferable(type: Data.self) {
+                await store.addPhoto(planId: planId, data: data)
+            }
+        }
+        pickerItems = []
+    }
+
+    @ViewBuilder private func budgetSection(_ plan: TravelPlan) -> some View {
+        Section("Budget") {
+            HStack {
+                Text("Planned")
+                Spacer()
+                Text(plan.budget > 0 ? String(Int(plan.budget)) : "—").foregroundStyle(.secondary)
+            }
+            HStack {
+                Text("Spent")
+                Spacer()
+                TextField("0", text: $spentText)
+                    .multilineTextAlignment(.trailing)
+                    .frame(maxWidth: 100)
+                    .onSubmit {
+                        let amount = Double(spentText.replacingOccurrences(of: ",", with: ".")) ?? 0
+                        Task { try? await store.setSpent(planId: planId, amount: amount) }
+                    }
+            }
+            if plan.budget > 0 {
+                ProgressView(value: min(plan.spent / plan.budget, 1))
+                if plan.spent > plan.budget {
+                    Text("Over budget by \(Int(plan.spent - plan.budget))")
+                        .font(.caption).foregroundStyle(.orange)
+                }
+            }
+        }
+    }
+
+    private var jetLagSection: some View {
+        Section {
+            Stepper("Time difference: \(jetLagHours > 0 ? "+" : "")\(jetLagHours)h", value: $jetLagHours, in: -12...12)
+            ForEach(store.jetLagPlan(hoursDifference: jetLagHours), id: \.daysBefore) { step in
+                Label(step.advice, systemImage: "moon.stars").labelStyle(.titleAndIcon)
+            }
+        } header: {
+            Text("Jet-lag plan")
+        } footer: {
+            Text("Shift bedtime toward the destination in the days before you fly.")
+        }
+    }
+
+    @ViewBuilder private func offlineSection(_ info: CountryInfo, country: String) -> some View {
+        Section("Good to know — \(country)") {
+            LabeledContent("Emergency", value: info.emergency)
+            LabeledContent("Plug / voltage", value: info.plug)
+            if !info.note.isEmpty { LabeledContent("Note", value: info.note) }
+        }
+    }
+
+    private var journalSection: some View {
+        Section("Journal") {
+            HStack {
+                TextField("How's the trip going?", text: $journalDraft, axis: .vertical)
+                Button {
+                    let text = journalDraft
+                    journalDraft = ""
+                    Task { try? await store.addJournalEntry(tripId: planId, text: text) }
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                }
+                .disabled(journalDraft.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            ForEach(store.journal(for: planId)) { entry in
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(entry.text)
+                    Text(entry.date, style: .date).font(.caption2).foregroundStyle(.secondary)
+                }
+            }
         }
     }
 
@@ -375,5 +507,29 @@ public struct FlowLayout: Layout {
             totalWidth = max(totalWidth, x - spacing)
         }
         return (CGSize(width: totalWidth, height: y + rowHeight), positions)
+    }
+}
+
+/// A trip-photo thumbnail, loaded lazily from its file URL (cross-platform).
+struct TripPhotoThumb: View {
+    let url: URL?
+    @State private var image: Image?
+
+    var body: some View {
+        Group {
+            if let image {
+                image.resizable().scaledToFill()
+            } else {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(.quaternary)
+                    .overlay(Image(systemName: "photo").foregroundStyle(.secondary))
+            }
+        }
+        .frame(width: 96, height: 96)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .task(id: url) {
+            guard image == nil, let url, let data = try? Data(contentsOf: url) else { return }
+            image = PlatformImage.make(from: data)
+        }
     }
 }

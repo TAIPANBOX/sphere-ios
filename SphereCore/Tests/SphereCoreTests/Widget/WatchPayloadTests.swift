@@ -26,4 +26,29 @@ struct WatchPayloadTests {
         #expect(WatchPayload.decode(["other": 1]) == nil)
         #expect(WatchPayload.decode([WatchPayload.snapshotKey: "not data"]) == nil)
     }
+
+    @Test func snapshotCarriesShoppingAndAgentReply() throws {
+        let snapshot = WidgetSnapshot(
+            lifeScore: 60, bestEmoji: "🫀", bestName: "Health",
+            needsFocusEmoji: "💰", needsFocusName: "Finance", topFocus: [],
+            shopping: [.init(id: "s1", title: "Milk"), .init(id: "s2", title: "Eggs")],
+            agentReply: "You slept 7.5 hours.",
+            updatedAt: Date(timeIntervalSince1970: 1)
+        )
+        let decoded = try #require(WatchPayload.decode(WatchPayload.encode(snapshot)))
+        #expect(decoded.shopping.map(\.title) == ["Milk", "Eggs"])
+        #expect(decoded.agentReply == "You slept 7.5 hours.")
+    }
+
+    @Test func decodesLegacySnapshotWithoutNewFields() throws {
+        // A snapshot written by an older build omits shopping / agentReply.
+        let legacy = """
+        {"lifeScore":50,"bestEmoji":"🫀","bestName":"Health","needsFocusEmoji":"💰",\
+        "needsFocusName":"Finance","topFocus":[],"updatedAt":0}
+        """
+        let decoded = try JSONDecoder().decode(WidgetSnapshot.self, from: Data(legacy.utf8))
+        #expect(decoded.shopping.isEmpty)
+        #expect(decoded.agentReply == nil)
+        #expect(decoded.lifeScore == 50)
+    }
 }

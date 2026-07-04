@@ -246,8 +246,56 @@ struct HealthStoreTests {
         let registry = SphereToolRegistry(tools: store.tools)
         #expect(
             registry.toolsFor(.health).map(\.name).sorted()
-                == ["get_health_today", "log_water_glass", "log_weight"]
+                == ["get_health_today", "log_energy", "log_meal", "log_period",
+                    "log_water_glass", "log_weight"]
         )
         #expect(registry.toolsFor(.finance).isEmpty)
+    }
+
+    // MARK: - Cycle
+
+    @Test func logPeriodPersistsAndPredicts() async throws {
+        let (store, database) = try makeStore()
+        try await store.load()
+        #expect(store.cyclePrediction() == nil)
+
+        try await store.logPeriod(flow: .heavy)
+        let prediction = try #require(store.cyclePrediction())
+        #expect(prediction.currentCycleDay == 1)
+        #expect(prediction.isEstimate)
+
+        let reloaded = HealthStore(database: database)
+        try await reloaded.load()
+        #expect(reloaded.cycleEntries.count == 1)
+        #expect(reloaded.cycleEntries.first?.flow == .heavy)
+    }
+
+    @Test func logPeriodSameDayOverwrites() async throws {
+        let (store, _) = try makeStore()
+        try await store.load()
+        try await store.logPeriod(flow: .light)
+        try await store.logPeriod(flow: .heavy, symptoms: [CycleSymptom.cramps.rawValue])
+        #expect(store.cycleEntries.count == 1)
+        #expect(store.cycleEntries.first?.flow == .heavy)
+        #expect(store.cycleEntries.first?.symptoms == [CycleSymptom.cramps.rawValue])
+    }
+
+    @Test func logPeriodToolAndSnapshotSurfaceCycle() async throws {
+        let (store, _) = try makeStore()
+        try await store.load()
+        let registry = SphereToolRegistry(tools: store.tools)
+
+        let call = LLMToolCall(id: "t1", name: "log_period", input: ["flow": "medium"])
+        let result = await registry.execute(call)
+        #expect(!result.isError)
+        #expect(store.cycleEntries.count == 1)
+        #expect(registry.confirmation(for: call) == "Logged period start (medium flow)")
+
+        let snapshot = await registry.execute(
+            LLMToolCall(id: "t2", name: "get_health_today", input: .object([:]))
+        )
+        let json = JSONValue.decoded(from: snapshot.content)
+        #expect(json?["cycle"]?["day"]?.intValue == 1)
+        #expect(json?["cycle"]?["phase"]?.stringValue == "Menstrual")
     }
 }

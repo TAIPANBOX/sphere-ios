@@ -11,13 +11,15 @@ struct SphereApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if !loaded {
-                    ProgressView()
-                } else if !container.profile.profile.onboarded {
-                    OnboardingFlow(container: container)
-                } else {
-                    RootView(container: container)
+            LockGate {
+                Group {
+                    if !loaded {
+                        ProgressView()
+                    } else if !container.profile.profile.onboarded {
+                        OnboardingFlow(container: container)
+                    } else {
+                        RootView(container: container)
+                    }
                 }
             }
             .preferredColorScheme(ThemePreference(rawValue: theme)?.colorScheme)
@@ -29,7 +31,10 @@ struct SphereApp: App {
         .onChange(of: scenePhase) { _, phase in
             if phase == .background {
                 container.refreshWidget()
-                Task { await container.runMemoryMaintenance() }
+                Task {
+                    await container.runMemoryMaintenance()
+                    await container.syncHabitReminders()
+                }
             }
         }
     }
@@ -38,27 +43,50 @@ struct SphereApp: App {
 struct RootView: View {
     let container: AppContainer
 
+    enum Tab: Hashable { case home, spheres, settings, profile }
+    @State private var tab: Tab = .home
+
     var body: some View {
-        TabView {
+        TabView(selection: $tab) {
             NavigationStack {
-                HomeScreen(store: container.home, userName: container.profile.profile.name)
+                HomeScreen(
+                    store: container.home,
+                    userName: container.profile.profile.name,
+                    onConfigureProvider: { tab = .settings },
+                    onQuickCapture: { await container.quickCapture($0) },
+                    ritual: container.ritual,
+                    insights: container.insights,
+                    nudges: container.nudges,
+                    reviews: container.reviews,
+                    experiments: container.experiments,
+                    readiness: container.readiness,
+                    agent: container.agent,
+                    search: container.search
+                )
+                .navigationDestination(for: SphereType.self) { sphere in
+                    SphereRootScreen(sphere: sphere, container: container)
+                }
             }
             .tabItem { Label("Home", systemImage: "house.fill") }
+            .tag(Tab.home)
 
             NavigationStack {
                 SpheresGridScreen(container: container)
             }
             .tabItem { Label("Spheres", systemImage: "circle.hexagongrid.fill") }
+            .tag(Tab.spheres)
 
             NavigationStack {
                 SettingsScreen(container: container)
             }
             .tabItem { Label("Settings", systemImage: "gearshape.fill") }
+            .tag(Tab.settings)
 
             NavigationStack {
                 ProfileScreen(container: container)
             }
             .tabItem { Label("Profile", systemImage: "person.crop.circle.fill") }
+            .tag(Tab.profile)
         }
     }
 }

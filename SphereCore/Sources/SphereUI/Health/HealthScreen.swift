@@ -6,55 +6,51 @@ public struct HealthScreen: View {
     private let store: HealthStore
     /// From the user profile; drives the BMI card.
     private let heightCm: Double?
+    /// Period tracking shows only when the profile gender is female.
+    private let showsCycle: Bool
     @State private var showingLogWeight = false
-    @State private var showingAddWorkout = false
-    @State private var showingAddMedication = false
-    @State private var showingAddLab = false
+    @State private var showingLogPeriod = false
 
     private let accent = SphereTheme.accent(for: .health)
 
-    public init(store: HealthStore, heightCm: Double? = nil) {
+    public init(store: HealthStore, heightCm: Double? = nil, showsCycle: Bool = false) {
         self.store = store
         self.heightCm = heightCm
+        self.showsCycle = showsCycle
     }
 
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
                 metricsGrid
+                if showsCycle {
+                    cycleCard
+                }
                 stepsChartCard
                 waterCard
+                energyMealCard
                 weightCard
-                medicationsSection
-                labResultsSection
-                workoutsSection
+                moreSection
             }
             .padding()
         }
         .navigationTitle("Health")
+        .sheet(isPresented: $showingLogPeriod) {
+            LogPeriodSheet { start, flow, symptoms in
+                Task { try? await store.logPeriod(start: start, flow: flow, symptoms: symptoms) }
+            }
+        }
         .sheet(isPresented: $showingLogWeight) {
             LogWeightSheet { kg in
                 Task { try? await store.logWeight(kg: kg) }
             }
         }
-        .sheet(isPresented: $showingAddWorkout) {
-            AddWorkoutSheet { workout in
-                Task { try? await store.addWorkout(workout) }
-            }
-        }
-        .sheet(isPresented: $showingAddMedication) {
-            AddMedicationSheet { medication in
-                Task { try? await store.addMedication(medication) }
-            }
-        }
-        .sheet(isPresented: $showingAddLab) {
-            AddLabResultSheet { result in
-                Task { try? await store.addLabResult(result) }
-            }
-        }
         .task {
             try? await store.load()
             await store.refreshMetrics()
+            if showsCycle {
+                await store.importCycleFromHealth()
+            }
         }
     }
 
@@ -171,6 +167,27 @@ public struct HealthScreen: View {
             }
         }
         .sphereCard()
+        .sensoryFeedback(.increase, trigger: store.waterToday)
+    }
+
+    // MARK: - Energy & meal (one-tap)
+
+    private var energyMealCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            RatingSelector(
+                title: "Energy today", systemImage: "bolt.fill",
+                selection: store.todayEnergy(), tint: .yellow
+            ) { level in
+                Task { try? await store.logEnergy(level) }
+            }
+            RatingSelector(
+                title: "Meal quality", systemImage: "fork.knife",
+                selection: store.todayMeal(), tint: .green
+            ) { quality in
+                Task { try? await store.logMeal(quality) }
+            }
+        }
+        .sphereCard()
     }
 
     // MARK: - Weight
@@ -203,131 +220,250 @@ public struct HealthScreen: View {
         .sphereCard()
     }
 
-    // MARK: - Medications
+    // MARK: - More (secondary lists → drill-downs)
 
-    private var medicationsSection: some View {
+    private var moreSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Medications").font(.title3.weight(.semibold))
-                Spacer()
-                if !store.medications.isEmpty {
-                    Text("\(store.medicationsTakenToday())/\(store.medications.count) taken")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Button {
-                    showingAddMedication = true
-                } label: {
-                    Image(systemName: "plus")
-                }
+            Text("More").font(.title3.weight(.semibold))
+            VStack(spacing: 0) {
+                MoreLink(
+                    "Medications", systemImage: "pills.fill",
+                    count: store.medications.isEmpty ? nil : store.medications.count
+                ) { medicationsList }
+                Divider().padding(.leading, 38)
+                MoreLink(
+                    "Lab results", systemImage: "cross.case.fill",
+                    count: store.labResults.isEmpty ? nil : store.labResults.count
+                ) { labResultsList }
+                Divider().padding(.leading, 38)
+                MoreLink(
+                    "Workouts", systemImage: "figure.run",
+                    count: store.workouts.isEmpty ? nil : store.workouts.count
+                ) { workoutsList }
             }
-            ForEach(store.medications) { medication in
-                HStack(spacing: 12) {
-                    Button {
-                        Task { try? await store.toggleMedication(id: medication.id) }
-                    } label: {
-                        Image(systemName: medication.takenToday() ? "checkmark.circle.fill" : "circle")
-                            .font(.title3)
-                            .foregroundStyle(medication.takenToday() ? .green : .secondary)
-                    }
-                    .buttonStyle(.plain)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(medication.name).font(.body.weight(.medium))
-                        Text([medication.dosage, medication.frequency.label]
-                            .filter { !$0.isEmpty }.joined(separator: " · "))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button(role: .destructive) {
-                        Task { try? await store.removeMedication(id: medication.id) }
-                    } label: {
-                        Image(systemName: "trash").foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
+            .sphereCard()
+        }
+    }
+
+    private var medicationsList: some View {
+        CRUDListScreen(
+            title: "Medications",
+            items: store.medications,
+            emptyTitle: "No medications",
+            emptySystemImage: "pills",
+            addSheet: {
+                AddMedicationSheet { medication in
+                    Task { try? await store.addMedication(medication) }
                 }
-                .sphereCard()
+            },
+            row: { medication in medicationRow(medication) },
+            onDelete: { medication in
+                Task { try? await store.removeMedication(id: medication.id) }
+            },
+            onRestore: { medication in
+                Task { try? await store.addMedication(medication) }
+            }
+        )
+    }
+
+    private func medicationRow(_ medication: Medication) -> some View {
+        HStack(spacing: 12) {
+            Button {
+                Task { try? await store.toggleMedication(id: medication.id) }
+            } label: {
+                Image(systemName: medication.takenToday() ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(medication.takenToday() ? .green : .secondary)
+            }
+            .buttonStyle(.plain)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(medication.name).font(.body.weight(.medium))
+                Text([medication.dosage, medication.frequency.label]
+                    .filter { !$0.isEmpty }.joined(separator: " · "))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
 
-    // MARK: - Lab results
+    private var labResultsList: some View {
+        CRUDListScreen(
+            title: "Lab Results",
+            items: store.labResults,
+            emptyTitle: "No lab results",
+            emptySystemImage: "cross.case",
+            addSheet: {
+                AddLabResultSheet { result in
+                    Task { try? await store.addLabResult(result) }
+                }
+            },
+            row: { result in labRow(result) },
+            onDelete: { result in
+                Task { try? await store.removeLabResult(id: result.id) }
+            },
+            onRestore: { result in
+                Task { try? await store.addLabResult(result) }
+            }
+        )
+    }
 
-    private var labResultsSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Lab Results").font(.title3.weight(.semibold))
-                Spacer()
-                Button {
-                    showingAddLab = true
-                } label: {
-                    Image(systemName: "plus")
+    private func labRow(_ result: LabResult) -> some View {
+        HStack(spacing: 12) {
+            Circle().fill(result.isNormal ? Color.green : Color.orange)
+                .frame(width: 8, height: 8)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(result.name).font(.body.weight(.medium))
+                if !result.refRange.isEmpty {
+                    Text("ref \(result.refRange)").font(.caption).foregroundStyle(.secondary)
                 }
             }
-            ForEach(store.labResults) { result in
-                HStack(spacing: 12) {
-                    Circle()
-                        .fill(result.isNormal ? Color.green : Color.orange)
-                        .frame(width: 8, height: 8)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(result.name).font(.body.weight(.medium))
-                        if !result.refRange.isEmpty {
-                            Text("ref \(result.refRange)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("\(result.value) \(result.unit)")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(result.isNormal ? Color.primary : Color.orange)
-                        Text(result.date, style: .date)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .sphereCard()
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("\(result.value) \(result.unit)")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(result.isNormal ? Color.primary : Color.orange)
+                Text(result.date, style: .date).font(.caption2).foregroundStyle(.secondary)
             }
         }
     }
 
-    // MARK: - Workouts
-
-    private var workoutsSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Workouts").font(.title3.weight(.semibold))
-                Spacer()
-                Button {
-                    showingAddWorkout = true
-                } label: {
-                    Image(systemName: "plus")
+    private var workoutsList: some View {
+        CRUDListScreen(
+            title: "Workouts",
+            items: store.sortedWorkouts,
+            emptyTitle: "No workouts logged",
+            emptySystemImage: "figure.run",
+            addSheet: {
+                AddWorkoutSheet { workout in
+                    Task { try? await store.addWorkout(workout) }
                 }
+            },
+            row: { workout in workoutRow(workout) },
+            onDelete: { workout in
+                Task { try? await store.removeWorkout(id: workout.id) }
+            },
+            onRestore: { workout in
+                Task { try? await store.addWorkout(workout) }
             }
-            if store.workouts.isEmpty {
-                Text("No workouts logged — tell your agent or tap +.")
+        )
+    }
+
+    private func workoutRow(_ workout: Workout) -> some View {
+        HStack(spacing: 12) {
+            Text(workout.type.emoji)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(workout.type.label).font(.body.weight(.medium))
+                Text(workout.date, style: .date).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            Text("\(workout.durationMinutes) min")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(accent)
+        }
+    }
+
+    // MARK: - Cycle
+
+    private var cycleTint: Color { Color(hex: 0xEC4899) }
+
+    private var cycleCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("Cycle", systemImage: "circle.circle")
+                    .font(.headline)
+                    .foregroundStyle(cycleTint)
+                Spacer()
+                Button("Log period") { showingLogPeriod = true }
+                    .font(.subheadline.weight(.semibold))
+            }
+
+            if let prediction = store.cyclePrediction() {
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Text("Day \(prediction.currentCycleDay)")
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                    Text("\(prediction.phase.emoji) \(prediction.phase.label)")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(cycleTint)
+                    Spacer()
+                }
+
+                ProgressView(
+                    value: Double(min(prediction.currentCycleDay, prediction.averageCycleLength)),
+                    total: Double(prediction.averageCycleLength)
+                )
+                .tint(cycleTint)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    cycleRow(
+                        icon: "calendar",
+                        text: nextPeriodText(prediction)
+                    )
+                    cycleRow(
+                        icon: "sparkles",
+                        text: "Fertile window "
+                            + "\(prediction.fertileWindow.lowerBound.formatted(.dateTime.month().day()))"
+                            + "–\(prediction.fertileWindow.upperBound.formatted(.dateTime.month().day()))"
+                            + " · ovulation ~\(prediction.ovulationDate.formatted(.dateTime.month().day()))"
+                    )
+                    if prediction.isEstimate {
+                        cycleRow(
+                            icon: "info.circle",
+                            text: "Estimate — log a couple more periods for accuracy."
+                        )
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            } else {
+                Text("Log your first period to see cycle day, next-period and "
+                    + "fertile-window predictions.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .sphereCard()
             }
-            ForEach(store.sortedWorkouts.prefix(10)) { workout in
-                HStack(spacing: 12) {
-                    Text(workout.type.emoji)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(workout.type.label).font(.body.weight(.medium))
-                        Text(workout.date, style: .date)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+
+            if !store.sortedCycleEntries.isEmpty {
+                Divider()
+                ForEach(store.sortedCycleEntries.prefix(4)) { entry in
+                    HStack(spacing: 10) {
+                        Text(entry.flow.emoji)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(entry.startDate, format: .dateTime.month().day().year())
+                                .font(.subheadline.weight(.medium))
+                            if !entry.symptoms.isEmpty {
+                                Text(entry.symptoms
+                                    .compactMap { CycleSymptom(rawValue: $0)?.label }
+                                    .joined(separator: ", "))
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer()
+                        Button(role: .destructive) {
+                            Task { try? await store.removeCycleEntry(id: entry.id) }
+                        } label: {
+                            Image(systemName: "trash").foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    Spacer()
-                    Text("\(workout.durationMinutes) min")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(accent)
                 }
-                .sphereCard()
             }
+        }
+        .sphereCard()
+    }
+
+    private func cycleRow(icon: String, text: String) -> some View {
+        Label(text, systemImage: icon).labelStyle(.titleAndIcon)
+    }
+
+    private func nextPeriodText(_ p: CyclePrediction) -> String {
+        if p.isOnPeriod { return "On your period now" }
+        switch p.daysUntilNextPeriod {
+        case ..<0: return "Period \(-p.daysUntilNextPeriod) day(s) late"
+        case 0: return "Period expected today"
+        default:
+            return "Next period in \(p.daysUntilNextPeriod) day(s) · "
+                + p.nextPeriodStart.formatted(.dateTime.month().day())
         }
     }
 }
@@ -471,6 +607,62 @@ struct AddLabResultSheet: View {
                         name.trimmingCharacters(in: .whitespaces).isEmpty
                             || value.trimmingCharacters(in: .whitespaces).isEmpty
                     )
+                }
+            }
+        }
+    }
+}
+
+struct LogPeriodSheet: View {
+    let onLog: (Date, FlowLevel, [String]) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var startDate = Date()
+    @State private var flow = FlowLevel.medium
+    @State private var symptoms: Set<String> = []
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    DatePicker("Start date", selection: $startDate, displayedComponents: .date)
+                    Picker("Flow", selection: $flow) {
+                        ForEach(FlowLevel.allCases, id: \.self) { level in
+                            Text("\(level.emoji) \(level.label)").tag(level)
+                        }
+                    }
+                }
+                Section("Symptoms") {
+                    ForEach(CycleSymptom.allCases, id: \.self) { symptom in
+                        Button {
+                            if symptoms.contains(symptom.rawValue) {
+                                symptoms.remove(symptom.rawValue)
+                            } else {
+                                symptoms.insert(symptom.rawValue)
+                            }
+                        } label: {
+                            HStack {
+                                Text(symptom.label).foregroundStyle(.primary)
+                                Spacer()
+                                if symptoms.contains(symptom.rawValue) {
+                                    Image(systemName: "checkmark").foregroundStyle(.pink)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Log Period")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        onLog(startDate, flow, CycleSymptom.allCases
+                            .map(\.rawValue).filter(symptoms.contains))
+                        dismiss()
+                    }
                 }
             }
         }

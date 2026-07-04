@@ -54,6 +54,12 @@ struct OnboardingFlow: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
+            Label("Free & private — runs on-device, no account or key needed.",
+                  systemImage: "lock.shield")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
             Spacer()
         }
     }

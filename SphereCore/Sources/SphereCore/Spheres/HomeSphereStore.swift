@@ -10,6 +10,10 @@ public final class HomeSphereStore {
     public private(set) var tasks: [HomeTask] = []
     public private(set) var plants: [Plant] = []
     public private(set) var shopping: [ShoppingItem] = []
+    public private(set) var appliances: [Appliance] = []
+    public private(set) var utilityReadings: [UtilityReading] = []
+    public private(set) var renovations: [RenovationProject] = []
+    public private(set) var inventory: [InventoryItem] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
@@ -20,16 +24,25 @@ public final class HomeSphereStore {
     }
 
     public func load() async throws {
-        let (tasks, plants, shopping) = try await database.writer.read { db in
-            (
-                try HomeTask.fetchAll(db),
-                try Plant.fetchAll(db),
-                try ShoppingItem.fetchAll(db)
-            )
-        }
+        let (tasks, plants, shopping, appliances, utilities, renovations, inventory) =
+            try await database.writer.read { db in
+                (
+                    try HomeTask.fetchAll(db),
+                    try Plant.fetchAll(db),
+                    try ShoppingItem.fetchAll(db),
+                    try Appliance.fetchAll(db),
+                    try UtilityReading.fetchAll(db, sql: "SELECT * FROM utility_readings ORDER BY date DESC"),
+                    try RenovationProject.fetchAll(db),
+                    try InventoryItem.fetchAll(db)
+                )
+            }
         self.tasks = tasks
         self.plants = plants
         self.shopping = shopping
+        self.appliances = appliances
+        self.utilityReadings = utilities
+        self.renovations = renovations
+        self.inventory = inventory
     }
 
     // MARK: - Tasks
@@ -46,9 +59,17 @@ public final class HomeSphereStore {
 
     public func toggle(id: String) async throws {
         guard var task = tasks.first(where: { $0.id == id }) else { return }
+        let completing = task.status != .done
         task.status = task.status == .done ? .todo : .done
         try await database.writer.write { [task] db in try task.save(db) }
         tasks = tasks.map { $0.id == id ? task : $0 }
+
+        // A completed recurring chore respawns its next occurrence, so weekly
+        // cleaning / watering never falls off the list (degrading-chore model).
+        if completing, let next = RecurringChore.nextOccurrence(after: task) {
+            try await database.writer.write { [next] db in try next.insert(db) }
+            tasks.append(next)
+        }
     }
 
     public func remove(id: String) async throws {
@@ -129,6 +150,67 @@ public final class HomeSphereStore {
     public var uncheckedCount: Int {
         shopping.count { !$0.checked }
     }
+
+    // MARK: - Appliances (with warranty)
+
+    public func addAppliance(_ appliance: Appliance) async throws {
+        try await database.writer.write { db in try appliance.insert(db) }
+        appliances.append(appliance)
+    }
+
+    public func removeAppliance(id: String) async throws {
+        _ = try await database.writer.write { db in try Appliance.deleteOne(db, key: id) }
+        appliances.removeAll { $0.id == id }
+    }
+
+    /// Appliances whose warranty lapses within `days` (and hasn't already).
+    public func warrantyExpiringSoon(within days: Int = 30, asOf now: Date = Date()) -> [Appliance] {
+        appliances
+            .filter { appliance in
+                guard let left = appliance.warrantyDaysLeft(asOf: now) else { return false }
+                return left >= 0 && left <= days
+            }
+            .sorted { ($0.warrantyDaysLeft(asOf: now) ?? 0) < ($1.warrantyDaysLeft(asOf: now) ?? 0) }
+    }
+
+    // MARK: - Utilities
+
+    public func addUtilityReading(_ reading: UtilityReading) async throws {
+        try await database.writer.write { db in try reading.insert(db) }
+        utilityReadings.insert(reading, at: 0)
+    }
+
+    public func removeUtilityReading(id: String) async throws {
+        _ = try await database.writer.write { db in try UtilityReading.deleteOne(db, key: id) }
+        utilityReadings.removeAll { $0.id == id }
+    }
+
+    // MARK: - Renovation
+
+    public func addRenovation(_ project: RenovationProject) async throws {
+        try await database.writer.write { db in try project.insert(db) }
+        renovations.append(project)
+    }
+
+    public func removeRenovation(id: String) async throws {
+        _ = try await database.writer.write { db in try RenovationProject.deleteOne(db, key: id) }
+        renovations.removeAll { $0.id == id }
+    }
+
+    // MARK: - Inventory (with lend tracking)
+
+    public func addInventoryItem(_ item: InventoryItem) async throws {
+        try await database.writer.write { db in try item.insert(db) }
+        inventory.append(item)
+    }
+
+    public func removeInventoryItem(id: String) async throws {
+        _ = try await database.writer.write { db in try InventoryItem.deleteOne(db, key: id) }
+        inventory.removeAll { $0.id == id }
+    }
+
+    /// Items currently lent out — "who did I lend this to".
+    public var lentItems: [InventoryItem] { inventory.filter(\.isLentOut) }
 
     // MARK: - Agent tools
 

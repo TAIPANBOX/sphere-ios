@@ -8,6 +8,8 @@ struct WatchCommandTests {
             WatchCommand.logWater,
             .logMood(4),
             .logMeditation(minutes: 10),
+            .checkShopping(id: "shop_1"),
+            .askAgent(query: "How did I sleep?"),
         ] {
             #expect(WatchCommand.decode(command.encode()) == command)
         }
@@ -19,5 +21,8 @@ struct WatchCommandTests {
         // Missing required value.
         #expect(WatchCommand.decode(["cmd": "mood"]) == nil)
         #expect(WatchCommand.decode(["cmd": "meditation"]) == nil)
+        #expect(WatchCommand.decode(["cmd": "shopping"]) == nil)
+        #expect(WatchCommand.decode(["cmd": "shopping", "id": ""]) == nil)
+        #expect(WatchCommand.decode(["cmd": "ask"]) == nil)
     }
 }

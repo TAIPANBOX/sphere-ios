@@ -6,24 +6,39 @@ public struct RestScreen: View {
     private let store: RestStore
     /// Today's stress level (0–10) from the mindfulness sphere, once ported.
     private let stressLevel: Int?
+    /// Annual paid-time-off allowance from the profile (drives the ledger).
+    private let vacationAllowance: Int?
     @State private var showingLogSleep = false
+    @State private var importing = false
+    @State private var importResult: String?
 
     private let accent = SphereTheme.accent(for: .rest)
 
-    public init(store: RestStore, stressLevel: Int? = nil) {
+    public init(store: RestStore, stressLevel: Int? = nil, vacationAllowance: Int? = nil) {
         self.store = store
         self.stressLevel = stressLevel
+        self.vacationAllowance = vacationAllowance
     }
 
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
                 recoveryCard
+                if store.sleepDebtLast7() >= 1 {
+                    sleepDebtCard
+                }
                 sleepChartCard
+                if store.hasHealthProvider {
+                    healthImportRow
+                }
                 scheduleCard
+                if let allowance = vacationAllowance {
+                    vacationCard(allowance: allowance)
+                }
                 detoxCard
                 burnoutCard
                 weekendCard
+                moreSection
                 sleepLogSection
             }
             .padding()
@@ -43,7 +58,146 @@ public struct RestScreen: View {
         }
         .task {
             try? await store.load()
+            await autoImport()
         }
+    }
+
+    private var healthImportRow: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "heart.fill").font(.title3).foregroundStyle(.pink)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Apple Health").font(.subheadline.weight(.medium))
+                Text(importResult ?? "Import last nights' sleep automatically.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            if importing {
+                ProgressView()
+            } else {
+                Button("Import") {
+                    Task { await runImport() }
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .sphereCard()
+    }
+
+    private func autoImport() async {
+        guard store.hasHealthProvider else { return }
+        let added = await store.importSleepFromHealth(days: 30)
+        if added > 0 { importResult = "Added \(added) night\(added == 1 ? "" : "s")." }
+    }
+
+    private func runImport() async {
+        importing = true
+        let added = await store.importSleepFromHealth(days: 30)
+        importResult = added > 0
+            ? "Added \(added) night\(added == 1 ? "" : "s")."
+            : "You're up to date."
+        importing = false
+    }
+
+    // MARK: - Sleep debt (gem)
+
+    private var sleepDebtCard: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "moon.zzz.fill").font(.title2).foregroundStyle(.indigo)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(format: "%.1fh sleep debt", store.sleepDebtLast7()))
+                    .font(.headline)
+                Text("Deficit over the last 7 nights vs your goal. An extra "
+                    + "early night helps.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .sphereCard()
+    }
+
+    // MARK: - Vacation ledger (gem)
+
+    private func vacationCard(allowance: Int) -> some View {
+        let used = store.usedVacationDays()
+        let remaining = store.remainingVacationDays(allowance: allowance)
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label("Time off this year", systemImage: "beach.umbrella.fill")
+                    .font(.headline).foregroundStyle(accent)
+                Spacer()
+                Text("\(remaining) of \(allowance) left")
+                    .font(.subheadline.weight(.semibold))
+            }
+            ProgressView(value: Double(used), total: Double(max(allowance, 1))).tint(accent)
+            Button {
+                Task { try? await store.toggleVacation() }
+            } label: {
+                Label(store.isVacationDay() ? "Today is marked off" : "Mark today as time off",
+                      systemImage: store.isVacationDay() ? "checkmark.circle.fill" : "plus.circle")
+                    .font(.subheadline)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(accent)
+        }
+        .sphereCard()
+    }
+
+    // MARK: - More (naps, recovery menu)
+
+    private var moreSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("More").font(.title3.weight(.semibold))
+            VStack(spacing: 0) {
+                MoreLink("Naps", systemImage: "powersleep",
+                         count: store.naps.isEmpty ? nil : store.naps.count) { napsList }
+                Divider().padding(.leading, 38)
+                MoreLink("What restores me", systemImage: "leaf.fill",
+                         count: store.recoveryActivities.isEmpty ? nil : store.recoveryActivities.count) { recoveryList }
+            }
+            .sphereCard()
+        }
+    }
+
+    private var napsList: some View {
+        CRUDListScreen(
+            title: "Naps",
+            items: store.naps,
+            emptyTitle: "No naps logged",
+            emptySystemImage: "powersleep",
+            addSheet: { AddNapSheet { nap in Task { try? await store.addNap(nap) } } },
+            row: { nap in
+                HStack {
+                    Text("\(nap.minutes) min").font(.body.weight(.medium))
+                    Spacer()
+                    Text(nap.date, style: .date).font(.caption).foregroundStyle(.secondary)
+                }
+            },
+            onDelete: { nap in Task { try? await store.removeNap(id: nap.id) } },
+            onRestore: { nap in Task { try? await store.addNap(nap) } }
+        )
+    }
+
+    private var recoveryList: some View {
+        CRUDListScreen(
+            title: "What restores me",
+            items: store.recoveryActivities,
+            emptyTitle: "Nothing added yet",
+            emptySystemImage: "leaf",
+            addSheet: { AddRecoveryActivitySheet { a in Task { try? await store.addRecoveryActivity(a) } } },
+            row: { activity in
+                HStack(spacing: 10) {
+                    Text(activity.emoji)
+                    Text(activity.name).font(.body.weight(.medium))
+                    Spacer()
+                    Text(String(repeating: "●", count: activity.rating))
+                        .font(.caption).foregroundStyle(accent)
+                }
+            },
+            onDelete: { activity in Task { try? await store.removeRecoveryActivity(id: activity.id) } },
+            onRestore: { activity in Task { try? await store.addRecoveryActivity(activity) } }
+        )
     }
 
     // MARK: - Recovery
@@ -281,6 +435,64 @@ struct LogSleepSheet: View {
                         ))
                         dismiss()
                     }
+                }
+            }
+        }
+    }
+}
+
+struct AddNapSheet: View {
+    let onAdd: (Nap) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var minutes = 20
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Stepper("Duration: \(minutes) min", value: $minutes, in: 5...180, step: 5)
+            }
+            .navigationTitle("Log Nap")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(Nap(id: Nap.newID(), date: Date(), minutes: minutes))
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct AddRecoveryActivitySheet: View {
+    let onAdd: (RecoveryActivity) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var emoji = "🌿"
+    @State private var rating = 3
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Activity (e.g. a long walk)", text: $name)
+                TextField("Emoji", text: $emoji)
+                Stepper("How restorative: \(rating)/5", value: $rating, in: 1...5)
+            }
+            .navigationTitle("Add Activity")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(RecoveryActivity(
+                            id: RecoveryActivity.newID(),
+                            name: name.trimmingCharacters(in: .whitespaces),
+                            emoji: emoji.isEmpty ? "🌿" : String(emoji.prefix(2)),
+                            rating: rating
+                        ))
+                        dismiss()
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
         }

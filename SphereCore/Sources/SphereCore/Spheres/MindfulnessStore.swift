@@ -13,6 +13,8 @@ public final class MindfulnessStore {
     public private(set) var journal: [JournalEntry] = []
     public private(set) var moods: [String: Int] = [:]
     public private(set) var stress: [String: Int] = [:]
+    public private(set) var gratitude: [GratitudeEntry] = []
+    public private(set) var customAffirmations: [Affirmation] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
@@ -23,20 +25,68 @@ public final class MindfulnessStore {
     }
 
     public func load() async throws {
-        let (sessions, journal, moods, stress) = try await database.writer.read { db in
-            (
-                try MeditationSession.fetchAll(db, sql: "SELECT * FROM meditation_sessions ORDER BY date DESC, rowid DESC"),
-                try JournalEntry.fetchAll(db),
-                try Row.fetchAll(db, sql: "SELECT dateKey, score FROM moods")
-                    .map { ($0["dateKey"] as String, $0["score"] as Int) },
-                try Row.fetchAll(db, sql: "SELECT dateKey, level FROM stress_levels")
-                    .map { ($0["dateKey"] as String, $0["level"] as Int) }
-            )
-        }
+        let (sessions, journal, moods, stress, gratitude, affirmations) =
+            try await database.writer.read { db in
+                (
+                    try MeditationSession.fetchAll(db, sql: "SELECT * FROM meditation_sessions ORDER BY date DESC, rowid DESC"),
+                    try JournalEntry.fetchAll(db),
+                    try Row.fetchAll(db, sql: "SELECT dateKey, score FROM moods")
+                        .map { ($0["dateKey"] as String, $0["score"] as Int) },
+                    try Row.fetchAll(db, sql: "SELECT dateKey, level FROM stress_levels")
+                        .map { ($0["dateKey"] as String, $0["level"] as Int) },
+                    try GratitudeEntry.fetchAll(db, sql: "SELECT * FROM gratitude_entries ORDER BY date DESC"),
+                    try Affirmation.fetchAll(db, sql: "SELECT * FROM affirmations WHERE isCustom = 1")
+                )
+            }
         self.sessions = sessions
         self.journal = journal
         self.moods = Dictionary(uniqueKeysWithValues: moods)
         self.stress = Dictionary(uniqueKeysWithValues: stress)
+        self.gratitude = gratitude
+        self.customAffirmations = affirmations
+    }
+
+    // MARK: - Gratitude & affirmations
+
+    public func hasGratitudeToday(asOf now: Date = Date()) -> Bool {
+        gratitude.contains { DayKey.make($0.date) == DayKey.make(now) }
+    }
+
+    public func addGratitude(_ content: String, on date: Date = Date()) async throws {
+        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let entry = GratitudeEntry(id: GratitudeEntry.newID(), date: date, content: trimmed)
+        try await database.writer.write { db in try entry.insert(db) }
+        gratitude.insert(entry, at: 0)
+        engram?.note(
+            agentId: SphereType.mindfulness.rawValue,
+            content: "Grateful for: \(trimmed)",
+            tags: ["log", "mindfulness", "gratitude"]
+        )
+    }
+
+    public func removeGratitude(id: String) async throws {
+        _ = try await database.writer.write { db in try GratitudeEntry.deleteOne(db, key: id) }
+        gratitude.removeAll { $0.id == id }
+    }
+
+    /// The affirmation to show today (a user's own if they added any, else a
+    /// built-in seed), stable through the day.
+    public func dailyAffirmation(for date: Date = Date()) -> String {
+        Affirmation.daily(for: date, custom: customAffirmations)
+    }
+
+    public func addAffirmation(_ text: String) async throws {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let affirmation = Affirmation(id: Affirmation.newID(), text: trimmed, isCustom: true)
+        try await database.writer.write { db in try affirmation.insert(db) }
+        customAffirmations.append(affirmation)
+    }
+
+    public func removeAffirmation(id: String) async throws {
+        _ = try await database.writer.write { db in try Affirmation.deleteOne(db, key: id) }
+        customAffirmations.removeAll { $0.id == id }
     }
 
     // MARK: - Meditation
@@ -62,18 +112,76 @@ public final class MindfulnessStore {
 
     public func hasMeditated(on date: Date = Date()) -> Bool {
         let key = DayKey.make(date)
-        return sessions.contains { DayKey.make($0.date) == key }
+        // Focus/deep-work sessions are tracked separately and don't count as
+        // meditation.
+        return sessions.contains { $0.type != .focus && DayKey.make($0.date) == key }
     }
 
-    /// Consecutive days with a session, ending today (0 when none today).
+    /// Day keys the user was in sick/vacation mode — set by the app so a
+    /// missed session during recovery bridges the streak instead of resetting
+    /// it (forgiveness, N4). Empty by default = plain streak semantics.
+    public var excusedStreakDays: Set<String> = []
+
+    /// Consecutive days with a session, ending today (0 when none today),
+    /// bridging any days excused by sick/vacation mode.
     public func currentStreak(asOf now: Date = Date()) -> Int {
-        var streak = 0
-        var day = now
-        while hasMeditated(on: day) {
-            streak += 1
-            day = day.addingTimeInterval(-86_400)
-        }
-        return streak
+        StreakPolicy.streak(
+            asOf: now,
+            isActive: { hasMeditated(on: $0) },
+            isExcused: { excusedStreakDays.contains(DayKey.make($0)) }
+        )
+    }
+
+    // MARK: - Focus sessions & discipline (Tysh-inspired)
+
+    /// Focus/deep-work sessions are logged as meditation sessions of type
+    /// `.focus`, so they reuse the same storage and streak machinery.
+    public var focusSessions: [MeditationSession] {
+        sessions.filter { $0.type == .focus }
+    }
+
+    public func focusMinutesToday(asOf now: Date = Date()) -> Int {
+        let key = DayKey.make(now)
+        return focusSessions
+            .filter { DayKey.make($0.date) == key }
+            .reduce(0) { $0 + $1.durationMinutes }
+    }
+
+    public func hasFocusedToday(asOf now: Date = Date()) -> Bool {
+        let key = DayKey.make(now)
+        return focusSessions.contains { DayKey.make($0.date) == key }
+    }
+
+    /// Consecutive days with a focus session, bridging sick/vacation days.
+    public func focusStreak(asOf now: Date = Date()) -> Int {
+        StreakPolicy.streak(
+            asOf: now,
+            isActive: { day in
+                let key = DayKey.make(day)
+                return focusSessions.contains { DayKey.make($0.date) == key }
+            },
+            isExcused: { excusedStreakDays.contains(DayKey.make($0)) }
+        )
+    }
+
+    /// Today's 0–100 discipline score from focus time, meditation, and streak.
+    public func disciplineScore(asOf now: Date = Date()) -> Int {
+        DisciplineScore.compute(
+            focusMinutesToday: focusMinutesToday(asOf: now),
+            meditatedToday: hasMeditated(on: now),
+            focusStreakDays: focusStreak(asOf: now)
+        )
+    }
+
+    /// Logs a completed focus session of `minutes`.
+    public func logFocusSession(minutes: Int, note: String = "", on date: Date = Date()) async throws {
+        try await add(MeditationSession(
+            id: MeditationSession.newID(now: date),
+            type: .focus,
+            durationMinutes: max(minutes, 1),
+            date: date,
+            note: note
+        ))
     }
 
     // MARK: - Mood

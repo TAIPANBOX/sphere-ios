@@ -379,6 +379,328 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("health-v3") { db in
+            try db.create(table: "cycle_entries") { t in
+                t.primaryKey("id", .text)
+                t.column("startDate", .datetime).notNull()
+                t.column("endDate", .datetime)
+                t.column("flow", .text).notNull().defaults(to: "medium")
+                t.column("symptoms", .text).notNull().defaults(to: "[]")
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+        }
+
+        migrator.registerMigration("health-v4") { db in
+            // Day-keyed one-tap logs (1–5), the cheapest correlates for the
+            // Stage-6 insight engine. Deliberately not calorie counting.
+            try db.create(table: "energy_levels") { t in
+                t.primaryKey("dateKey", .text)
+                t.column("level", .integer).notNull()
+            }
+            try db.create(table: "meal_quality") { t in
+                t.primaryKey("dateKey", .text)
+                t.column("quality", .integer).notNull()
+            }
+        }
+
+        migrator.registerMigration("mindfulness-v2") { db in
+            try db.create(table: "gratitude_entries") { t in
+                t.primaryKey("id", .text)
+                t.column("date", .datetime).notNull()
+                t.column("content", .text).notNull()
+            }
+            try db.create(table: "affirmations") { t in
+                t.primaryKey("id", .text)
+                t.column("text", .text).notNull()
+                t.column("isCustom", .boolean).notNull().defaults(to: true)
+            }
+        }
+
+        migrator.registerMigration("readiness-v1") { db in
+            try db.create(table: "readiness_log") { t in
+                t.primaryKey("dateKey", .text)
+                t.column("predicted", .integer).notNull()
+                t.column("createdAt", .datetime).notNull()
+            }
+        }
+
+        migrator.registerMigration("experiments-v1") { db in
+            try db.create(table: "experiments") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+                t.column("startDate", .datetime).notNull()
+                t.column("durationDays", .integer).notNull()
+                t.column("status", .text).notNull().defaults(to: "running")
+                t.column("createdAt", .datetime).notNull()
+            }
+        }
+
+        migrator.registerMigration("reviews-v1") { db in
+            try db.create(table: "reviews") { t in
+                t.primaryKey("id", .text)
+                t.column("type", .text).notNull()
+                t.column("periodKey", .text).notNull()
+                t.column("content", .text).notNull().defaults(to: "")
+                t.column("selfRatings", .text).notNull().defaults(to: "{}")
+                t.column("createdAt", .datetime).notNull()
+            }
+        }
+
+        migrator.registerMigration("nudges-v1") { db in
+            try db.create(table: "nudge_log") { t in
+                t.primaryKey("id", .text)
+                t.column("firedAt", .datetime).notNull()
+            }
+        }
+
+        migrator.registerMigration("goals-v2") { db in
+            try db.alter(table: "goals") { t in
+                t.add(column: "why", .text).notNull().defaults(to: "")
+            }
+            try db.alter(table: "habits") { t in
+                t.add(column: "identity", .text).notNull().defaults(to: "")
+                t.add(column: "reminderWeekdays", .text).notNull().defaults(to: "[]")
+            }
+            try db.create(table: "anti_goals") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+        }
+
+        migrator.registerMigration("hobbies-v2") { db in
+            try db.alter(table: "hobbies") { t in
+                t.add(column: "costTotal", .double).notNull().defaults(to: 0)
+            }
+            try db.alter(table: "hobby_sessions") { t in
+                t.add(column: "rating", .integer).notNull().defaults(to: 0)
+            }
+            try db.create(table: "hobby_milestones") { t in
+                t.primaryKey("id", .text)
+                t.column("hobbyId", .text).notNull()
+                t.column("title", .text).notNull()
+                t.column("done", .boolean).notNull().defaults(to: false)
+            }
+        }
+
+        migrator.registerMigration("creativity-v2") { db in
+            try db.create(table: "portfolio_items") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("type", .text).notNull()
+                t.column("url", .text).notNull().defaults(to: "")
+                t.column("date", .datetime).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "project_sessions") { t in
+                t.primaryKey("id", .text)
+                t.column("projectId", .text).notNull()
+                t.column("date", .datetime).notNull()
+                t.column("minutes", .integer).notNull()
+            }
+        }
+
+        migrator.registerMigration("travel-v2") { db in
+            try db.alter(table: "travel_plans") { t in
+                t.add(column: "spent", .double).notNull().defaults(to: 0)
+            }
+            try db.create(table: "trip_journal") { t in
+                t.primaryKey("id", .text)
+                t.column("tripId", .text).notNull()
+                t.column("date", .datetime).notNull()
+                t.column("text", .text).notNull()
+            }
+        }
+
+        migrator.registerMigration("travel-v3") { db in
+            try db.create(table: "trip_photos") { t in
+                t.primaryKey("id", .text)
+                t.column("planId", .text).notNull()
+                t.column("filename", .text).notNull()
+                t.column("caption", .text).notNull().defaults(to: "")
+                t.column("createdAt", .datetime).notNull()
+            }
+        }
+
+        migrator.registerMigration("relationships-v2") { db in
+            try db.create(table: "custom_dates") { t in
+                t.primaryKey("id", .text)
+                t.column("contactId", .text).notNull()
+                t.column("label", .text).notNull()
+                t.column("date", .datetime).notNull()
+                t.column("recursYearly", .boolean).notNull().defaults(to: true)
+            }
+            try db.create(table: "message_templates") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("body", .text).notNull()
+            }
+        }
+
+        migrator.registerMigration("career-v3") { db in
+            try db.create(table: "career_skills") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("category", .text).notNull().defaults(to: "General")
+                t.column("level", .integer).notNull().defaults(to: 3)
+            }
+            try db.create(table: "salary_entries") { t in
+                t.primaryKey("id", .text)
+                t.column("amount", .double).notNull()
+                t.column("role", .text).notNull().defaults(to: "")
+                t.column("company", .text).notNull().defaults(to: "")
+                t.column("date", .datetime).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "career_goals") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("status", .text).notNull()
+                t.column("progressPercent", .integer).notNull().defaults(to: 0)
+                t.column("targetDate", .datetime)
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "one_on_ones") { t in
+                t.primaryKey("id", .text)
+                t.column("person", .text).notNull()
+                t.column("role", .text).notNull().defaults(to: "")
+                t.column("date", .datetime).notNull()
+                t.column("notes", .text).notNull().defaults(to: "")
+                t.column("talkingPoints", .text).notNull().defaults(to: "[]")
+            }
+        }
+
+        migrator.registerMigration("home-v2") { db in
+            try db.alter(table: "home_tasks") { t in
+                t.add(column: "recurrenceDays", .integer).notNull().defaults(to: 0)
+            }
+            try db.create(table: "appliances") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("brand", .text).notNull().defaults(to: "")
+                t.column("purchaseDate", .datetime)
+                t.column("warrantyUntil", .datetime)
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "utility_readings") { t in
+                t.primaryKey("id", .text)
+                t.column("kind", .text).notNull()
+                t.column("value", .double).notNull()
+                t.column("cost", .double).notNull().defaults(to: 0)
+                t.column("date", .datetime).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "renovation_projects") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("status", .text).notNull()
+                t.column("budget", .double).notNull().defaults(to: 0)
+                t.column("spent", .double).notNull().defaults(to: 0)
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "inventory_items") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("quantity", .integer).notNull().defaults(to: 1)
+                t.column("location", .text).notNull().defaults(to: "")
+                t.column("lentTo", .text).notNull().defaults(to: "")
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+        }
+
+        migrator.registerMigration("rest-v2") { db in
+            try db.create(table: "naps") { t in
+                t.primaryKey("id", .text)
+                t.column("date", .datetime).notNull()
+                t.column("minutes", .integer).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "recovery_activities") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("emoji", .text).notNull().defaults(to: "🌿")
+                t.column("rating", .integer).notNull().defaults(to: 3)
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "vacation_days") { t in
+                t.primaryKey("dateKey", .text)
+            }
+        }
+
+        migrator.registerMigration("learning-v2") { db in
+            try db.create(table: "courses") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("provider", .text).notNull().defaults(to: "")
+                t.column("progressPercent", .integer).notNull().defaults(to: 0)
+                t.column("status", .text).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "languages") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("level", .text).notNull().defaults(to: "A1")
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "learning_queue") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("kind", .text).notNull()
+                t.column("url", .text).notNull().defaults(to: "")
+                t.column("done", .boolean).notNull().defaults(to: false)
+                t.column("createdAt", .datetime).notNull()
+            }
+            try db.create(table: "flashcards") { t in
+                t.primaryKey("id", .text)
+                t.column("deck", .text).notNull().defaults(to: "General")
+                t.column("front", .text).notNull()
+                t.column("back", .text).notNull()
+                t.column("easiness", .double).notNull().defaults(to: 2.5)
+                t.column("intervalDays", .integer).notNull().defaults(to: 0)
+                t.column("repetitions", .integer).notNull().defaults(to: 0)
+                t.column("dueDate", .datetime).notNull()
+                t.column("lastReviewed", .datetime)
+            }
+        }
+
+        migrator.registerMigration("finance-v3") { db in
+            try db.create(table: "debts") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("lender", .text).notNull().defaults(to: "")
+                t.column("totalAmount", .double).notNull()
+                t.column("remaining", .double).notNull()
+                t.column("monthlyPayment", .double).notNull().defaults(to: 0)
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "investments") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("type", .text).notNull()
+                t.column("value", .double).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "wishlist") { t in
+                t.primaryKey("id", .text)
+                t.column("title", .text).notNull()
+                t.column("amount", .double).notNull()
+                t.column("createdAt", .datetime).notNull()
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+        }
+
+        migrator.registerMigration("ritual-v1") { db in
+            try db.create(table: "daily_ritual") { t in
+                t.primaryKey("dateKey", .text)
+                t.column("intention", .text).notNull().defaults(to: "")
+                t.column("plannedFocusIds", .text).notNull().defaults(to: "[]")
+                t.column("reflection", .text).notNull().defaults(to: "")
+                t.column("morningCompletedAt", .datetime)
+                t.column("eveningCompletedAt", .datetime)
+            }
+        }
+
         return migrator
     }
 }

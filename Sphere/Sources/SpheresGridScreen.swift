@@ -15,6 +15,7 @@ struct SpheresGridScreen: View {
     }
 
     @State private var destination: Destination?
+    @State private var showingCapture = false
     @AppStorage(Prefs.currency) private var currency = Currency.deviceDefault.rawValue
 
     private static let emojis: [SphereType: String] = [
@@ -35,7 +36,16 @@ struct SpheresGridScreen: View {
             .onMove(perform: move)
         }
         .navigationTitle("Spheres")
-        .toolbar { EditButton() }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { showingCapture = true } label: { Image(systemName: "plus.circle.fill") }
+                    .accessibilityLabel("Quick capture")
+            }
+            ToolbarItem(placement: .topBarLeading) { EditButton() }
+        }
+        .sheet(isPresented: $showingCapture) {
+            QuickCaptureSheet { await container.quickCapture($0) }
+        }
         .navigationDestination(item: $destination) { dest in
             switch dest {
             case .screen(let sphere): sphereScreen(sphere)
@@ -87,19 +97,6 @@ struct SpheresGridScreen: View {
 
     @ViewBuilder
     private func sphereScreen(_ sphere: SphereType) -> some View {
-        switch sphere {
-        case .health: HealthScreen(store: container.health, heightCm: container.profile.profile.heightCm)
-        case .learning: LearningScreen(store: container.learning)
-        case .career: CareerScreen(store: container.career)
-        case .finance: FinanceScreen(store: container.finance, currency: storedCurrency(currency))
-        case .relationships: RelationshipsScreen(store: container.relationships)
-        case .rest: RestScreen(store: container.rest, stressLevel: container.mindfulness.todayStress())
-        case .hobbies: HobbiesScreen(store: container.hobbies)
-        case .travel: TravelScreen(store: container.travel)
-        case .mindfulness: MindfulnessScreen(store: container.mindfulness)
-        case .creativity: CreativityScreen(store: container.creativity)
-        case .home: HomeSphereScreen(store: container.homeSphere)
-        case .goals: GoalsScreen(store: container.goals)
-        }
+        SphereRootScreen(sphere: sphere, container: container)
     }
 }
