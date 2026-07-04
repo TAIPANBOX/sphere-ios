@@ -179,8 +179,10 @@ final class AppContainer {
     func apply(_ command: WatchCommand) async {
         switch command {
         case .logWater:
+            // load() first so the snapshot pushed back reflects full health
+            // state; the increment itself is atomic in SQL (no lost updates).
             try? await health.load()
-            try? await health.addWaterGlass()
+            try? await health.incrementWater()
         case .logMood(let score):
             try? await mindfulness.load()
             try? await mindfulness.setMood(score)

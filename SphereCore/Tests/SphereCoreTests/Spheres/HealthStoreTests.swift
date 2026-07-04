@@ -42,6 +42,25 @@ struct HealthStoreTests {
         #expect(reloaded.waterToday == HealthStore.maxWaterGlasses)
     }
 
+    @Test func incrementWaterAccumulatesInSQLAndCaps() async throws {
+        let (store, database) = try makeStore()
+        try await store.load()
+
+        // Each increment is a self-contained atomic SQL statement (no
+        // read-modify-write on waterToday), so counts accumulate exactly.
+        for _ in 0..<5 { try await store.incrementWater() }
+        #expect(store.waterToday == 5)
+
+        // Persisted, not just in-memory.
+        let reloaded = HealthStore(database: database)
+        try await reloaded.load()
+        #expect(reloaded.waterToday == 5)
+
+        // Caps at the max.
+        for _ in 0..<20 { try await store.incrementWater() }
+        #expect(store.waterToday == HealthStore.maxWaterGlasses)
+    }
+
     @Test func waterIsScopedToToday() async throws {
         let (store, database) = try makeStore()
         try await store.load()

@@ -91,6 +91,29 @@ public final class HealthStore {
         waterToday = clamped
     }
 
+    /// Adds one glass atomically in SQL (capped), returning the new count.
+    /// Used by the watch quick-log path so two near-simultaneous commands
+    /// can't lose an increment via a read-modify-write on `waterToday`.
+    @discardableResult
+    public func incrementWater(on date: Date = Date()) async throws -> Int {
+        let key = DayKey.make(date)
+        let cap = Self.maxWaterGlasses
+        let newValue = try await database.writer.write { db -> Int in
+            try db.execute(
+                sql: """
+                    INSERT INTO water (dateKey, glasses) VALUES (?, 1)
+                    ON CONFLICT(dateKey) DO UPDATE SET glasses = MIN(glasses + 1, ?)
+                    """,
+                arguments: [key, cap]
+            )
+            return try Int.fetchOne(
+                db, sql: "SELECT glasses FROM water WHERE dateKey = ?", arguments: [key]
+            ) ?? 0
+        }
+        if key == DayKey.make() { waterToday = newValue }
+        return newValue
+    }
+
     // MARK: - Weight
 
     /// Records today's weight, overwriting an earlier entry for the same day.
