@@ -124,8 +124,12 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
   and complications (circular gauge / rectangular / inline) fed by the phone
   over WatchConnectivity (`updateApplicationContext`); the watch persists the
   snapshot to its own App Group for the complication (243 tests total).
-- [ ] Language (String Catalog from ARB, EN/UK); Watch quick-logging +
-  voice queries (read path done, write path next)
+- [x] Localization (EN/UK) — app-shell String Catalog (tabs, sphere names,
+  onboarding, Settings, Profile) with Ukrainian from the Flutter ARB;
+  verified rendering under `-AppleLanguages '(uk)'`. Sphere screens
+  (SphereUI package) still inline-English — same pattern, larger volume.
+- [ ] SphereUI screen localization (String Catalog in the SPM target);
+  Watch quick-logging + voice queries; voice input in chat; secondary lists
 
 ## Development
 
