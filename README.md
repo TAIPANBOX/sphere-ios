@@ -131,8 +131,12 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
 - [x] Voice input in chat — on-device `SFSpeechRecognizer` dictation
   (SpeechDictation in SphereUI, iOS-guarded); mic button in the chat input
   streams partial transcripts into the draft (243 tests total).
-- [ ] SphereUI screen localization (String Catalog in the SPM target);
-  Watch quick-logging + voice queries; secondary lists per sphere
+- [x] Health secondary lists — medications (taken toggle, dosage/
+  frequency, reminders-ready) and lab results (value/unit/range, normal
+  flag) on GRDB, surfaced in the agent snapshot (248 tests total).
+- [ ] Remaining secondary lists (Finance accounts/debts/investments/
+  savings, Career/Learning/etc.); SphereUI screen localization;
+  Watch quick-logging + voice queries
 
 ## Development
 
