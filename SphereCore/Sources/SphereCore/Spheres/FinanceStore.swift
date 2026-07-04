@@ -11,6 +11,8 @@ public final class FinanceStore {
     public private(set) var transactions: [Transaction] = []
     public private(set) var budgets: [Budget] = []
     public private(set) var subscriptions: [Subscription] = []
+    public private(set) var accounts: [Account] = []
+    public private(set) var savingsGoals: [SavingsGoal] = []
 
     private let database: AppDatabase
     private let engram: EngramStore?
@@ -21,16 +23,20 @@ public final class FinanceStore {
     }
 
     public func load() async throws {
-        let (transactions, budgets, subscriptions) = try await database.writer.read { db in
+        let (transactions, budgets, subscriptions, accounts, savings) = try await database.writer.read { db in
             (
                 try Transaction.fetchAll(db, sql: "SELECT * FROM transactions ORDER BY date DESC, rowid DESC"),
                 try Budget.fetchAll(db),
-                try Subscription.fetchAll(db)
+                try Subscription.fetchAll(db),
+                try Account.fetchAll(db),
+                try SavingsGoal.fetchAll(db)
             )
         }
         self.transactions = transactions
         self.budgets = budgets
         self.subscriptions = subscriptions
+        self.accounts = accounts
+        self.savingsGoals = savings
     }
 
     // MARK: - Transactions
@@ -118,6 +124,53 @@ public final class FinanceStore {
 
     public var totalMonthlySubscriptions: Double {
         subscriptions.filter(\.isActive).reduce(0) { $0 + $1.amount }
+    }
+
+    // MARK: - Accounts
+
+    public func addAccount(_ account: Account) async throws {
+        try await database.writer.write { db in try account.insert(db) }
+        accounts.append(account)
+    }
+
+    public func updateAccount(_ account: Account) async throws {
+        try await database.writer.write { db in try account.save(db) }
+        accounts = accounts.map { $0.id == account.id ? account : $0 }
+    }
+
+    public func removeAccount(id: String) async throws {
+        _ = try await database.writer.write { db in try Account.deleteOne(db, key: id) }
+        accounts.removeAll { $0.id == id }
+    }
+
+    /// Sum of all account balances (the net-worth line).
+    public var totalAccountBalance: Double {
+        accounts.reduce(0) { $0 + $1.balance }
+    }
+
+    // MARK: - Savings goals
+
+    public func addSavingsGoal(_ goal: SavingsGoal) async throws {
+        try await database.writer.write { db in try goal.insert(db) }
+        savingsGoals.append(goal)
+        engram?.note(
+            agentId: SphereType.finance.rawValue,
+            content: "New savings goal: \(goal.name) (target \(Int(goal.target.rounded())))",
+            tags: ["log", "finance", "savings"]
+        )
+    }
+
+    public func removeSavingsGoal(id: String) async throws {
+        _ = try await database.writer.write { db in try SavingsGoal.deleteOne(db, key: id) }
+        savingsGoals.removeAll { $0.id == id }
+    }
+
+    /// Adds (or, with a negative amount, withdraws) toward a goal, never below 0.
+    public func addToSavings(id: String, amount: Double) async throws {
+        guard var goal = savingsGoals.first(where: { $0.id == id }) else { return }
+        goal.saved = max(goal.saved + amount, 0)
+        try await database.writer.write { [goal] db in try goal.save(db) }
+        savingsGoals = savingsGoals.map { $0.id == id ? goal : $0 }
     }
 
     // MARK: - Agent tools
@@ -218,7 +271,7 @@ public final class FinanceStore {
     }
 
     private func financeSummaryJSON(limit: Int) -> String {
-        JSONValue.object([
+        var summary: [String: JSONValue] = [
             "income": .number(totalIncome),
             "expenses": .number(totalExpenses),
             "balance": .number(balance),
@@ -232,6 +285,20 @@ public final class FinanceStore {
                     "date": .string(DayKey.make(transaction.date)),
                 ])
             }),
-        ]).encodedString()
+        ]
+        if !accounts.isEmpty {
+            summary["totalAccountBalance"] = .number(totalAccountBalance)
+        }
+        if !savingsGoals.isEmpty {
+            summary["savingsGoals"] = .array(savingsGoals.map { goal in
+                .object([
+                    "name": .string(goal.name),
+                    "saved": .number(goal.saved),
+                    "target": .number(goal.target),
+                    "percent": .number((goal.percent * 100).rounded()),
+                ])
+            })
+        }
+        return JSONValue.object(summary).encodedString()
     }
 }

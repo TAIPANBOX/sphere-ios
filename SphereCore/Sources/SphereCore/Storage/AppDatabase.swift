@@ -111,6 +111,23 @@ public final class AppDatabase: Sendable {
             }
         }
 
+        migrator.registerMigration("finance-v2") { db in
+            try db.create(table: "accounts") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("type", .text).notNull()
+                t.column("balance", .double).notNull().defaults(to: 0)
+                t.column("note", .text).notNull().defaults(to: "")
+            }
+            try db.create(table: "savings_goals") { t in
+                t.primaryKey("id", .text)
+                t.column("name", .text).notNull()
+                t.column("emoji", .text).notNull().defaults(to: "🎯")
+                t.column("target", .double).notNull()
+                t.column("saved", .double).notNull().defaults(to: 0)
+            }
+        }
+
         migrator.registerMigration("learning-v1") { db in
             try db.create(table: "books") { t in
                 t.primaryKey("id", .text)

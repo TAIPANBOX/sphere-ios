@@ -5,6 +5,9 @@ public struct FinanceScreen: View {
     private let store: FinanceStore
     private let currency: Currency
     @State private var showingAddTransaction = false
+    @State private var showingAddAccount = false
+    @State private var showingAddSavings = false
+    @State private var addToGoalId: String?
 
     private let accent = SphereTheme.accent(for: .finance)
 
@@ -20,6 +23,8 @@ public struct FinanceScreen: View {
                 if !store.overBudget().isEmpty {
                     overBudgetWarning
                 }
+                accountsSection
+                savingsSection
                 budgetsSection
                 subscriptionsSection
                 transactionsSection
@@ -27,6 +32,27 @@ public struct FinanceScreen: View {
             .padding()
         }
         .navigationTitle("Finance")
+        .sheet(isPresented: $showingAddAccount) {
+            AddAccountSheet { account in
+                Task { try? await store.addAccount(account) }
+            }
+        }
+        .sheet(isPresented: $showingAddSavings) {
+            AddSavingsGoalSheet { goal in
+                Task { try? await store.addSavingsGoal(goal) }
+            }
+        }
+        .alert("Add to goal", isPresented: Binding(
+            get: { addToGoalId != nil },
+            set: { if !$0 { addToGoalId = nil } }
+        )) {
+            AddToGoalAlert(currency: currency) { amount in
+                if let id = addToGoalId {
+                    Task { try? await store.addToSavings(id: id, amount: amount) }
+                }
+                addToGoalId = nil
+            }
+        }
         .toolbar {
             Button {
                 showingAddTransaction = true
@@ -71,6 +97,95 @@ public struct FinanceScreen: View {
                 .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Accounts
+
+    private var accountsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Accounts").font(.title3.weight(.semibold))
+                Spacer()
+                if !store.accounts.isEmpty {
+                    Text(money(store.totalAccountBalance))
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(accent)
+                }
+                Button {
+                    showingAddAccount = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            ForEach(store.accounts) { account in
+                HStack(spacing: 12) {
+                    Text(account.type.emoji).font(.title3)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(account.name).font(.body.weight(.medium))
+                        Text(account.type.label).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Text(money(account.balance))
+                        .font(.subheadline.weight(.semibold))
+                }
+                .sphereCard()
+                .swipeActions {
+                    Button(role: .destructive) {
+                        Task { try? await store.removeAccount(id: account.id) }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Savings goals
+
+    private var savingsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Savings Goals").font(.title3.weight(.semibold))
+                Spacer()
+                Button {
+                    showingAddSavings = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            ForEach(store.savingsGoals) { goal in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("\(goal.emoji) \(goal.name)").font(.body.weight(.medium))
+                        Spacer()
+                        Button {
+                            addToGoalId = goal.id
+                        } label: {
+                            Image(systemName: "plus.circle").foregroundStyle(accent)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    ProgressView(value: goal.percent).tint(accent)
+                    HStack {
+                        Text("\(money(goal.saved)) / \(money(goal.target))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text("\(Int(goal.percent * 100))%")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(accent)
+                    }
+                }
+                .sphereCard()
+                .swipeActions {
+                    Button(role: .destructive) {
+                        Task { try? await store.removeSavingsGoal(id: goal.id) }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Budgets
@@ -181,6 +296,114 @@ public struct FinanceScreen: View {
                 .sphereCard()
             }
         }
+    }
+}
+
+struct AddAccountSheet: View {
+    let onAdd: (Account) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var type = AccountType.checking
+    @State private var balanceText = ""
+
+    private var balance: Double {
+        Double(balanceText.replacingOccurrences(of: ",", with: ".")) ?? 0
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Account name", text: $name)
+                Picker("Type", selection: $type) {
+                    ForEach(AccountType.allCases, id: \.self) { type in
+                        Text("\(type.emoji) \(type.label)").tag(type)
+                    }
+                }
+                TextField("Balance", text: $balanceText)
+            }
+            .navigationTitle("Add Account")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        onAdd(Account(
+                            id: Account.newID(),
+                            name: name.trimmingCharacters(in: .whitespaces),
+                            type: type,
+                            balance: balance
+                        ))
+                        dismiss()
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+struct AddSavingsGoalSheet: View {
+    let onAdd: (SavingsGoal) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var emoji = "🎯"
+    @State private var targetText = ""
+
+    private var target: Double? {
+        Double(targetText.replacingOccurrences(of: ",", with: "."))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Goal name", text: $name)
+                TextField("Emoji", text: $emoji)
+                TextField("Target amount", text: $targetText)
+            }
+            .navigationTitle("New Savings Goal")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        if let target, target > 0 {
+                            onAdd(SavingsGoal(
+                                id: SavingsGoal.newID(),
+                                name: name.trimmingCharacters(in: .whitespaces),
+                                emoji: emoji.isEmpty ? "🎯" : emoji,
+                                target: target
+                            ))
+                        }
+                        dismiss()
+                    }
+                    .disabled(
+                        name.trimmingCharacters(in: .whitespaces).isEmpty
+                            || target.map { $0 <= 0 } ?? true
+                    )
+                }
+            }
+        }
+    }
+}
+
+struct AddToGoalAlert: View {
+    let currency: Currency
+    let onAdd: (Double) -> Void
+
+    @State private var amountText = ""
+
+    var body: some View {
+        TextField("Amount", text: $amountText)
+        Button("Add") {
+            if let amount = Double(amountText.replacingOccurrences(of: ",", with: ".")) {
+                onAdd(amount)
+            }
+        }
+        Button("Cancel", role: .cancel) {}
     }
 }
 

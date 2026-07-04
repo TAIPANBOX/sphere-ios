@@ -140,3 +140,96 @@ public struct Subscription: Codable, Equatable, Identifiable, Sendable {
 extension Subscription: FetchableRecord, PersistableRecord {
     public static let databaseTableName = "subscriptions"
 }
+
+public enum AccountType: String, Codable, CaseIterable, Sendable {
+    case checking, savings, cash, crypto, other
+
+    public var label: String {
+        switch self {
+        case .checking: "Checking"
+        case .savings: "Savings"
+        case .cash: "Cash"
+        case .crypto: "Crypto"
+        case .other: "Other"
+        }
+    }
+
+    public var emoji: String {
+        switch self {
+        case .checking: "🏦"
+        case .savings: "🐖"
+        case .cash: "💵"
+        case .crypto: "₿"
+        case .other: "💳"
+        }
+    }
+}
+
+public struct Account: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var name: String
+    public var type: AccountType
+    public var balance: Double
+    public var note: String
+
+    public init(
+        id: String,
+        name: String,
+        type: AccountType = .checking,
+        balance: Double = 0,
+        note: String = ""
+    ) {
+        self.id = id
+        self.name = name
+        self.type = type
+        self.balance = balance
+        self.note = note
+    }
+
+    public static func newID(now: Date = Date()) -> String {
+        EntityID.make("acct", now: now)
+    }
+}
+
+extension Account: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "accounts"
+}
+
+public struct SavingsGoal: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var name: String
+    public var emoji: String
+    public var target: Double
+    public var saved: Double
+
+    public init(
+        id: String,
+        name: String,
+        emoji: String = "🎯",
+        target: Double,
+        saved: Double = 0
+    ) {
+        self.id = id
+        self.name = name
+        self.emoji = emoji
+        self.target = target
+        self.saved = saved
+    }
+
+    /// 0–1
+    public var percent: Double {
+        target > 0 ? min(max(saved / target, 0), 1) : 0
+    }
+
+    public var remaining: Double {
+        min(max(target - saved, 0), target)
+    }
+
+    public static func newID(now: Date = Date()) -> String {
+        EntityID.make("save", now: now)
+    }
+}
+
+extension SavingsGoal: FetchableRecord, PersistableRecord {
+    public static let databaseTableName = "savings_goals"
+}
