@@ -119,8 +119,10 @@ Remaining:
    `UserProfile`/`ProfileStore` in SphereCore (agentContext feeds chat
    sessions via `AppContainer.chatSession`), `OnboardingFlow`,
    `ProfileScreen`, `SettingsScreen` in the app target. Still to do here:
-   theme/language/currency in Settings, and the String Catalog from the ARB
-   files (`sphere/lib/l10n/*.arb`) for EN/UK.
+   ~~theme/currency~~ DONE (Settings Appearance; `Currency` in SphereCore,
+   `ThemePreference`/`Prefs` @AppStorage in the app). Still: language via a
+   String Catalog from the ARB files (`sphere/lib/l10n/*.arb`) for EN/UK —
+   the big mechanical i18n pass; all UI strings are currently inline English.
 3. ~~Spheres grid: live stat lines + drag-to-reorder~~ DONE
    (`SpheresGridScreen` is now a reorderable List; `container.sphereStat`
    reuses LifeScore for 8 spheres + `SphereStat` helpers for the other 4;

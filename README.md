@@ -111,7 +111,12 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
   LifeScore insight/score, four computed via SphereStat), drag-to-reorder
   persisted to the profile (`sphereOrder`, unknown spheres trail in enum
   order), row → sphere screen, bubble → agent chat (235 tests total).
-- [ ] Widget + Watch targets; theme/language/currency in Settings
+- [x] Theme + currency preferences — Settings Appearance section
+  (system/light/dark theme via `preferredColorScheme`, currency picker);
+  `Currency` enum in SphereCore with locale-aware formatting drives the
+  Finance screen (238 tests total). Verified system dark mode in the
+  simulator.
+- [ ] Widget + Watch targets; language (String Catalog from ARB, EN/UK)
 
 ## Development
 
