@@ -123,11 +123,15 @@ Remaining:
    `ThemePreference`/`Prefs` @AppStorage in the app). Still: language via a
    String Catalog from the ARB files (`sphere/lib/l10n/*.arb`) for EN/UK —
    the big mechanical i18n pass; all UI strings are currently inline English.
-3. ~~Spheres grid: live stat lines + drag-to-reorder~~ DONE
-   (`SpheresGridScreen` is now a reorderable List; `container.sphereStat`
-   reuses LifeScore for 8 spheres + `SphereStat` helpers for the other 4;
-   order persists in `profile.sphereOrder`). Widget + Watch targets
-   (add to project.yml) still to do.
+3. ~~Spheres grid live stats + reorder~~ and ~~home-screen Widget~~ DONE.
+   The Widget (`SphereWidgetExtension` in project.yml) reads a
+   `WidgetSnapshot` from the App Group (`group.app.sphere.shared`) written
+   by `AppContainer.refreshWidget`. **App Group provisioning needs signing**,
+   so it only works on signed builds — the CI `CODE_SIGNING_ALLOWED=NO`
+   build compiles it but the runtime write is a graceful no-op there.
+   Still to do: **Watch target** (add a watchOS app + WatchConnectivity;
+   the SphereCore package already builds for watchOS 10 — reuse the
+   WidgetSnapshot for a complication, or send state over WCSession).
 4. Secondary lists per sphere (flagged in README) + voice input in chat.
 5. iCloud sync (Phase 8) and Engram v2 (Phase 9) are post-launch updates;
    do not start them ad hoc.

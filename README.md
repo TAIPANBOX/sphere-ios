@@ -116,7 +116,11 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
   `Currency` enum in SphereCore with locale-aware formatting drives the
   Finance screen (238 tests total). Verified system dark mode in the
   simulator.
-- [ ] Widget + Watch targets; language (String Catalog from ARB, EN/UK)
+- [x] Home-screen widget — WidgetKit extension (small: Life Score ring +
+  best/needs chips; medium: + top-3 focus) reading a shared App Group
+  snapshot the app writes after loadAll/background; store unit-tested,
+  pipeline verified on a signed simulator build (241 tests total).
+- [ ] Watch target; language (String Catalog from ARB, EN/UK)
 
 ## Development
 
