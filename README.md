@@ -139,8 +139,10 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
 - [x] Watch quick-logging — Water / 10-min meditation / mood (1–5) from the
   wrist over WCSession; phone applies to the store and pushes a fresh
   snapshot back (254 tests). Watch read + write both done.
-- [ ] Remaining secondary lists (Finance debts/investments, Career/Learning);
-  SphereUI screen localization; Watch voice agent queries
+- [x] Career secondary lists — achievements (impact log) and network
+  (reconnect tracking, stale detection) on GRDB (257 tests).
+- [ ] Remaining secondary lists (Finance debts/investments, Learning
+  courses, etc.); SphereUI screen localization; Watch voice agent queries
 
 ## Development
 
