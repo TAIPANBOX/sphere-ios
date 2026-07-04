@@ -144,9 +144,12 @@ Remaining:
    watch/extension bundle ids must be children of the app; and **never pass
    `-sdk iphonesimulator`** when the scheme embeds watchOS targets (it forces
    them onto the iOS SDK, breaking WCSessionDelegate conformance) — use
-   `-destination` only. Watch READ path is done; quick-logging / voice-query
-   WRITE path (watch → phone via WCSession sendMessage → apply to a store)
-   is the next Watch increment.
+   `-destination` only. Watch READ + WRITE both done: quick-logging via
+   `WatchCommand` (watch → phone sendMessage/transferUserInfo →
+   `WatchBridge.onCommand` → `AppContainer.apply` reloads the store,
+   mutates, pushes a fresh snapshot back). Remaining Watch increment: a
+   voice agent query from the wrist (dictate → send text → phone runs
+   AgentService → reply back).
 4. ~~Voice input in chat~~ DONE (`SpeechDictation` in SphereUI, iOS-guarded;
    mic button in `ChatScreen`). Still: **secondary lists per sphere**
    (flagged in README — e.g. Health medications/labs/cycle/doctor, Finance
