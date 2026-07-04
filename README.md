@@ -134,9 +134,10 @@ Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX
 - [x] Health secondary lists — medications (taken toggle, dosage/
   frequency, reminders-ready) and lab results (value/unit/range, normal
   flag) on GRDB, surfaced in the agent snapshot (248 tests total).
-- [ ] Remaining secondary lists (Finance accounts/debts/investments/
-  savings, Career/Learning/etc.); SphereUI screen localization;
-  Watch quick-logging + voice queries
+- [x] Finance secondary lists — accounts (net-worth total) and savings
+  goals (progress, add/withdraw) on GRDB, in the agent snapshot (252 tests).
+- [ ] Remaining secondary lists (Finance debts/investments, Career/Learning/
+  etc.); SphereUI screen localization; Watch quick-logging + voice queries
 
 ## Development
 
