@@ -7,7 +7,7 @@ struct SphereWatchApp: App {
 
     var body: some Scene {
         WindowGroup {
-            WatchRootView(snapshot: model.snapshot)
+            WatchRootView(model: model)
         }
     }
 }
@@ -15,7 +15,8 @@ struct SphereWatchApp: App {
 private let accent = Color(red: 10 / 255, green: 132 / 255, blue: 1)
 
 struct WatchRootView: View {
-    let snapshot: WidgetSnapshot
+    let model: WatchModel
+    private var snapshot: WidgetSnapshot { model.snapshot }
 
     var body: some View {
         ScrollView {
@@ -55,8 +56,48 @@ struct WatchRootView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
+
+                quickLog
             }
             .padding()
         }
+    }
+
+    private var quickLog: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Quick Log")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+            HStack {
+                Button {
+                    model.send(.logWater)
+                } label: {
+                    Label("Water", systemImage: "drop.fill")
+                }
+                .tint(.blue)
+                Button {
+                    model.send(.logMeditation(minutes: 10))
+                } label: {
+                    Label("10 min", systemImage: "figure.mind.and.body")
+                }
+                .tint(accent)
+            }
+            .font(.caption2)
+
+            HStack(spacing: 6) {
+                ForEach(1...5, id: \.self) { score in
+                    Button("\(moodEmoji(score))") {
+                        model.send(.logMood(score))
+                    }
+                    .buttonStyle(.plain)
+                    .font(.title3)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func moodEmoji(_ score: Int) -> String {
+        ["😞", "😕", "😐", "🙂", "😄"][score - 1]
     }
 }

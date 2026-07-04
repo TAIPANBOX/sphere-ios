@@ -17,6 +17,10 @@ final class WatchBridge: NSObject, @unchecked Sendable {
     private let lock = NSLock()
     private var pending: WidgetSnapshot?
 
+    /// Set by the composition root; invoked (on the main actor) for each
+    /// quick-log command the watch sends.
+    var onCommand: (@Sendable (WatchCommand) -> Void)?
+
     private override init() {
         super.init()
         guard WCSession.isSupported() else { return }
@@ -61,6 +65,21 @@ extension WatchBridge: WCSessionDelegate {
     func sessionDidBecomeInactive(_ session: WCSession) {}
     func sessionDidDeactivate(_ session: WCSession) {
         session.activate()
+    }
+
+    // Quick-log commands arrive as a live message (watch reachable) or as
+    // queued user info (delivered when the phone next wakes).
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        dispatch(message)
+    }
+
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+        dispatch(userInfo)
+    }
+
+    private func dispatch(_ payload: [String: Any]) {
+        guard let command = WatchCommand.decode(payload), let onCommand else { return }
+        onCommand(command)
     }
 }
 #endif

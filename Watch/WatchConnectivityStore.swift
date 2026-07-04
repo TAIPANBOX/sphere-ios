@@ -28,6 +28,12 @@ final class WatchModel {
         WidgetSnapshotStore.shared()?.write(new)
         WidgetCenter.shared.reloadAllTimelines()
     }
+
+    /// Sends a quick-log command to the phone (live if reachable, else
+    /// queued for the next wake).
+    func send(_ command: WatchCommand) {
+        session.send(command)
+    }
 }
 
 /// Isolated WCSession plumbing. Delivers snapshots on the main queue.
@@ -38,6 +44,17 @@ final class WatchSession: NSObject, WCSessionDelegate {
         guard WCSession.isSupported() else { return }
         WCSession.default.delegate = self
         WCSession.default.activate()
+    }
+
+    func send(_ command: WatchCommand) {
+        guard WCSession.isSupported() else { return }
+        let session = WCSession.default
+        let payload = command.encode()
+        if session.isReachable {
+            session.sendMessage(payload, replyHandler: nil)
+        } else {
+            session.transferUserInfo(payload)
+        }
     }
 
     func session(

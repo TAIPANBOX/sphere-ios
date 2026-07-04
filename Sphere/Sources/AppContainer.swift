@@ -85,6 +85,10 @@ final class AppContainer {
             weatherService: WeatherService(),
             location: CoreLocationProvider()
         )
+
+        WatchBridge.shared.onCommand = { [weak self] command in
+            Task { @MainActor in await self?.apply(command) }
+        }
     }
 
     /// Loads every sphere store once at launch so grids, Life Score, and
@@ -167,6 +171,29 @@ final class AppContainer {
     /// Persists a reordered sphere list from a drag-to-reorder gesture.
     func reorderSpheres(_ spheres: [SphereType]) async {
         try? await profile.setSphereOrder(spheres)
+    }
+
+    /// Applies a quick-log command sent from the watch, then pushes a fresh
+    /// snapshot back. Reloads the affected store first so a background wake
+    /// mutates the real persisted state, not a zeroed in-memory default.
+    func apply(_ command: WatchCommand) async {
+        switch command {
+        case .logWater:
+            try? await health.load()
+            try? await health.addWaterGlass()
+        case .logMood(let score):
+            try? await mindfulness.load()
+            try? await mindfulness.setMood(score)
+        case .logMeditation(let minutes):
+            try? await mindfulness.load()
+            try? await mindfulness.add(MeditationSession(
+                id: MeditationSession.newID(),
+                type: .breathing,
+                durationMinutes: minutes,
+                date: Date()
+            ))
+        }
+        refreshWidget()
     }
 
     /// Nightly-ish Engram maintenance; call on app background.
