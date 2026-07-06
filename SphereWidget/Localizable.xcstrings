@@ -1,0 +1,76 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Done" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово"
+          }
+        }
+      }
+    },
+    "Life" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Життя"
+          }
+        }
+      }
+    },
+    "Life Score" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оцінка життя"
+          }
+        }
+      }
+    },
+    "Meditate" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Медитувати"
+          }
+        }
+      }
+    },
+    "Today's Focus" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фокус на сьогодні"
+          }
+        }
+      }
+    },
+    "You're all set 🎉" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Усе готово 🎉"
+          }
+        }
+      }
+    },
+    "Your Life Score and today's focus across all spheres." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваша оцінка життя та фокус на сьогодні за всіма сферами."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

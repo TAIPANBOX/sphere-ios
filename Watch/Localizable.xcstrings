@@ -1,0 +1,136 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "10 min" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 хв"
+          }
+        }
+      }
+    },
+    "Ask" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запитати"
+          }
+        }
+      }
+    },
+    "Life" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Життя"
+          }
+        }
+      }
+    },
+    "Quick Log" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Швидкий запис"
+          }
+        }
+      }
+    },
+    "Shopping" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покупки"
+          }
+        }
+      }
+    },
+    "Still waiting for your iPhone…" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все ще чекаємо на ваш iPhone…"
+          }
+        }
+      }
+    },
+    "Tell or ask your agent" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Розкажіть або запитайте свого агента"
+          }
+        }
+      }
+    },
+    "Thinking…" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Думаю…"
+          }
+        }
+      }
+    },
+    "Today's Focus" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фокус на сьогодні"
+          }
+        }
+      }
+    },
+    "Updated %@ ago" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оновлено %@ тому"
+          }
+        }
+      }
+    },
+    "Waiting for your iPhone…" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чекаємо на ваш iPhone…"
+          }
+        }
+      }
+    },
+    "Will ask when your iPhone is nearby." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запитаємо, коли ваш iPhone буде поруч."
+          }
+        }
+      }
+    },
+    "Will sync when your iPhone is nearby." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронізуємо, коли ваш iPhone буде поруч."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
