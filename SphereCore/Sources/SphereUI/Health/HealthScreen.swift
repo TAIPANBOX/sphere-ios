@@ -139,15 +139,21 @@ public struct HealthScreen: View {
                     .font(.headline)
                     .foregroundStyle(.blue)
                 Spacer()
-                Text("\(store.waterToday) / \(HealthStore.waterGoalGlasses) glasses")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    Text("\(store.waterToday)")
+                        .contentTransition(.numericText())
+                        .sphereAnimation(SphereMotion.snappy, value: store.waterToday)
+                    Text("/ \(HealthStore.waterGoalGlasses) glasses")
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
             }
             ProgressView(
                 value: Double(min(store.waterToday, HealthStore.waterGoalGlasses)),
                 total: Double(HealthStore.waterGoalGlasses)
             )
             .tint(.blue)
+            .sphereAnimation(SphereMotion.gentle, value: store.waterToday)
             HStack {
                 Button {
                     Task { try? await store.removeWaterGlass() }
@@ -160,14 +166,16 @@ public struct HealthScreen: View {
                 Button {
                     Task { try? await store.addWaterGlass() }
                 } label: {
-                    Image(systemName: "plus.circle.fill").font(.title2)
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title2)
+                        .symbolEffect(.bounce, value: store.waterToday)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.blue)
             }
         }
         .sphereCard()
-        .sensoryFeedback(.increase, trigger: store.waterToday)
+        .sphereHaptic(.success, trigger: store.waterToday)
     }
 
     // MARK: - Energy & meal (one-tap)

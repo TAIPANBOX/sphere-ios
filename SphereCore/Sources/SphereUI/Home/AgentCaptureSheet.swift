@@ -13,16 +13,26 @@ public struct AgentCaptureSheet: View {
     private let agentAvailable: Bool
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var text = ""
     @State private var images: [Data] = []
     @State private var pickerItems: [PhotosPickerItem] = []
     @State private var results: [CaptureResult] = []
+    /// Chips revealed so far, staggered in behind `results` (see `stageResults`).
+    @State private var revealedResults: [CaptureResult] = []
     @State private var working = false
     @State private var missed = false
     @State private var showingCamera = false
+    @State private var successTick = 0
+    @State private var warningTick = 0
     #if os(iOS)
     @State private var dictation = SpeechDictation()
     #endif
+
+    /// Cap on how many result chips get the staggered reveal; the rest
+    /// appear immediately with the last staggered chip.
+    private static let maxStaggeredChips = 6
+    private static let staggerStepNanoseconds: UInt64 = 80_000_000
 
     public init(
         agentAvailable: Bool = false,
@@ -41,10 +51,11 @@ public struct AgentCaptureSheet: View {
                     prompt
                     if !images.isEmpty { attachments }
                     if working { thinking }
-                    if !results.isEmpty { resultsList }
+                    if !revealedResults.isEmpty { resultsList }
                     if missed { missHint }
                 }
                 .padding()
+                .sphereAnimation(SphereMotion.gentle, value: revealedResults.count)
             }
             .safeAreaInset(edge: .bottom) { composer }
             .navigationTitle("Your agent")
@@ -104,23 +115,31 @@ public struct AgentCaptureSheet: View {
     private var thinking: some View {
         HStack(spacing: 8) {
             ProgressView().controlSize(.small)
-            Text("Sorting it into your spheres…").font(.subheadline).foregroundStyle(.secondary)
+            Label {
+                Text("Sorting it into your spheres…").font(.subheadline).foregroundStyle(.secondary)
+            } icon: {
+                Image(systemName: "sparkles")
+                    .foregroundStyle(SphereTheme.accent(for: .mindfulness))
+                    .symbolEffect(.pulse, options: reduceMotion ? .nonRepeating : .repeating)
+            }
         }
     }
 
     private var resultsList: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Logged").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-            ForEach(Array(results.enumerated()), id: \.offset) { _, result in
+            ForEach(Array(revealedResults.enumerated()), id: \.offset) { _, result in
                 Label(result.summary, systemImage: result.isError
                       ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
                     .font(.subheadline)
                     .foregroundStyle(result.isError ? .orange : .green)
+                    .transition(.move(edge: .leading).combined(with: .opacity))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .background(RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial))
+        .sphereHaptic(.success, trigger: successTick)
     }
 
     private var missHint: some View {
@@ -132,6 +151,7 @@ public struct AgentCaptureSheet: View {
                     .font(.subheadline)
             }
         }
+        .sphereHaptic(.warning, trigger: warningTick)
     }
 
     private var composer: some View {
@@ -178,14 +198,44 @@ public struct AgentCaptureSheet: View {
         guard !working, !(input.isEmpty && images.isEmpty) else { return }
         working = true
         missed = false
+        revealedResults = []
         #if os(iOS)
         dictation.stop()
         #endif
         let output = await onCapture(input, images)
         results = output
         missed = output.isEmpty
-        if !output.isEmpty { text = ""; images = [] }
+        if missed {
+            warningTick += 1
+        } else {
+            text = ""
+            images = []
+            successTick += 1
+            await stageResults(output)
+        }
         working = false
+    }
+
+    /// Reveals result chips one by one (gentle preset, ~80ms steps), capped
+    /// at `maxStaggeredChips` — the rest land together with the last one.
+    /// Under Reduce Motion every chip appears at once, immediately.
+    private func stageResults(_ output: [CaptureResult]) async {
+        guard !reduceMotion else {
+            revealedResults = output
+            return
+        }
+        for (index, result) in output.enumerated() {
+            if index >= Self.maxStaggeredChips {
+                revealedResults = output
+                return
+            }
+            if index > 0 {
+                try? await Task.sleep(nanoseconds: Self.staggerStepNanoseconds)
+            }
+            withAnimation(SphereMotion.gentle) {
+                revealedResults.append(result)
+            }
+        }
     }
 }
 

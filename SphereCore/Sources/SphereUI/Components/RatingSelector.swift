@@ -48,11 +48,13 @@ public struct RatingSelector: View {
                                 in: RoundedRectangle(cornerRadius: 8)
                             )
                             .foregroundStyle(selection == value ? .white : .primary)
+                            .scaleEffect(selection == value ? 1.08 : 1)
+                            .sphereAnimation(SphereMotion.snappy, value: selection == value)
                     }
                     .buttonStyle(.plain)
                 }
             }
         }
-        .sensoryFeedback(.selection, trigger: tapTick)
+        .sphereHaptic(.success, trigger: tapTick)
     }
 }

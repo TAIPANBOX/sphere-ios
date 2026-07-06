@@ -10,6 +10,8 @@ public struct MindfulnessScreen: View {
     @State private var showingFocus = false
     @State private var breathingPattern = BreathingPattern.fourSevenEight
     @State private var gratitudeDraft = ""
+    @State private var moodTick = 0
+    @State private var meditationTick = 0
 
     private let accent = SphereTheme.accent(for: .mindfulness)
 
@@ -34,6 +36,7 @@ public struct MindfulnessScreen: View {
         .navigationTitle("Mindfulness")
         .sheet(isPresented: $showingLogMeditation) {
             LogMeditationSheet { session in
+                meditationTick += 1
                 Task { try? await store.add(session) }
             }
         }
@@ -44,6 +47,7 @@ public struct MindfulnessScreen: View {
         }
         .sheet(isPresented: $showingBreathing) {
             BreathingExerciseView(accent: accent, pattern: breathingPattern) { minutes in
+                meditationTick += 1
                 Task {
                     try? await store.add(MeditationSession(
                         id: MeditationSession.newID(),
@@ -56,6 +60,7 @@ public struct MindfulnessScreen: View {
         }
         .sheet(isPresented: $showingFocus) {
             FocusTimerSheet(accent: accent) { minutes in
+                meditationTick += 1
                 Task { try? await store.logFocusSession(minutes: minutes) }
             }
         }
@@ -156,12 +161,14 @@ public struct MindfulnessScreen: View {
             HStack(spacing: 14) {
                 ForEach(1...5, id: \.self) { score in
                     Button {
+                        moodTick += 1
                         Task { try? await store.setMood(score) }
                     } label: {
                         Text(moodEmoji(score))
                             .font(.system(size: 30))
                             .opacity(store.todaysMood() == nil || store.todaysMood() == score ? 1 : 0.35)
                             .scaleEffect(store.todaysMood() == score ? 1.2 : 1)
+                            .sphereAnimation(SphereMotion.snappy, value: store.todaysMood())
                     }
                     .buttonStyle(.plain)
                 }
@@ -177,6 +184,7 @@ public struct MindfulnessScreen: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .sphereCard()
+        .sphereHaptic(.success, trigger: moodTick)
     }
 
     private func moodEmoji(_ score: Int) -> String {
@@ -193,15 +201,24 @@ public struct MindfulnessScreen: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Meditation").font(.headline)
-                Text("\(store.currentStreak())-day streak · \(store.totalMinutes) min total")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 0) {
+                    Text("\(store.currentStreak())")
+                        .contentTransition(.numericText())
+                    Text("-day streak · ")
+                    Text("\(store.totalMinutes)")
+                        .contentTransition(.numericText())
+                    Text(" min total")
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .sphereAnimation(SphereMotion.snappy, value: store.totalMinutes)
             }
             Spacer()
             Button("Log") { showingLogMeditation = true }
                 .font(.subheadline.weight(.semibold))
         }
         .sphereCard()
+        .sphereHaptic(.success, trigger: meditationTick)
     }
 
     private var breathingCard: some View {

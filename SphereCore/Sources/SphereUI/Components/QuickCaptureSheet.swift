@@ -69,7 +69,7 @@ public struct QuickCaptureSheet: View {
                 Spacer()
             }
             .padding()
-            .sensoryFeedback(.success, trigger: successTick)
+            .sphereHaptic(.success, trigger: successTick)
             .navigationTitle("Quick capture")
             .onAppear { fieldFocused = true }
             .toolbar {

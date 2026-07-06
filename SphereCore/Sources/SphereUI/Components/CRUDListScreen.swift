@@ -20,6 +20,7 @@ public struct CRUDListScreen<Item: Identifiable, Row: View, AddSheet: View>: Vie
 
     @State private var showingAdd = false
     @State private var recentlyDeleted: Item?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(
         title: String,
@@ -72,7 +73,8 @@ public struct CRUDListScreen<Item: Identifiable, Row: View, AddSheet: View>: Vie
         }
         .sheet(isPresented: $showingAdd) { addSheet() }
         .overlay(alignment: .bottom) { undoBar }
-        .animation(.snappy, value: recentlyDeleted?.id)
+        .sphereAnimation(SphereMotion.gentle, value: items.count)
+        .sphereAnimation(SphereMotion.gentle, value: recentlyDeleted?.id)
     }
 
     @ViewBuilder
