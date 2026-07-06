@@ -35,6 +35,15 @@ struct SphereApp: App {
                     await container.runMemoryMaintenance()
                     await container.refreshReminders()
                 }
+            } else if phase == .active && loaded {
+                // Widget buttons and Siri write to the shared DB while this
+                // app instance may be holding stale in-memory stores; reload
+                // just the quick-log-affected ones rather than a full loadAll.
+                Task {
+                    try? await container.health.load()
+                    try? await container.mindfulness.load()
+                    container.refreshWidget()
+                }
             }
         }
     }

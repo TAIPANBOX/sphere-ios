@@ -91,6 +91,10 @@ targets:
     platform: iOS
     sources:
       - SphereWidget
+      # Shared verbatim with the app target: Button(intent:) requires the
+      # intent type compiled into this target too. Only needs AppIntents +
+      # SphereCore + WidgetKit, so it carries no app-only dependencies.
+      - path: Sphere/Sources/QuickLogIntents.swift
     dependencies:
       - package: SphereCore
         product: SphereCore
