@@ -1,161 +1,136 @@
 # Sphere (iOS)
 
+> **Your whole life, understood by agents that remember.** Twelve life-sphere AI
+> agents, cross-sphere intelligence, and on-device memory — private by default,
+> free without a key.
+
+![CI](https://github.com/TAIPANBOX/sphere-ios/actions/workflows/ci.yml/badge.svg)
+![Swift 6](https://img.shields.io/badge/swift-6-F05138.svg?logo=swift)
+![Platform](https://img.shields.io/badge/platform-iOS%2017%20·%20watchOS%2010-1a1a1a?logo=apple)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Tests](https://img.shields.io/badge/tests-509%20passed-green)
+
 Native SwiftUI rewrite of [Sphere](https://github.com/TAIPANBOX/sphere) — a
-Personal Life Intelligence System with 12 life-sphere AI agents and on-device
-cognitive memory (Engram).
+Personal Life Intelligence System.
 
-Rewrite plan: [sphere/planning/IOS_REWRITE_PLAN.md](https://github.com/TAIPANBOX/sphere/blob/main/planning/IOS_REWRITE_PLAN.md)
+---
 
-## Structure
+## The problem
 
-- `SphereCore/` — SPM package: models, Engram memory, LLM engines, services.
-  Pure Swift, testable with `swift test`, shared by App / Widget / Watch targets.
+Your life is scattered across a dozen apps. A habit tracker here, a budget app
+there, a notes app, a calendar, a health app, a reading list. None of them talk
+to each other, so none of them can tell you the thing that actually matters:
+*your sleep debt is why your spending crept up this week*, or *the weeks you
+meditate are the weeks you hit your goals.*
+
+And most of them punish you. Miss a day and the streak resets to zero. Open the
+app and a cold **"38% complete"** stares back. That's why the average tracker is
+abandoned inside two weeks.
+
+**Sphere is one place that sees the whole picture — and is kind about it.**
+
+---
+
+## What Sphere does
+
+Twelve life spheres — Health, Finance, Career, Learning, Relationships, Rest,
+Hobbies, Travel, Mindfulness, Creativity, Home, Goals — each with its own
+`@Observable` store, agent tools, and screen. On top of them sits a layer that
+no single-sphere app can build:
+
+- **Cross-sphere correlation engine** — day-keyed metrics across every sphere,
+  surfacing honest patterns ("on days your sleep is higher, your mood tends to
+  be higher — a pattern, not proof").
+- **Proactive nudges** — one gentle, cooled-down suggestion a day, assembled
+  from real context (stress streaks, budget pace, sleep debt, a thirsty plant).
+- **Weekly narrative review + Life Wheel** — a warm recap and a feeling-vs-data
+  gap chart across the twelve spheres.
+- **N-of-1 experiments** — "cut caffeine after 2pm for two weeks," measured
+  against the baseline across sleep, mood, and spend. Passive logging becomes
+  personal science.
+- **Adaptive "Today" verdict** — one line from sleep, stress, and energy, that
+  self-corrects on how you actually felt.
+- **Year in Sphere** — a free, shareable recap of your year across every sphere.
+- **Forgiveness + momentum** — excused days bridge streaks; warm "building
+  momentum" framing replaces the cold percentage.
+
+Everything works with **zero setup and no account**. Rule-based quick capture
+("water 2, mood 4, spent 12 on lunch") and every deterministic feature run with
+no model at all.
+
+## AI, three ways — free first
+
+| Tier | Backend | Cost | Needs |
+|------|---------|------|-------|
+| Free | Apple Foundation Models (on-device) | Free | iPhone 15 Pro+ / iOS 26 |
+| Free | Downloaded model (MLX, on-device) | Free | A recent device + a download |
+| Power | OpenRouter (Claude · GPT · Gemini · …) | Your key | One OpenRouter key (optional) |
+
+Nothing ever *requires* a key. The on-device paths keep your data on your phone.
+
+---
+
+## Architecture
+
+```
+SphereCore/            SPM package — pure Swift, no UIKit. `swift test`-able,
+                       shared by every target.
+├── Sources/SphereCore Models, 12 sphere stores (GRDB), Engram memory, LLM
+│                      engines, agent service, insight/nudge/review/experiment
+│                      engines, search, on-device model manager.
+└── Sources/SphereUI   All SwiftUI screens (compiles on macOS too, for previews).
+
+Sphere/                iOS app target (XcodeGen — project.yml).
+SphereWidget/          Home-screen + Smart Stack widget.
+Watch/                 watchOS app + complication + WCSession bridge.
+```
+
+- **Persistence:** [GRDB](https://github.com/groue/GRDB.swift) with additive
+  migrations; one App Group container shared with the widget, App Intents, and
+  watch.
+- **Memory:** Engram v1.5 — episodic memory with FTS5/BM25 recall, access
+  reinforcement, and Ebbinghaus decay.
+- **LLM:** one OpenAI-compatible cloud engine (OpenRouter) behind a single
+  `LLMEngine` seam, plus Apple Foundation Models and MLX-backed local models.
+- **Sync:** CloudKit; wearables via HealthKit — no per-service OAuth.
+
+## Build
+
+```bash
+# Core package — pure Swift, runs anywhere Swift does
+cd SphereCore
+swift build
+swift test          # 509 tests
+
+# App — generate the Xcode project, then build for a simulator
+brew install xcodegen
+xcodegen generate
+xcodebuild -project Sphere.xcodeproj -scheme Sphere \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+```
+
+The downloaded-model backend uses MLX, which needs a device GPU: the code
+compiles for the simulator but runs inference only on a real device.
+
+## Privacy
+
+Local-first by design. Sphere data lives in on-device GRDB; the free AI paths
+never leave the phone. API keys (optional) are stored in the iCloud Keychain and
+used only when you pick a cloud model. Full data export (JSON) and a Face ID lock
+ship in Settings.
 
 ## Status
 
-- [x] Engram v1.5 on GRDB — episodic memory, FTS5 + BM25 recall, access
-  reinforcement, Ebbinghaus decay + pruning
-- [x] LLM layer — Anthropic native + OpenAI-compatible engines (OpenAI,
-  Gemini, OpenRouter), SSE streaming, tool-call assembly
-- [x] Agent layer — AgentService (chat tool-loop, daily brief, insight with
-  offline cache), SphereToolRegistry, sphere/meta prompts
-- [x] Golden-template sphere (Goals) — @Observable store on GRDB, agent
-  tools (add_goal / list_goals), Engram notes, SwiftUI screen in `SphereUI`
-- [x] Health sphere — HealthKit behind `HealthMetricsProviding` (real
-  `HealthKitService` + fake for tests), water/weight/workouts on GRDB,
-  agent tools (log_water_glass, log_weight, get_health_today), screen with
-  Swift Charts weekly steps (98 tests total). Secondary lists (medications,
-  labs, cycle, doctor) still to port — simple CRUD per the handoff recipe.
-- [x] Finance sphere — transactions feed, monthly budgets with over-budget
-  detection, subscriptions with billing countdown, agent tools
-  (add_transaction, get_finance_summary), screen (110 tests total).
-  Secondary lists (accounts, debts, investments, savings) to port per the
-  handoff recipe.
-- [x] Learning sphere — books library (reading/queue/completed, page
-  progress, quotes, notes) + skills tracker (1–5 levels, categories),
-  list_books agent tool, screen (118 tests total). Secondary lists
-  (courses, flashcards, languages) and the Pomodoro timer to port per the
-  handoff recipe.
-- [x] Career sphere — task manager (open/done/overdue, Today's Focus feed),
-  active projects with deadlines, interviews pipeline, agent tools
-  (add_career_task, list_career_tasks), screen (129 tests total). Secondary
-  lists (achievements, career goals, network, salary, career skills) to port
-  per the handoff recipe.
-- [x] Home tab — Life Score (per-sphere formulas from the Flutter home tab),
-  Today's Focus builder (urgency-ranked, with fallbacks), Open-Meteo weather
-  (+ CoreLocation provider), HomeStore aggregating the sphere stores with
-  streamed Meta Agent brief, HomeScreen (146 tests total). Wave-2 focus
-  sources (birthdays, home tasks, rest/hobbies scores) join as those spheres
-  are ported.
-- [x] Agent chat — ChatSession state machine (streaming bubbles, tool
-  confirmation chips, fresh bubble after tools, friendly error bubbles,
-  history building with image placeholders) + ChatScreen (markdown bubbles,
-  photo attachments via PhotosPicker, auto-scroll) (155 tests total).
-  Voice input (SFSpeechRecognizer) lands with the app target.
-- [x] Rest sphere — sleep log with recovery levels + Recovery Score
-  (formula from the Flutter screen), sleep schedule with midnight rollover,
-  digital-detox streak, anti-burnout work hours, weekend plans, agent tools
-  (log_sleep, get_rest_summary — new; the Dart version had none), screen
-  with sleep chart (166 tests total).
-- [x] Travel sphere — trip planner with type-specific packing/document
-  checklists, next-trip countdown, countries visited (dedup), dream list,
-  agent tools (add_wishlist_destination, get_travel_summary — new), screen
-  with trip detail checklists and flow-layout country chips (176 tests
-  total).
-- [x] Mindfulness sphere — meditation sessions with streak, day-keyed mood
-  (1–5) and stress (1–10) check-ins, journal with Engram previews, all four
-  Dart agent tools ported verbatim (log_meditation, log_mood,
-  add_journal_entry, get_mindfulness_summary), screen with mood row,
-  animated 4-7-8 breathing exercise, stress chart, journal (186 tests
-  total). Affirmations list to port per the handoff recipe.
-- [x] Home sphere — household tasks (overdue/due-today helpers for Today's
-  Focus), plant watering with intervals, shopping list, agent tools
-  (add_home_task, add_shopping_item, get_home_summary — new), screen
-  (194 tests total). Secondary lists (appliances, inventory, renovation,
-  utilities) to port per the handoff recipe.
-- [x] Creativity sphere — creative projects (8 types, idea/in-progress/
-  paused/completed, progress with lastWorkedOn stamping, collaborators) +
-  idea capture, agent tools (capture_idea, get_creativity_summary — new),
-  screen with inline idea capture (202 tests total). Portfolio and project
-  sessions to port per the handoff recipe.
-- [x] Hobbies sphere — hobby list with weekly targets/goals/equipment,
-  session log with cascade delete, weekly-minutes windows (feeds the Life
-  Score), agent tools (log_hobby_session with by-name matching that lists
-  known hobbies on miss, get_hobbies_summary — new), screen (210 tests
-  total).
-- [x] Relationships sphere — contacts with birthday countdown (year
-  rollover), check-in reminders, gift ideas/meeting notes, agent tools
-  (add_contact, mark_contacted, get_relationships_summary — new), screen
-  (218 tests total). **All 12 spheres ported.**
-- [x] App target (iOS 17+) — XcodeGen project (`xcodegen generate` →
-  `Sphere.xcodeproj`), AppContainer composition root (databases in
-  Application Support, Keychain-backed API keys, one AgentService, 12
-  stores, unified tool registry, per-sphere chat sessions, Engram decay on
-  background), 4-tab shell (Home · Spheres grid with per-sphere chat ·
-  Settings with provider keys · Profile), HealthKit/location/photos usage
-  strings. Verified in the iOS Simulator.
-- [x] Wave-2 cross-sphere wiring — LifeScore now scores 8 spheres
-  (+ relationships/rest/hobbies formulas from Dart), Today's Focus includes
-  contact birthdays and home-sphere overdue/due-today tasks, meditation
-  check wired from Mindfulness, yearly birthday notifications at 09:00
-  (UNCalendarNotificationTrigger, idempotent resync) (223 tests total).
-- [x] Profile + onboarding + Settings — UserProfile shared-context model
-  (`agentContext` woven into every agent's system prompt), ProfileStore on
-  GRDB (single JSON row), 4-step onboarding flow (welcome → personal →
-  dietary → spheres) gating first launch, full Profile editor (personal /
-  body / dietary / allergies / conditions chips), Settings with provider
-  keys + My Spheres toggles; grid shows only active spheres; birthday
-  reminders defer their permission prompt until a contact has a birthday
-  (230 tests total). Verified in the iOS Simulator.
-- [x] Spheres tab — live per-sphere stat line + progress (eight reuse the
-  LifeScore insight/score, four computed via SphereStat), drag-to-reorder
-  persisted to the profile (`sphereOrder`, unknown spheres trail in enum
-  order), row → sphere screen, bubble → agent chat (235 tests total).
-- [x] Theme + currency preferences — Settings Appearance section
-  (system/light/dark theme via `preferredColorScheme`, currency picker);
-  `Currency` enum in SphereCore with locale-aware formatting drives the
-  Finance screen (238 tests total). Verified system dark mode in the
-  simulator.
-- [x] Home-screen widget — WidgetKit extension (small: Life Score ring +
-  best/needs chips; medium: + top-3 focus) reading a shared App Group
-  snapshot the app writes after loadAll/background; store unit-tested,
-  pipeline verified on a signed simulator build (241 tests total).
-- [x] Apple Watch — watchOS app (Life Score ring + best/needs + top focus)
-  and complications (circular gauge / rectangular / inline) fed by the phone
-  over WatchConnectivity (`updateApplicationContext`); the watch persists the
-  snapshot to its own App Group for the complication (243 tests total).
-- [x] Localization (EN/UK) — app-shell String Catalog (tabs, sphere names,
-  onboarding, Settings, Profile) with Ukrainian from the Flutter ARB;
-  verified rendering under `-AppleLanguages '(uk)'`. Sphere screens
-  (SphereUI package) still inline-English — same pattern, larger volume.
-- [x] Voice input in chat — on-device `SFSpeechRecognizer` dictation
-  (SpeechDictation in SphereUI, iOS-guarded); mic button in the chat input
-  streams partial transcripts into the draft (243 tests total).
-- [x] Health secondary lists — medications (taken toggle, dosage/
-  frequency, reminders-ready) and lab results (value/unit/range, normal
-  flag) on GRDB, surfaced in the agent snapshot (248 tests total).
-- [x] Finance secondary lists — accounts (net-worth total) and savings
-  goals (progress, add/withdraw) on GRDB, in the agent snapshot (252 tests).
-- [x] Watch quick-logging — Water / 10-min meditation / mood (1–5) from the
-  wrist over WCSession; phone applies to the store and pushes a fresh
-  snapshot back (254 tests). Watch read + write both done.
-- [x] Career secondary lists — achievements (impact log) and network
-  (reconnect tracking, stale detection) on GRDB (257 tests).
-- [ ] Remaining secondary lists (Finance debts/investments, Learning
-  courses, etc.); SphereUI screen localization; Watch voice agent queries
+All twelve spheres plus the intelligence, platform-integration, and polish
+stages are built — see [docs/ROADMAP.md](docs/ROADMAP.md) for the full,
+dependency-ordered plan and what remains (constrained on-device tool calling,
+Spotlight donation, notification delivery of nudges).
 
-## Development
+## Contributing
 
-```bash
-# Core (models, Engram, LLM, stores) — fast, no simulator
-cd SphereCore && swift test
-
-# App — generate the Xcode project first (it is gitignored)
-brew install xcodegen
-xcodegen generate
-open Sphere.xcodeproj
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md). In short: `swift test` must stay green,
+every public `SphereCore` API gets a test, and all repo content is in English.
 
 ## License
 
-MIT
+[MIT](LICENSE) © TAIPANBOX
