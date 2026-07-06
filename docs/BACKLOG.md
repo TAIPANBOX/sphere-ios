@@ -24,7 +24,7 @@ updates, **P3** = later / opportunistic.
 | C8 | **EventKit calendar context** in the Meta Agent brief (Flutter had it) + profile context (HANDOFF note) | Brief quality; parity | P2 |
 | C9 | **SphereUI localization (uk)** — known debt, strings in `app_uk.arb` | Mechanical, big volume | P1 |
 | C10 | **Watch voice agent query** — dictate from the wrist, phone runs AgentService, reply back | Planned watch increment | P2 |
-| C11 | **Empty-state coaching** — every sphere screen gets a friendly zero-data state with one-tap seed actions ("Add your first…") | First-run experience across 12 screens | P1 |
+| C11 | ~~**Empty-state coaching** — every sphere screen gets a friendly zero-data state with one-tap seed actions ("Add your first…")~~ DONE (2026-07-06): shared `EmptyStateCard` (`SphereUI/Components/`) — sphere emoji, title, one warm guidance line, accent-tinted "Add your first…" button, gentle-motion fade/scale-in. Wired at the top of all 12 screens, each with its own emptiness condition (whole-screen, not per-section) and its existing add-flow sheet: Goals (goals+habits empty → Add Goal), Health (no weight + no workouts → Log Weight), Finance (no transactions+accounts+subscriptions → Add Transaction), Learning (no books+skills → Add Book), Career (no tasks+network → Add Task), Relationships (no contacts → Add Contact), Rest (no sleep entries → Log Sleep), Hobbies (no hobbies → Add Hobby), Travel (no plans+wishlist → Add Trip), Mindfulness (no sessions+journal → Log Meditation), Creativity (no projects+ideas → Add Project), Home (no tasks+plants+shopping → Add Task). | First-run experience across 12 screens | P1 |
 | C12 | **Haptics + undo** — haptic on quick logs; snackbar undo for destructive swipes | Perceived quality | P2 |
 
 ## Home tab
@@ -191,7 +191,7 @@ no single-sphere app can correlate across life domains.
 4. Rest: HealthKit sleep auto-import
 5. Relationships: iOS Contacts import
 6. Finance: monthly category chart; Home sphere: recurring chores
-7. C11 empty states + Mindfulness affirmations (cheap delight)
+7. ~~C11 empty states~~ DONE (2026-07-06) + Mindfulness affirmations (cheap delight, affirmations already shipped)
 8. C9 SphereUI uk localization (mechanical, pre-launch)
 9. ~~C4 HealthKit write-back~~ DONE (2026-07-06)
 10. Learning: Pomodoro + Live Activity (post-launch headline feature)
