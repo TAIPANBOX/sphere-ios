@@ -34,7 +34,7 @@
 	<key>NSHealthShareUsageDescription</key>
 	<string>Sphere reads your steps, heart rate, sleep, energy, HRV, and cycle from Apple Health so your Health agent can work with real data.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Sphere can save the weight, water, and workouts you log back to Apple Health, so your data stays in one place.</string>
+	<string>Sphere can save the weight, water, workouts, and mindful minutes you log back to Apple Health, so your data stays in one place.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Sphere uses your location to show local weather on the Home tab.</string>
 	<key>NSMicrophoneUsageDescription</key>

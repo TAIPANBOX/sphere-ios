@@ -55,6 +55,13 @@ public extension HealthMetricsProviding {
     func writeWorkout(type: WorkoutType, minutes: Int, calories: Int?, date: Date) async {}
 }
 
+/// Write-back seam for the Mindfulness sphere (HealthKit `mindfulSession` on
+/// device, a fake in tests). Kept separate from `HealthMetricsProviding`
+/// since a mindful-session writer has no read/metrics surface of its own.
+public protocol MindfulSessionWriting: Sendable {
+    func writeMindfulSession(start: Date, end: Date) async
+}
+
 public enum WorkoutType: String, Codable, CaseIterable, Sendable {
     case running, cycling, swimming, gym, yoga, walking, hiit, other
 

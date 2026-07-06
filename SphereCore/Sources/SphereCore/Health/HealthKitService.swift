@@ -9,7 +9,7 @@ import HealthKit
 ///
 /// `@unchecked Sendable`: HKHealthStore is documented thread-safe and the
 /// class holds no other mutable state.
-public final class HealthKitService: HealthMetricsProviding, @unchecked Sendable {
+public final class HealthKitService: HealthMetricsProviding, MindfulSessionWriting, @unchecked Sendable {
     private let store = HKHealthStore()
 
     public init() {}
@@ -31,6 +31,7 @@ public final class HealthKitService: HealthMetricsProviding, @unchecked Sendable
             HKQuantityType(.dietaryWater),
             HKQuantityType(.activeEnergyBurned),
             HKObjectType.workoutType(),
+            HKCategoryType(.mindfulSession),
         ]
     }
 
@@ -81,6 +82,16 @@ public final class HealthKitService: HealthMetricsProviding, @unchecked Sendable
         } catch {
             // Write-back is best-effort; a failed sample must not break logging.
         }
+    }
+
+    public func writeMindfulSession(start: Date, end: Date) async {
+        guard HKHealthStore.isHealthDataAvailable(), end > start else { return }
+        let sample = HKCategorySample(
+            type: HKCategoryType(.mindfulSession),
+            value: HKCategoryValue.notApplicable.rawValue,
+            start: start, end: end
+        )
+        try? await store.save(sample)
     }
 
     private func save(

@@ -4,7 +4,10 @@ import Observation
 
 /// Mindfulness sphere store: meditation sessions with streak, daily mood
 /// check-in, stress levels, and the journal. Follows the golden-template
-/// shape (docs/HANDOFF.md).
+/// shape (docs/HANDOFF.md). Completed sessions (including focus sessions,
+/// which reuse the same storage) are mirrored to HealthKit via the injected
+/// `mindfulWriter`, mirroring the `HealthStore`/`HealthMetricsProviding`
+/// write-back pattern.
 @MainActor
 @Observable
 public final class MindfulnessStore {
@@ -18,10 +21,16 @@ public final class MindfulnessStore {
 
     private let database: AppDatabase
     private let engram: EngramStore?
+    private let mindfulWriter: (any MindfulSessionWriting)?
 
-    public init(database: AppDatabase, engram: EngramStore? = nil) {
+    public init(
+        database: AppDatabase,
+        engram: EngramStore? = nil,
+        mindfulWriter: (any MindfulSessionWriting)? = nil
+    ) {
         self.database = database
         self.engram = engram
+        self.mindfulWriter = mindfulWriter
     }
 
     public func load() async throws {
@@ -99,6 +108,10 @@ public final class MindfulnessStore {
             content: "Meditated \(session.durationMinutes) min (\(session.type.rawValue))",
             tags: ["log", "mindfulness", "meditation"]
         )
+        if session.durationMinutes > 0 {
+            let end = session.date.addingTimeInterval(Double(session.durationMinutes) * 60)
+            await mindfulWriter?.writeMindfulSession(start: session.date, end: end)
+        }
     }
 
     public func remove(id: String) async throws {

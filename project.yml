@@ -55,8 +55,8 @@ targets:
           Sphere reads your steps, heart rate, sleep, energy, HRV, and cycle from
           Apple Health so your Health agent can work with real data.
         NSHealthUpdateUsageDescription: >-
-          Sphere can save the weight, water, and workouts you log back to Apple
-          Health, so your data stays in one place.
+          Sphere can save the weight, water, workouts, and mindful minutes you
+          log back to Apple Health, so your data stays in one place.
         NSContactsUsageDescription: >-
           Sphere can import names and birthdays from your contacts to set up
           your Relationships sphere. Nothing is shared or uploaded.

@@ -90,7 +90,7 @@ final class AppContainer {
         career = CareerStore(database: database, engram: engram)
         rest = RestStore(database: database, engram: engram, metricsProvider: healthKit)
         travel = TravelStore(database: database, engram: engram, photoStore: TripPhotoStorage())
-        mindfulness = MindfulnessStore(database: database, engram: engram)
+        mindfulness = MindfulnessStore(database: database, engram: engram, mindfulWriter: healthKit)
         homeSphere = HomeSphereStore(database: database, engram: engram)
         creativity = CreativityStore(database: database, engram: engram)
         hobbies = HobbiesStore(database: database, engram: engram)
