@@ -133,12 +133,29 @@ Remaining:
    String Catalog is `Sphere/Sources/Localizable.xcstrings` (must live inside
    the target's sources dir or it isn't bundled). project.yml declares
    knownRegions/CFBundleLocalizations [en, uk]. Computed sphere names render
-   via `LocalizedStringKey(rawValue.capitalized)`. **Remaining i18n: the
-   sphere SCREENS in the SphereUI package** — add a `Localizable.xcstrings`
-   to `SphereCore/Sources/SphereUI/`, set `defaultLocalization: "en"` in
-   Package.swift, and (SPM localizes package `Text` against the package
-   bundle automatically). Big mechanical volume; UK strings are in
-   `sphere/lib/l10n/app_uk.arb`.
+   via `LocalizedStringKey(rawValue.capitalized)`. ~~Remaining i18n: the
+   sphere SCREENS in the SphereUI package~~ DONE (2026-07-06, C9):
+   `SphereCore/Sources/SphereUI/Localizable.xcstrings` (604 keys) +
+   `defaultLocalization: "en"` and explicit `resources:
+   [.process("Localizable.xcstrings")]` on the SphereUI target in
+   Package.swift — **SPM does NOT auto-process `.xcstrings`**, it must be
+   declared. Bigger trap: plain `Text("literal")` (and the string-literal
+   convenience inits on `Button`/`Label`/`TextField`/`Section`/
+   `.navigationTitle`) resolve against `Bundle.main`, NOT the package's
+   `Bundle.module` — confirmed by forcing the Simulator to the uk locale and
+   watching a SphereUI string stay in English while app-shell strings
+   localized correctly. Fix: `SphereUI/Localization.swift` adds `Text(ui:)`
+   (`Text(_:bundle: .module)`) and `uiString(_:)` (`String(localized:bundle:
+   .module)` for `String`-typed component params); every SphereUI screen was
+   swept to route through these. `SphereCoreTests/SphereUILocalizationTests.swift`
+   guards the resource wiring — note it asserts catalog content directly
+   rather than via `Bundle.localizations`/`String(localized:locale:)`,
+   because `swift test`'s SwiftPM-CLI build copies `.xcstrings` uncompiled
+   (no per-locale `.lproj`), unlike Xcode's build system which does compile
+   it; verified the real (Xcode-built) app resolves `uk` correctly via a
+   Simulator screenshot. Left deliberately unlocalized: a few Chart
+   axis/legend labels, one multi-placeholder health format string, and
+   count-bearing strings use flat (non-plural-variant) translations.
 3. ~~Spheres grid live stats + reorder~~ and ~~home-screen Widget~~ DONE.
    The Widget (`SphereWidgetExtension` in project.yml) reads a
    `WidgetSnapshot` from the App Group (`group.app.sphere.shared`) written

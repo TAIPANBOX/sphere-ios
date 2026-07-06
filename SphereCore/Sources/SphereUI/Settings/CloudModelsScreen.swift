@@ -44,34 +44,38 @@ public struct CloudModelsScreen: View {
                 Section {
                     HStack {
                         Spacer()
-                        ProgressView("Loading models…")
+                        ProgressView(uiString("Loading models…"))
                         Spacer()
                     }
                 }
             }
 
             Section {
-                row(id: nil, name: "Default", subtitle: "Provider's recommended model")
+                row(id: nil, name: uiString("Default"), subtitle: uiString("Provider's recommended model"))
             }
 
             if !recommended.isEmpty {
-                Section("Recommended") {
+                Section {
                     ForEach(recommended) { model in
                         row(model)
                     }
+                } header: {
+                    Text(ui: "Recommended")
                 }
             }
 
             if !models.isEmpty {
-                Section("All models") {
+                Section {
                     ForEach(filtered) { model in
                         row(model)
                     }
+                } header: {
+                    Text(ui: "All models")
                 }
             }
         }
-        .navigationTitle("Cloud model")
-        .searchableCompat(text: $query, prompt: "Search models")
+        .navigationTitle(Text(ui: "Cloud model"))
+        .searchableCompat(text: $query, prompt: uiString("Search models"))
         .task {
             selection = selectedID()
             models = await catalog.load()
@@ -104,7 +108,7 @@ public struct CloudModelsScreen: View {
                     }
                     Text(subtitle).font(.caption).foregroundStyle(.secondary)
                     if warnsAboutImages {
-                        Text("Photo capture will not work with this model.")
+                        Text(ui: "Photo capture will not work with this model.")
                             .font(.caption2)
                             .foregroundStyle(Color.orange)
                     }
@@ -128,19 +132,22 @@ public struct CloudModelsScreen: View {
             parts.append(String(format: "$%.2f / $%.2f per 1M", prompt, completion))
         }
         if model.supportsImages {
-            parts.append("Vision")
+            parts.append(uiString("Vision"))
         }
         return parts.joined(separator: " · ")
     }
 
     private func contextLabel(_ tokens: Int) -> String {
         if tokens >= 1_000_000 {
+            // Compromise: `String(format:)` with a nested Double formatter produces
+            // an ambiguous LocalizedStringKey placeholder token, so this variant is
+            // deliberately left un-cataloged (renders in English in all locales).
             return String(format: "%.1fM context", Double(tokens) / 1_000_000)
         }
         if tokens >= 1_000 {
-            return "\(tokens / 1_000)K context"
+            return uiString("\(tokens / 1_000)K context")
         }
-        return "\(tokens) context"
+        return uiString("\(tokens) context")
     }
 }
 

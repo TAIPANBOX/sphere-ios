@@ -15,10 +15,10 @@ public struct ModelsScreen: View {
                     row(model)
                 }
             } footer: {
-                Text("Models run entirely on your device — private and free. They download over Wi-Fi and live in on-device storage.")
+                Text(ui: "Models run entirely on your device — private and free. They download over Wi-Fi and live in on-device storage.")
             }
         }
-        .navigationTitle("Models")
+        .navigationTitle(Text(ui: "Models"))
     }
 
     @ViewBuilder
@@ -47,9 +47,12 @@ public struct ModelsScreen: View {
                 Button {
                     manager.setActive(isActive ? nil : model.id)
                 } label: {
-                    Label(isActive ? "Active" : "Use this model",
-                          systemImage: isActive ? "checkmark.circle.fill" : "circle")
-                        .font(.caption)
+                    Label {
+                        Text(ui: isActive ? "Active" : "Use this model")
+                    } icon: {
+                        Image(systemName: isActive ? "checkmark.circle.fill" : "circle")
+                    }
+                    .font(.caption)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(isActive ? SphereTheme.accent(for: .mindfulness) : .secondary)
@@ -62,16 +65,16 @@ public struct ModelsScreen: View {
     private func control(_ model: ModelInfo, state: ModelDownloadState, fit: RAMFit) -> some View {
         switch state {
         case .notInstalled, .failed:
-            Button("Get") { manager.startDownload(model) }
+            Button { manager.startDownload(model) } label: { Text(ui: "Get") }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
                 .disabled(fit == .insufficient || !manager.fitsOnDisk(model))
         case .downloading:
-            Button("Cancel") { manager.cancelDownload(model) }
+            Button { manager.cancelDownload(model) } label: { Text(ui: "Cancel") }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
         case .installed:
-            Button("Delete", role: .destructive) { manager.remove(model) }
+            Button(role: .destructive) { manager.remove(model) } label: { Text(ui: "Delete") }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
         }

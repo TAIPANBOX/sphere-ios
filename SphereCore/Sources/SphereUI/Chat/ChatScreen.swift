@@ -75,7 +75,9 @@ public struct ChatScreen: View {
                 }
                 .buttonStyle(.plain)
                 #endif
-                TextField("Message your \(session.sphereName) agent…", text: $draft, axis: .vertical)
+                TextField(text: $draft, axis: .vertical) {
+                    Text(ui: "Message your \(session.sphereName) agent…")
+                }
                     .textFieldStyle(.plain)
                     .lineLimit(1...5)
                     .onSubmit(sendDraft)
