@@ -84,6 +84,59 @@ struct AgentServiceTests {
         #expect(recalled.contains { $0.content.hasPrefix("User: I just drank") })
     }
 
+    @Test func captureRoutesAcrossSpheresAndReturnsChips() async throws {
+        let engine = StubEngine(scripts: [
+            [
+                .toolCall(LLMToolCall(id: "tu_1", name: "log_water_glass", input: ["count": 1])),
+                .stop(.toolUse),
+            ],
+            [.stop(.endTurn)],
+        ])
+        let (service, engram, _) = try makeService(engine: engine)
+
+        let chips = try await service.capture(
+            text: "drank a glass of water", tools: waterRegistry()
+        )
+
+        #expect(chips == [CaptureResult(summary: "Logged 1 glass of water", isError: false)])
+        // Capture offers the whole tool set (cross-sphere), unscoped.
+        #expect(engine.calls[0].tools.map(\.name) == ["log_water_glass"])
+        #expect(engine.calls[0].system.contains("capture router"))
+        // The write is filed into Engram under the meta agent.
+        #expect(try await engram.count(agentId: "meta") == 1)
+    }
+
+    @Test func captureThrowsWithoutBackend() async throws {
+        let engine = StubEngine()
+        let (service, _, _) = try makeService(engine: engine, keys: [:])
+
+        await #expect(throws: AgentError.noApiKey) {
+            _ = try await service.capture(text: "drank water", tools: waterRegistry())
+        }
+    }
+
+    @Test func captureSurfacesToolErrorsAsChips() async throws {
+        let engine = StubEngine(scripts: [
+            [
+                .toolCall(LLMToolCall(id: "tu_1", name: "log_water_glass", input: ["count": 1])),
+                .stop(.toolUse),
+            ],
+            [.stop(.endTurn)],
+        ])
+        let registry = SphereToolRegistry(tools: [
+            SphereTool(
+                definition: LLMTool(name: "log_water_glass", description: "Log water", inputSchema: ["type": "object"]),
+                spheres: [.health],
+                confirmation: { _ in "Logged 1 glass of water" },
+                handler: { _ in throw AgentToolInputError("boom") }
+            ),
+        ])
+        let (service, _, _) = try makeService(engine: engine)
+
+        let chips = try await service.capture(text: "drank water", tools: registry)
+        #expect(chips == [CaptureResult(summary: "Logged 1 glass of water", isError: true)])
+    }
+
     @Test func memoryFromPastChatsEntersSystemPrompt() async throws {
         let engine = StubEngine(scripts: [[.textDelta("Hi"), .stop(.endTurn)]])
         let (service, engram, _) = try makeService(engine: engine)

@@ -54,6 +54,7 @@ struct RootView: View {
                     userName: container.profile.profile.name,
                     onConfigureProvider: { tab = .settings },
                     onQuickCapture: { await container.quickCapture($0) },
+                    onAgentCapture: { await container.agentCapture($0, images: $1) },
                     ritual: container.ritual,
                     insights: container.insights,
                     nudges: container.nudges,

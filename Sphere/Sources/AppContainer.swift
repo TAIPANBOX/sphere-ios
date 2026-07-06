@@ -294,6 +294,27 @@ final class AppContainer {
         return results
     }
 
+    /// Agent-driven capture: when a tool-capable backend is available, the
+    /// agent routes the note (and any photos) across every sphere; otherwise it
+    /// falls back to the free rule-based parser for plain text. Refreshes the
+    /// widget when anything was logged.
+    func agentCapture(_ text: String, images: [Data]) async -> [CaptureResult] {
+        if agent.isAvailable() {
+            let llmImages = images.map {
+                LLMImage(mimeType: "image/jpeg", base64Data: $0.base64EncodedString())
+            }
+            if let results = try? await agent.capture(
+                text: text, images: llmImages, tools: toolRegistry
+            ), !results.isEmpty {
+                refreshWidget()
+                return results
+            }
+        }
+        // No agent (or it routed nothing): the free rule parser handles text.
+        guard !text.isEmpty else { return [] }
+        return await quickCapture(text)
+    }
+
     /// Applies a quick-log command sent from the watch, then pushes a fresh
     /// snapshot back. Reloads the affected store first so a background wake
     /// mutates the real persisted state, not a zeroed in-memory default.

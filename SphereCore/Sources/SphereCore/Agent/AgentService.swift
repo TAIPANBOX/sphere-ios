@@ -216,6 +216,75 @@ public final class AgentService: Sendable {
         }
     }
 
+    // MARK: - Capture
+
+    /// Universal capture: routes a free-form note (and optional images) across
+    /// every sphere by letting the model call the matching tools, then returns
+    /// one confirmation chip per executed write. Unlike ``chat``, this offers
+    /// the full tool set (not one sphere), stays silent, and returns structured
+    /// results instead of streaming. Throws when no backend is configured.
+    public func capture(
+        text: String,
+        images: [LLMImage] = [],
+        tools: SphereToolRegistry,
+        maxTurns: Int = 3
+    ) async throws -> [CaptureResult] {
+        let picked = try resolveBackend()
+        let toolDefs = tools.toolsFor(nil)
+        guard !toolDefs.isEmpty else { return [] }
+
+        let note = text.isEmpty ? "Log everything recordable in the attached image(s)." : text
+        var messages: [LLMMessage] = [.user(note, images: images)]
+        var captured: [CaptureResult] = []
+
+        for _ in 0..<maxTurns {
+            var turnText = ""
+            var calls: [LLMToolCall] = []
+            var stopReason = StopReason.endTurn
+
+            for try await event in picked.engine.stream(
+                apiKey: picked.apiKey,
+                system: SpherePrompts.capture(hasTools: true),
+                messages: messages,
+                tools: toolDefs,
+                maxTokens: 1024
+            ) {
+                switch event {
+                case .textDelta(let text): turnText += text
+                case .toolCall(let call): calls.append(call)
+                case .stop(let reason): stopReason = reason
+                }
+            }
+
+            guard !calls.isEmpty, stopReason == .toolUse else { break }
+            messages.append(.assistant(turnText, toolCalls: calls))
+
+            var results: [LLMToolResult] = []
+            for call in calls {
+                let execution = await tools.execute(call)
+                results.append(LLMToolResult(
+                    toolCallId: call.id, content: execution.content, isError: execution.isError
+                ))
+                let label = tools.confirmation(for: call)
+                if execution.isError {
+                    captured.append(CaptureResult(summary: label ?? "Couldn't log that", isError: true))
+                } else if let label {
+                    captured.append(CaptureResult(summary: label, isError: false))
+                }
+            }
+            messages.append(.toolResults(results))
+        }
+
+        let logged = captured.filter { !$0.isError }.map(\.summary).joined(separator: "; ")
+        if !logged.isEmpty {
+            try? await engram.observe(
+                agentId: "meta", content: "Captured: \(logged)",
+                tags: ["capture"], salience: 0.6
+            )
+        }
+        return captured
+    }
+
     // MARK: - Meta agent
 
     /// Streams the daily brief from the Meta Agent, falling back to the last

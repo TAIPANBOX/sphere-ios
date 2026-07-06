@@ -6,6 +6,7 @@ public struct HomeScreen: View {
     private let userName: String
     private let onConfigureProvider: (() -> Void)?
     private let onQuickCapture: ((String) async -> [CaptureResult])?
+    private let onAgentCapture: ((String, [Data]) async -> [CaptureResult])?
     private let ritual: RitualStore?
     private let insights: InsightsStore?
     private let nudges: NudgeStore?
@@ -16,6 +17,7 @@ public struct HomeScreen: View {
     private let search: SearchStore?
 
     @State private var showingCapture = false
+    @State private var showingAgent = false
     @State private var showingRitual = false
     @State private var showingWeeklyReview = false
     @State private var showingLifeWheel = false
@@ -35,6 +37,7 @@ public struct HomeScreen: View {
         userName: String = "",
         onConfigureProvider: (() -> Void)? = nil,
         onQuickCapture: ((String) async -> [CaptureResult])? = nil,
+        onAgentCapture: ((String, [Data]) async -> [CaptureResult])? = nil,
         ritual: RitualStore? = nil,
         insights: InsightsStore? = nil,
         nudges: NudgeStore? = nil,
@@ -48,6 +51,7 @@ public struct HomeScreen: View {
         self.userName = userName
         self.onConfigureProvider = onConfigureProvider
         self.onQuickCapture = onQuickCapture
+        self.onAgentCapture = onAgentCapture
         self.ritual = ritual
         self.insights = insights
         self.nudges = nudges
@@ -60,68 +64,52 @@ public struct HomeScreen: View {
 
     public var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                header
-                if onQuickCapture != nil {
-                    quickActionsRow
-                }
-                if let readiness {
-                    todayVerdictCard(readiness)
-                }
-                if let nudge = nudges?.activeNudge {
-                    nudgeCard(nudge)
-                }
-                if ritualPhase != .none {
-                    ritualCard
-                }
+            VStack(spacing: 14) {
+                LifeRingsCard(lifeScore: store.lifeScore, scores: store.scores, userName: userName)
                 if store.isPaused {
                     pausedBadge
                 }
-                if let weather = store.weather {
-                    WeatherBar(weather: weather)
+                if let signal = topSignal {
+                    signalLine(signal)
                 }
-                if !store.todayEvents.isEmpty {
-                    scheduleCard
-                }
-                summaryCard
-                if let insight = insights?.topInsight {
-                    insightCard(insight)
-                }
-                if let experiment = experiments?.activeExperiment() {
-                    experimentCard(experiment)
-                }
-                if reviews != nil || experiments != nil || agent != nil {
-                    reviewsSection
-                }
-                focusSection
             }
             .padding()
         }
         .navigationTitle("Home")
+        .safeAreaInset(edge: .bottom) { agentBar }
         .toolbar {
             if let search {
                 ToolbarItem(placement: .navigation) {
                     NavigationLink {
                         GlobalSearchScreen(store: search)
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                    }
+                    } label: { Image(systemName: "magnifyingglass") }
                     .accessibilityLabel("Search")
                 }
             }
-            if let onQuickCapture {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingCapture = true
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                    }
-                    .accessibilityLabel("Quick capture")
-                    .sheet(isPresented: $showingCapture) {
-                        QuickCaptureSheet(run: onQuickCapture)
-                    }
-                }
-            }
+            ToolbarItem(placement: .primaryAction) { moreMenu }
+        }
+        .sheet(isPresented: $showingCapture) {
+            if let onQuickCapture { QuickCaptureSheet(run: onQuickCapture) }
+        }
+        .sheet(isPresented: $showingAgent) { agentSheet }
+        .sheet(isPresented: $showingRitual) { ritualSheet }
+        .sheet(isPresented: $showingWeeklyReview) {
+            if let reviews { WeeklyReviewSheet(reviews: reviews) }
+        }
+        .sheet(isPresented: $showingLifeWheel) {
+            if let reviews { LifeWheelSheet(reviews: reviews) }
+        }
+        .sheet(isPresented: $showingExperiments) {
+            if let experiments { ExperimentsScreen(store: experiments) }
+        }
+        .sheet(isPresented: $showingPatterns) {
+            AgentResultSheet(
+                title: "Your patterns", subtitle: "Across your life, this week",
+                systemImage: "sparkles.rectangle.stack",
+                tint: SphereTheme.accent(for: .mindfulness),
+                agent: agent, task: .analyzePatterns(scope: "my life", facts: patternFacts()),
+                onConfigureProvider: onConfigureProvider
+            )
         }
         .refreshable {
             await store.refreshWeather()
@@ -132,6 +120,113 @@ public struct HomeScreen: View {
             await store.refreshWeather()
             await store.refreshCalendar()
             await store.streamBrief()
+        }
+    }
+
+    // MARK: - Bottom agent bar
+
+    private var agentBar: some View {
+        Button { showingAgent = true } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "sparkles").font(.body.weight(.semibold))
+                Text("Tell your agent anything").font(.callout.weight(.medium))
+                Spacer()
+                Image(systemName: "mic.fill")
+                Image(systemName: "camera.fill")
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 15)
+            .frame(maxWidth: .infinity)
+            .background(
+                Capsule().fill(SphereTheme.accent(for: .mindfulness).gradient)
+            )
+            .foregroundStyle(.white)
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal)
+        .padding(.bottom, 6)
+    }
+
+    @ViewBuilder private var agentSheet: some View {
+        AgentCaptureSheet(
+            agentAvailable: agent?.isAvailable() ?? false,
+            onConfigureProvider: onConfigureProvider,
+            onCapture: { text, images in
+                if let onAgentCapture { return await onAgentCapture(text, images) }
+                if let onQuickCapture, !text.isEmpty { return await onQuickCapture(text) }
+                return []
+            }
+        )
+    }
+
+    private var moreMenu: some View {
+        Menu {
+            if onQuickCapture != nil {
+                Button("Quick log", systemImage: "bolt") { showingCapture = true }
+            }
+            if reviews != nil {
+                Button("Weekly review", systemImage: "calendar.badge.clock") { showingWeeklyReview = true }
+                Button("Life Wheel", systemImage: "chart.pie") { showingLifeWheel = true }
+            }
+            if experiments != nil {
+                Button("Experiments", systemImage: "flask") { showingExperiments = true }
+            }
+            if agent != nil {
+                Button("Analyze my patterns", systemImage: "sparkles.rectangle.stack") { showingPatterns = true }
+            }
+            if ritualPhase != .none {
+                Button("Daily ritual", systemImage: "sun.max") { showingRitual = true }
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+    }
+
+    // MARK: - One signal line
+
+    private enum HomeSignal { case nudge(Nudge), verdict(ReadinessVerdict), insight(Correlation) }
+
+    private var topSignal: HomeSignal? {
+        if let nudge = nudges?.activeNudge { return .nudge(nudge) }
+        if let readiness { return .verdict(readiness.verdict()) }
+        if let insight = insights?.topInsight { return .insight(insight) }
+        return nil
+    }
+
+    @ViewBuilder private func signalLine(_ signal: HomeSignal) -> some View {
+        switch signal {
+        case .nudge(let nudge):
+            HStack(spacing: 10) {
+                Image(systemName: "hand.wave.fill").foregroundStyle(SphereTheme.accent(for: .goals))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(nudge.title).font(.subheadline.weight(.semibold))
+                    Text(nudge.body).font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button { Task { await nudges?.acknowledge(nudge) } } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
+                }.buttonStyle(.plain)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading).sphereCard()
+        case .verdict(let verdict):
+            HStack(spacing: 10) {
+                Text("\(verdict.score)").font(.title3.weight(.bold).monospacedDigit())
+                    .foregroundStyle(SphereTheme.accent(for: .health))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(verdict.headline).font(.subheadline.weight(.semibold))
+                    Text("Focus \(verdict.focusWindow) · wind down \(verdict.windDown)")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading).sphereCard()
+        case .insight(let insight):
+            HStack(spacing: 10) {
+                Image(systemName: "lightbulb.fill").foregroundStyle(SphereTheme.accent(for: .mindfulness))
+                Text(insight.phrase).font(.caption)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading).sphereCard()
         }
     }
 
