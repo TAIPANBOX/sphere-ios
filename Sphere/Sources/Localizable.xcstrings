@@ -211,6 +211,16 @@
         }
       }
     },
+    "A few words about you, your goals, your situation…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кілька слів про вас, ваші цілі, вашу ситуацію…"
+          }
+        }
+      }
+    },
     "A melody, a story, a shot…": {
       "localizations": {
         "uk": {
@@ -261,12 +271,62 @@
         }
       }
     },
+    "AI": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        }
+      }
+    },
     "AI Agents": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "AI Агенти"
+          }
+        }
+      }
+    },
+    "API key": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ API"
+          }
+        }
+      }
+    },
+    "API keys (optional)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключі API (необов'язково)"
+          }
+        }
+      }
+    },
+    "About": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Про застосунок"
+          }
+        }
+      }
+    },
+    "About me": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Про мене"
           }
         }
       }
@@ -317,6 +377,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Досягнення"
+          }
+        }
+      }
+    },
+    "Acknowledgements": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подяки"
           }
         }
       }
@@ -721,6 +791,16 @@
         }
       }
     },
+    "Add a provider key below, or use this iPhone's free on-device AI where available (iPhone 15 Pro or newer on iOS 26).": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додайте ключ провайдера нижче, або скористайтеся безкоштовним AI на пристрої, де це доступно (iPhone 15 Pro чи новіший на iOS 26)."
+          }
+        }
+      }
+    },
     "Add birthday": {
       "localizations": {
         "uk": {
@@ -737,6 +817,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Додати елемент…"
+          }
+        }
+      }
+    },
+    "Add photo": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати фото"
           }
         }
       }
@@ -841,6 +931,26 @@
         }
       }
     },
+    "An AI companion for all 12 spheres of your life — each with its own agent that remembers everything, on your device.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI-супутник для всіх 12 сфер вашого життя — кожна зі своїм агентом, який усе пам'ятає, на вашому пристрої."
+          }
+        }
+      }
+    },
+    "An AI companion for all 12 spheres of your life — private and on-device.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI-супутник для всіх 12 сфер вашого життя — приватний і на пристрої."
+          }
+        }
+      }
+    },
     "Analyze my patterns": {
       "localizations": {
         "uk": {
@@ -867,6 +977,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Анти-цілі"
+          }
+        }
+      }
+    },
+    "Anxiety": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тривожність"
+          }
+        }
+      }
+    },
+    "Anything Sphere or its AI agents suggest — about health, finances, or anything else — is informational only, not medical, financial, or legal advice.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усе, що пропонує Sphere чи його AI-агенти — щодо здоров'я, фінансів чи будь-чого іншого — має лише інформаційний характер, а не є медичною, фінансовою чи юридичною консультацією."
           }
         }
       }
@@ -911,6 +1041,16 @@
         }
       }
     },
+    "Assistant": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Асистент"
+          }
+        }
+      }
+    },
     "Assistant is off": {
       "localizations": {
         "uk": {
@@ -921,12 +1061,32 @@
         }
       }
     },
+    "Asthma": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Астма"
+          }
+        }
+      }
+    },
     "Author": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Автор"
+          }
+        }
+      }
+    },
+    "Automatic": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автоматично"
           }
         }
       }
@@ -971,6 +1131,16 @@
         }
       }
     },
+    "Bedtime wind-down": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підготовка до сну"
+          }
+        }
+      }
+    },
     "Before vs during · a pattern, not proof.": {
       "localizations": {
         "uk": {
@@ -987,6 +1157,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Дата народження"
+          }
+        }
+      }
+    },
+    "Birthdays": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дні народження"
           }
         }
       }
@@ -1161,6 +1341,16 @@
         }
       }
     },
+    "Change photo": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Змінити фото"
+          }
+        }
+      }
+    },
     "Children": {
       "localizations": {
         "uk": {
@@ -1181,6 +1371,16 @@
         }
       }
     },
+    "City": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Місто"
+          }
+        }
+      }
+    },
     "Clear done": {
       "localizations": {
         "uk": {
@@ -1197,6 +1397,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Закрити"
+          }
+        }
+      }
+    },
+    "Cloud AI (optional)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Хмарний AI (необов'язково)"
+          }
+        }
+      }
+    },
+    "Cloud model": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Хмарна модель"
           }
         }
       }
@@ -1341,6 +1561,16 @@
         }
       }
     },
+    "Dairy": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Молочні продукти"
+          }
+        }
+      }
+    },
     "Dark": {
       "localizations": {
         "uk": {
@@ -1421,6 +1651,16 @@
         }
       }
     },
+    "Default": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Типова"
+          }
+        }
+      }
+    },
     "Delete": {
       "localizations": {
         "uk": {
@@ -1467,6 +1707,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пункт призначення"
+          }
+        }
+      }
+    },
+    "Device permissions": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дозволи пристрою"
+          }
+        }
+      }
+    },
+    "Diabetes": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Діабет"
           }
         }
       }
@@ -1641,6 +1901,16 @@
         }
       }
     },
+    "Eggs": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Яйця"
+          }
+        }
+      }
+    },
     "Email": {
       "localizations": {
         "uk": {
@@ -1691,12 +1961,52 @@
         }
       }
     },
+    "Every agent addresses you by name and weaves these details into its memory.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кожен агент звертається до вас на ім'я і вплітає ці деталі у свою пам'ять."
+          }
+        }
+      }
+    },
+    "Every sphere, journal entry, health log and memory lives in a database on this device. Sphere has no account and no server of its own.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кожна сфера, запис у щоденнику, запис про здоров'я та спогад живуть у базі даних на цьому пристрої. У Sphere немає облікового запису й немає власного сервера."
+          }
+        }
+      }
+    },
     "Everyone in your contacts is already here, or access was denied.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Усі з контактів уже тут, або доступ відхилено."
+          }
+        }
+      }
+    },
+    "Everything here flows into every agent's context — dietary tags shape Travel advice, conditions shape Health advice.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усе це потрапляє в контекст кожного агента — теги харчування впливають на поради з Подорожей, стани впливають на поради зі Здоров'я."
+          }
+        }
+      }
+    },
+    "Everything stays on this device. Export saves a JSON copy of all your data; Face ID keeps it private.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усе залишається на цьому пристрої. Експорт зберігає копію всіх ваших даних у JSON; Face ID тримає їх приватними."
           }
         }
       }
@@ -1721,12 +2031,62 @@
         }
       }
     },
+    "Export all data": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Експортувати всі дані"
+          }
+        }
+      }
+    },
+    "Export all your data to a JSON file at any time from Settings. Nothing locks you in.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Експортуйте всі свої дані у файл JSON у будь-який час із Налаштувань. Ніщо вас не утримує."
+          }
+        }
+      }
+    },
+    "Export all your data to a file, or delete it, at any time from Settings.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Експортуйте всі свої дані у файл або видаліть їх у будь-який час із Налаштувань."
+          }
+        }
+      }
+    },
+    "Face ID lock": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Блокування Face ID"
+          }
+        }
+      }
+    },
     "Felt": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Відчуття"
+          }
+        }
+      }
+    },
+    "Female": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Жіноча"
           }
         }
       }
@@ -1831,6 +2191,26 @@
         }
       }
     },
+    "Free & private — runs on-device, no account or key needed.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Безкоштовно й приватно — працює на пристрої, без облікового запису чи ключа."
+          }
+        }
+      }
+    },
+    "Free weather API, no key": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Безкоштовний API погоди, без ключа"
+          }
+        }
+      }
+    },
     "Frequency": {
       "localizations": {
         "uk": {
@@ -1851,6 +2231,16 @@
         }
       }
     },
+    "GRDB.swift": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GRDB.swift"
+          }
+        }
+      }
+    },
     "Gaining ground": {
       "localizations": {
         "uk": {
@@ -1867,6 +2257,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Стать"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загальне"
           }
         }
       }
@@ -1917,6 +2317,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ідеї подарунків"
+          }
+        }
+      }
+    },
+    "Gluten-free": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без глютену"
           }
         }
       }
@@ -2001,12 +2411,32 @@
         }
       }
     },
+    "Habit reminders": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нагадування про звички"
+          }
+        }
+      }
+    },
     "Habits": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Звички"
+          }
+        }
+      }
+    },
+    "Halal": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Халяль"
           }
         }
       }
@@ -2037,6 +2467,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Стани здоров'я"
+          }
+        }
+      }
+    },
+    "Health, location, photos, microphone, and speech are used only for the features you enable, and the data stays on your device.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здоров'я, геолокація, фото, мікрофон і мовлення використовуються лише для функцій, які ви вмикаєте, а дані залишаються на вашому пристрої."
           }
         }
       }
@@ -2151,6 +2591,26 @@
         }
       }
     },
+    "Hypertension": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Гіпертонія"
+          }
+        }
+      }
+    },
+    "Hypothyroidism": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Гіпотиреоз"
+          }
+        }
+      }
+    },
     "I am… (e.g. a reader)": {
       "localizations": {
         "uk": {
@@ -2177,6 +2637,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ідентичність"
+          }
+        }
+      }
+    },
+    "If you add an API key for a cloud AI provider, you're bound by that provider's terms, and any usage costs are yours.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Якщо ви додаєте ключ API для хмарного AI-провайдера, на вас поширюються умови цього провайдера, і будь-які витрати на використання — ваші."
+          }
+        }
+      }
+    },
+    "If you choose to connect OpenRouter with your own key, only the messages for that conversation are sent to that provider, processed under their privacy policy.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Якщо ви підключите OpenRouter із власним ключем, лише повідомлення цієї розмови надсилаються цьому провайдеру та обробляються згідно з його політикою конфіденційності."
           }
         }
       }
@@ -2351,12 +2831,32 @@
         }
       }
     },
+    "Keys are stored in the iCloud Keychain and never leave your devices. Used only when you select a cloud model above.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключі зберігаються в iCloud Keychain і ніколи не покидають ваші пристрої. Використовуються лише якщо ви оберете хмарну модель вище."
+          }
+        }
+      }
+    },
     "Kind": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Тип"
+          }
+        }
+      }
+    },
+    "Kosher": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кошерне"
           }
         }
       }
@@ -2377,6 +2877,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Підпис (напр. Річниця)"
+          }
+        }
+      }
+    },
+    "Lactose-free": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без лактози"
           }
         }
       }
@@ -2417,6 +2927,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Навчання"
+          }
+        }
+      }
+    },
+    "Legal": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Юридична інформація"
           }
         }
       }
@@ -2511,12 +3031,42 @@
         }
       }
     },
+    "Local-first": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Локально насамперед"
+          }
+        }
+      }
+    },
+    "Local-first by design": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "За задумом — локально насамперед"
+          }
+        }
+      }
+    },
     "Location (e.g. Garage)": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Місце (напр. Гараж)"
+          }
+        }
+      }
+    },
+    "Locked if you want": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Блокування за бажанням"
           }
         }
       }
@@ -2641,6 +3191,26 @@
         }
       }
     },
+    "MIT — SQLite persistence": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MIT — збереження SQLite"
+          }
+        }
+      }
+    },
+    "Male": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чоловіча"
+          }
+        }
+      }
+    },
     "Map": {
       "localizations": {
         "uk": {
@@ -2687,6 +3257,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Виміряний ефект"
+          }
+        }
+      }
+    },
+    "Medication times": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Час прийому ліків"
           }
         }
       }
@@ -2761,6 +3341,16 @@
         }
       }
     },
+    "Migraine": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мігрень"
+          }
+        }
+      }
+    },
     "Milestones": {
       "localizations": {
         "uk": {
@@ -2777,6 +3367,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Усвідомленість"
+          }
+        }
+      }
+    },
+    "Mode": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Режим"
           }
         }
       }
@@ -2817,6 +3417,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Більше"
+          }
+        }
+      }
+    },
+    "Morning brief": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ранковий огляд"
           }
         }
       }
@@ -3281,6 +3891,16 @@
         }
       }
     },
+    "No tracking": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без стеження"
+          }
+        }
+      }
+    },
     "No transactions yet — add one or tell your agent.": {
       "localizations": {
         "uk": {
@@ -3307,6 +3927,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Тренувань не записано"
+          }
+        }
+      }
+    },
+    "Normal": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Звичайний"
+          }
+        }
+      }
+    },
+    "Not professional advice": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не професійна консультація"
           }
         }
       }
@@ -3411,12 +4051,42 @@
         }
       }
     },
+    "Nothing yet — fill in the fields above.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поки нічого немає — заповніть поля вище."
+          }
+        }
+      }
+    },
     "Noticed across %lld days · a pattern, not proof.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Помічено за %lld днів · патерн, не доказ."
+          }
+        }
+      }
+    },
+    "Notifications": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сповіщення"
+          }
+        }
+      }
+    },
+    "Nuts": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Горіхи"
           }
         }
       }
@@ -3431,12 +4101,72 @@
         }
       }
     },
+    "On-device (free)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На пристрої (безкоштовно)"
+          }
+        }
+      }
+    },
+    "On-device AI": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI на пристрої"
+          }
+        }
+      }
+    },
+    "On-device AI is free and private — nothing leaves your iPhone, no key needed. Add a key below only if you want a cloud model.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI на пристрої безкоштовний і приватний — нічого не покидає ваш iPhone, ключ не потрібен. Додайте ключ нижче, лише якщо хочете хмарну модель."
+          }
+        }
+      }
+    },
     "One thing you're grateful for": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Одне, за що ти вдячний"
+          }
+        }
+      }
+    },
+    "Open-Meteo": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open-Meteo"
+          }
+        }
+      }
+    },
+    "OpenRouter": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenRouter"
+          }
+        }
+      }
+    },
+    "Other": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Інша"
           }
         }
       }
@@ -3571,6 +4301,16 @@
         }
       }
     },
+    "Plant watering": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Полив рослин"
+          }
+        }
+      }
+    },
     "Plants": {
       "localizations": {
         "uk": {
@@ -3597,6 +4337,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Посада"
+          }
+        }
+      }
+    },
+    "Prefer not to say": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не хочу вказувати"
           }
         }
       }
@@ -3641,6 +4391,56 @@
         }
       }
     },
+    "Privacy": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приватність"
+          }
+        }
+      }
+    },
+    "Privacy & Data": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приватність і дані"
+          }
+        }
+      }
+    },
+    "Privacy & data": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приватність і дані"
+          }
+        }
+      }
+    },
+    "Privacy Policy": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Політика конфіденційності"
+          }
+        }
+      }
+    },
+    "Proactive nudges": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проактивні підказки"
+          }
+        }
+      }
+    },
     "Profile": {
       "localizations": {
         "uk": {
@@ -3677,6 +4477,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Проєкт (необовʼязково)"
+          }
+        }
+      }
+    },
+    "Provided “as is”": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Надається “як є”"
           }
         }
       }
@@ -3871,6 +4681,26 @@
         }
       }
     },
+    "Reminders are built from your own data and stay on this device. Bedtime needs a bedtime set in Rest; medication and plant reminders appear once you add them.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нагадування будуються на основі ваших власних даних і залишаються на цьому пристрої. Для нагадування про сон потрібно встановити час сну у Відпочинку; нагадування про ліки й рослини з'являються після того, як ви їх додасте."
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити"
+          }
+        }
+      }
+    },
     "Renovation": {
       "localizations": {
         "uk": {
@@ -4031,6 +4861,16 @@
         }
       }
     },
+    "Seafood": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Морепродукти"
+          }
+        }
+      }
+    },
     "Search": {
       "localizations": {
         "uk": {
@@ -4057,6 +4897,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Побачити розрив"
+          }
+        }
+      }
+    },
+    "Set an end date": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Встановити кінцеву дату"
           }
         }
       }
@@ -4091,6 +4941,16 @@
         }
       }
     },
+    "Shellfish": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Молюски та ракоподібні"
+          }
+        }
+      }
+    },
     "Shift bedtime toward the destination in the days before you fly.": {
       "localizations": {
         "uk": {
@@ -4117,6 +4977,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показати відповідь"
+          }
+        }
+      }
+    },
+    "Sick": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Хвороба"
+          }
+        }
+      }
+    },
+    "Sick or vacation mode pauses your streaks and mutes daily nudges, so a break never costs you your progress.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Режим хвороби чи відпустки призупиняє ваші серії та вимикає щоденні нагадування, тож перерва ніколи не коштує вам прогресу."
           }
         }
       }
@@ -4171,6 +5051,16 @@
         }
       }
     },
+    "Soy": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Соя"
+          }
+        }
+      }
+    },
     "Spent": {
       "localizations": {
         "uk": {
@@ -4181,12 +5071,72 @@
         }
       }
     },
+    "Sphere": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sphere"
+          }
+        }
+      }
+    },
     "Sphere compares your metrics during these %lld days against the %lld days just before.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Sphere порівнює твої показники за ці %lld днів із %lld днями до того."
+          }
+        }
+      }
+    },
+    "Sphere contains no analytics, ads, or third-party tracking SDKs.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sphere не містить аналітики, реклами чи стороннього трекінгу."
+          }
+        }
+      }
+    },
+    "Sphere is a personal tool you run on your own device. Use it to organise your life; you're responsible for what you put in and act on.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sphere — це особистий інструмент, який ви запускаєте на власному пристрої. Використовуйте його, щоб організувати своє життя; ви відповідальні за те, що вносите і на основі чого дієте."
+          }
+        }
+      }
+    },
+    "Sphere is locked": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sphere заблоковано"
+          }
+        }
+      }
+    },
+    "Sphere is open-source software provided under the MIT License, without warranty of any kind. We aren't liable for any loss arising from its use.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sphere — це програмне забезпечення з відкритим кодом, що надається за ліцензією MIT, без жодних гарантій. Ми не несемо відповідальності за будь-які втрати, пов'язані з його використанням."
+          }
+        }
+      }
+    },
+    "Sphere stores all of your data in a database on your device. There is no account and no server we operate — we never receive your data.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sphere зберігає всі ваші дані в базі даних на вашому пристрої. Немає облікового запису й немає сервера, яким ми керуємо — ми ніколи не отримуємо ваші дані."
           }
         }
       }
@@ -4331,6 +5281,16 @@
         }
       }
     },
+    "Subscription renewals": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Продовження підписок"
+          }
+        }
+      }
+    },
     "Subscriptions": {
       "localizations": {
         "uk": {
@@ -4371,12 +5331,32 @@
         }
       }
     },
+    "Takes full effect after reopening the app.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Набуває повної чинності після повторного відкриття застосунку."
+          }
+        }
+      }
+    },
     "Talking points (comma-separated)": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Теми (через кому)"
+          }
+        }
+      }
+    },
+    "Tap to turn any off — you can change this anytime in Settings.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Торкніться, щоб вимкнути будь-яку — ви можете змінити це будь-коли в Налаштуваннях."
           }
         }
       }
@@ -4421,6 +5401,16 @@
         }
       }
     },
+    "Terms of Service": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Умови використання"
+          }
+        }
+      }
+    },
     "Test name": {
       "localizations": {
         "uk": {
@@ -4441,6 +5431,36 @@
         }
       }
     },
+    "The most useful thing you can tell your agents. Shared with every sphere so advice fits your life.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Найкорисніше, що ви можете розповісти своїм агентам. Поширюється на всі сфери, щоб поради відповідали вашому життю."
+          }
+        }
+      }
+    },
+    "The on-device model runs entirely on your phone — nothing leaves it. If you choose to connect OpenRouter with your own key instead, only the messages for that chat are sent to that provider, using your own key.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модель на пристрої працює повністю на вашому телефоні — нічого його не покидає. Якщо ви натомість підключите OpenRouter із власним ключем, лише повідомлення цього чату надсилаються цьому провайдеру, з використанням вашого ключа."
+          }
+        }
+      }
+    },
+    "The short version": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Коротка версія"
+          }
+        }
+      }
+    },
     "Theme": {
       "localizations": {
         "uk": {
@@ -4451,12 +5471,42 @@
         }
       }
     },
+    "These shape Health and Travel recommendations. Skip if none apply.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Це формує рекомендації для Здоров'я та Подорожей. Пропустіть, якщо нічого не підходить."
+          }
+        }
+      }
+    },
     "This Week": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Цього тижня"
+          }
+        }
+      }
+    },
+    "This is a plain-language starting point, not legal advice.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Це відправна точка простою мовою, а не юридична консультація."
+          }
+        }
+      }
+    },
+    "This is the entire context shared with your agents — nothing else about you leaves this device. Updates when you save.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Це весь контекст, яким діляться з вашими агентами — більше нічого про вас не покидає цей пристрій. Оновлюється при збереженні."
           }
         }
       }
@@ -4621,6 +5671,16 @@
         }
       }
     },
+    "Turn on Face ID lock so your life data can't be read from the app switcher or by anyone who picks up your phone.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Увімкніть блокування Face ID, щоб ваші особисті дані не можна було побачити в перемикачі застосунків чи тому, хто візьме ваш телефон."
+          }
+        }
+      }
+    },
     "Type": {
       "localizations": {
         "uk": {
@@ -4651,12 +5711,52 @@
         }
       }
     },
+    "Unlock": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розблокувати"
+          }
+        }
+      }
+    },
+    "Unlock Sphere": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розблокувати Sphere"
+          }
+        }
+      }
+    },
     "Unstoppable": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Не спинити"
+          }
+        }
+      }
+    },
+    "Until": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "До"
+          }
+        }
+      }
+    },
+    "Use passcode": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ввести код"
           }
         }
       }
@@ -4691,12 +5791,52 @@
         }
       }
     },
+    "Vacation": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відпустка"
+          }
+        }
+      }
+    },
     "Value": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Значення"
+          }
+        }
+      }
+    },
+    "Vegan": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Веганське"
+          }
+        }
+      }
+    },
+    "Vegetarian": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вегетаріанське"
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Версія %@"
           }
         }
       }
@@ -4747,6 +5887,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вода"
+          }
+        }
+      }
+    },
+    "Water reminders": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нагадування про воду"
           }
         }
       }
@@ -4811,6 +5961,16 @@
         }
       }
     },
+    "Wellbeing": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Самопочуття"
+          }
+        }
+      }
+    },
     "What changed": {
       "localizations": {
         "uk": {
@@ -4871,12 +6031,32 @@
         }
       }
     },
+    "What your agents know about you": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Що ваші агенти знають про вас"
+          }
+        }
+      }
+    },
     "What's on your mind?": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Про що думаєш?"
+          }
+        }
+      }
+    },
+    "When you use the built-in on-device model, your prompts never leave your phone.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Коли ви використовуєте вбудовану модель на пристрої, ваші запити ніколи не покидають ваш телефон."
           }
         }
       }
@@ -4991,6 +6171,36 @@
         }
       }
     },
+    "You hold the exit": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вихід завжди у ваших руках"
+          }
+        }
+      }
+    },
+    "You own everything you create in Sphere and can export or delete it at any time.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ви володієте всім, що створюєте в Sphere, і можете експортувати чи видалити це в будь-який час."
+          }
+        }
+      }
+    },
+    "Your AI, your choice": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш AI, ваш вибір"
+          }
+        }
+      }
+    },
     "Your Year in Sphere": {
       "localizations": {
         "uk": {
@@ -5001,12 +6211,52 @@
         }
       }
     },
+    "Your control": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контроль у ваших руках"
+          }
+        }
+      }
+    },
     "Your daily brief will appear here.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Тут зʼявиться ваш денний огляд."
+          }
+        }
+      }
+    },
+    "Your data is yours": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваші дані належать вам"
+          }
+        }
+      }
+    },
+    "Your data stays on your device": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваші дані залишаються на вашому пристрої"
+          }
+        }
+      }
+    },
+    "Your keys, your accounts": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваші ключі, ваші облікові записи"
           }
         }
       }
@@ -5137,6 +6387,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "· зібрано %lld/%lld"
+          }
+        }
+      }
+    },
+    "—": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "—"
+          }
+        }
+      }
+    },
+    "✨": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✨"
+          }
+        }
+      }
+    },
+    "🌐": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🌐"
           }
         }
       }

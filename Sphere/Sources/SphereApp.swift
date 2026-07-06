@@ -1,6 +1,7 @@
 import SwiftUI
 import SphereCore
 import SphereUI
+import WidgetKit
 
 @main
 struct SphereApp: App {
@@ -8,6 +9,7 @@ struct SphereApp: App {
     @State private var loaded = false
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage(Prefs.theme) private var theme = ThemePreference.system.rawValue
+    @AppStorage(Prefs.language) private var language = AppLanguage.system.rawValue
 
     var body: some Scene {
         WindowGroup {
@@ -23,10 +25,18 @@ struct SphereApp: App {
                 }
             }
             .preferredColorScheme(ThemePreference(rawValue: theme)?.colorScheme)
+            .appLanguage(AppLanguage(rawValue: language) ?? .system)
             .task {
                 await container.loadAll()
                 loaded = true
             }
+        }
+        .onChange(of: language) { _, newValue in
+            let chosen = AppLanguage(rawValue: newValue) ?? .system
+            chosen.applyAppleLanguagesOverride()
+            SharedAppLanguage.write(chosen)
+            WidgetCenter.shared.reloadAllTimelines()
+            container.refreshWidget()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background {

@@ -102,6 +102,9 @@ targets:
       path: SphereWidget/Info.plist
       properties:
         CFBundleDisplayName: Sphere
+        CFBundleLocalizations:
+          - en
+          - uk
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
@@ -133,6 +136,9 @@ targets:
       path: Watch/Info.plist
       properties:
         CFBundleDisplayName: Sphere
+        CFBundleLocalizations:
+          - en
+          - uk
         WKApplication: true
         WKCompanionAppBundleIdentifier: app.sphere.Sphere
         NSLocationWhenInUseUsageDescription: Sphere shows your local weather.
@@ -163,6 +169,9 @@ targets:
       path: WatchWidget/Info.plist
       properties:
         CFBundleDisplayName: Sphere
+        CFBundleLocalizations:
+          - en
+          - uk
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
