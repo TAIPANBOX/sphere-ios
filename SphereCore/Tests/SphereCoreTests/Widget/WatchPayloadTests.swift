@@ -90,9 +90,39 @@ struct WatchPayloadTests {
         let decoded = try JSONDecoder().decode(WidgetSnapshot.self, from: Data(legacy.utf8))
         #expect(decoded.agentReply == "Hi")
         #expect(decoded.agentReplyAt == nil)
+        #expect(decoded.captureResults.isEmpty)
         #expect(decoded.waterToday == 0)
         #expect(decoded.waterGoal == 8)
         #expect(decoded.meditatedToday == false)
         #expect(decoded.moodToday == nil)
+    }
+
+    @Test func snapshotRoundTripsCaptureResults() throws {
+        let snapshot = WidgetSnapshot(
+            lifeScore: 65, bestEmoji: "🫀", bestName: "Health",
+            needsFocusEmoji: "💰", needsFocusName: "Finance", topFocus: [],
+            captureResults: [
+                .init(summary: "Logged 1 glass of water", isError: false),
+                .init(summary: "Couldn't log that", isError: true),
+            ],
+            updatedAt: Date(timeIntervalSince1970: 200)
+        )
+        let decoded = try #require(WatchPayload.decode(WatchPayload.encode(snapshot)))
+        #expect(decoded == snapshot)
+        #expect(decoded.captureResults.map(\.summary) == ["Logged 1 glass of water", "Couldn't log that"])
+        #expect(decoded.captureResults.map(\.isError) == [false, true])
+    }
+
+    @Test func decodesLegacySnapshotWithoutCaptureResults() throws {
+        // A build before capture existed omits the field entirely.
+        let legacy = """
+        {"lifeScore":50,"bestEmoji":"🫀","bestName":"Health","needsFocusEmoji":"💰",\
+        "needsFocusName":"Finance","topFocus":[],"shopping":[],"agentReply":"Hi",\
+        "agentReplyAt":100,"waterToday":5,"waterGoal":8,"meditatedToday":true,\
+        "moodToday":4,"updatedAt":101}
+        """
+        let decoded = try JSONDecoder().decode(WidgetSnapshot.self, from: Data(legacy.utf8))
+        #expect(decoded.captureResults.isEmpty)
+        #expect(decoded.agentReply == "Hi")
     }
 }

@@ -10,6 +10,7 @@ struct WatchCommandTests {
             .logMeditation(minutes: 10),
             .checkShopping(id: "shop_1"),
             .askAgent(query: "How did I sleep?"),
+            .capture(text: "drank a glass of water"),
         ] {
             #expect(WatchCommand.decode(command.encode()) == command)
         }
@@ -24,5 +25,7 @@ struct WatchCommandTests {
         #expect(WatchCommand.decode(["cmd": "shopping"]) == nil)
         #expect(WatchCommand.decode(["cmd": "shopping", "id": ""]) == nil)
         #expect(WatchCommand.decode(["cmd": "ask"]) == nil)
+        #expect(WatchCommand.decode(["cmd": "capture"]) == nil)
+        #expect(WatchCommand.decode(["cmd": "capture", "text": ""]) == nil)
     }
 }

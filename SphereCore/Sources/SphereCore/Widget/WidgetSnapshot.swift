@@ -24,6 +24,17 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         }
     }
 
+    /// One chip from a wrist capture: a logged fact or a failed one.
+    public struct CaptureLine: Codable, Equatable, Sendable {
+        public let summary: String
+        public let isError: Bool
+
+        public init(summary: String, isError: Bool) {
+            self.summary = summary
+            self.isError = isError
+        }
+    }
+
     /// 0–100
     public let lifeScore: Int
     public let bestEmoji: String
@@ -39,6 +50,9 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     /// compares this to its query-submission time to know a fresh reply
     /// landed, and formats it as a relative timestamp under the reply.
     public let agentReplyAt: Date?
+    /// Confirmation chips from the last wrist capture, if any. Takes
+    /// precedence over `agentReply` in the watch UI when non-empty.
+    public let captureResults: [CaptureLine]
     /// Glasses of water logged today.
     public let waterToday: Int
     /// Daily water goal in glasses.
@@ -59,6 +73,7 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         shopping: [ShoppingLine] = [],
         agentReply: String? = nil,
         agentReplyAt: Date? = nil,
+        captureResults: [CaptureLine] = [],
         waterToday: Int = 0,
         waterGoal: Int = 8,
         meditatedToday: Bool = false,
@@ -74,6 +89,7 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         self.shopping = shopping
         self.agentReply = agentReply
         self.agentReplyAt = agentReplyAt
+        self.captureResults = captureResults
         self.waterToday = waterToday
         self.waterGoal = waterGoal
         self.meditatedToday = meditatedToday
@@ -94,6 +110,7 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         shopping = try c.decodeIfPresent([ShoppingLine].self, forKey: .shopping) ?? []
         agentReply = try c.decodeIfPresent(String.self, forKey: .agentReply)
         agentReplyAt = try c.decodeIfPresent(Date.self, forKey: .agentReplyAt)
+        captureResults = try c.decodeIfPresent([CaptureLine].self, forKey: .captureResults) ?? []
         waterToday = try c.decodeIfPresent(Int.self, forKey: .waterToday) ?? 0
         waterGoal = try c.decodeIfPresent(Int.self, forKey: .waterGoal) ?? 8
         meditatedToday = try c.decodeIfPresent(Bool.self, forKey: .meditatedToday) ?? false

@@ -15,6 +15,14 @@ public enum AgentError: Error, Equatable, Sendable {
     case api(String)
 }
 
+/// What a wrist voice submission turned into: something was logged, or the
+/// agent just answered a question. Never throws to the caller — the watch
+/// always has something to show.
+public enum WristReply: Sendable, Equatable {
+    case captured([CaptureResult])
+    case answered(String)
+}
+
 /// Orchestrates one agent exchange: recall memories → build system prompt →
 /// stream from the picked provider → dispatch tool calls → observe the
 /// conversation back into Engram.
@@ -283,6 +291,28 @@ public final class AgentService: Sendable {
             )
         }
         return captured
+    }
+
+    /// The watch's single voice entry point: log it if it can be logged,
+    /// otherwise answer it. Routing order: the free rule parser first (no LLM
+    /// call at all when it matches), then agent-driven capture across every
+    /// sphere, then a plain Q&A fallback. Never throws — a wrist screen always
+    /// needs something to show.
+    public func captureOrAnswer(text: String, tools: SphereToolRegistry) async -> WristReply {
+        if QuickCapture.canParse(text) {
+            let results = await QuickCapture.run(text, registry: tools)
+            if !results.isEmpty { return .captured(results) }
+        }
+
+        if let results = try? await capture(text: text, tools: tools),
+           results.contains(where: { !$0.isError }) {
+            return .captured(results)
+        }
+
+        if let text = try? await answer(text) {
+            return .answered(text)
+        }
+        return .answered("Couldn't reach the assistant.")
     }
 
     // MARK: - Meta agent

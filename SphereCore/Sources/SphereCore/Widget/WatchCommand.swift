@@ -12,7 +12,13 @@ public enum WatchCommand: Equatable, Sendable {
     /// Check off a shopping item by id.
     case checkShopping(id: String)
     /// Ask the agent a question; the answer comes back on the next snapshot.
+    /// Superseded by `.capture` but kept for backward compat with an old watch
+    /// build that hasn't updated yet.
     case askAgent(query: String)
+    /// Log-or-ask: the phone decides whether the text can be captured as a
+    /// fact across the spheres, or should be answered as a question. The
+    /// result (chips or reply) comes back on the next snapshot.
+    case capture(text: String)
 
     static let key = "cmd"
 
@@ -28,6 +34,8 @@ public enum WatchCommand: Equatable, Sendable {
             return [Self.key: "shopping", "id": id]
         case .askAgent(let query):
             return [Self.key: "ask", "query": query]
+        case .capture(let text):
+            return [Self.key: "capture", "text": text]
         }
     }
 
@@ -47,6 +55,9 @@ public enum WatchCommand: Equatable, Sendable {
         case "ask":
             guard let query = dictionary["query"] as? String, !query.isEmpty else { return nil }
             return .askAgent(query: query)
+        case "capture":
+            guard let text = dictionary["text"] as? String, !text.isEmpty else { return nil }
+            return .capture(text: text)
         default:
             return nil
         }

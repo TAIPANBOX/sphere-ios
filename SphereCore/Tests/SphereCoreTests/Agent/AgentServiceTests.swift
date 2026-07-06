@@ -306,6 +306,63 @@ struct AgentServiceTests {
 
         #expect(try await service.insight() == cached)
     }
+
+    // MARK: - captureOrAnswer
+
+    @Test func captureOrAnswerShortCircuitsOnRuleParseableText() async throws {
+        let engine = StubEngine()
+        let (service, _, _) = try makeService(engine: engine)
+
+        let reply = await service.captureOrAnswer(
+            text: "drank a glass of water", tools: waterRegistry()
+        )
+
+        #expect(reply == .captured([CaptureResult(summary: "Logged 1 glass of water", isError: false)]))
+        // The rule parser handled it; the LLM was never touched.
+        #expect(engine.calls.isEmpty)
+    }
+
+    @Test func captureOrAnswerRoutesUnparseableTextToCapture() async throws {
+        let engine = StubEngine(scripts: [
+            [
+                .toolCall(LLMToolCall(id: "tu_1", name: "log_water_glass", input: ["count": 1])),
+                .stop(.toolUse),
+            ],
+            [.stop(.endTurn)],
+        ])
+        let (service, _, _) = try makeService(engine: engine)
+
+        let reply = await service.captureOrAnswer(
+            text: "just finished my morning run, felt great", tools: waterRegistry()
+        )
+
+        #expect(reply == .captured([CaptureResult(summary: "Logged 1 glass of water", isError: false)]))
+    }
+
+    @Test func captureOrAnswerFallsBackToAnswerWhenCaptureYieldsNothing() async throws {
+        let engine = StubEngine(scripts: [
+            [.stop(.endTurn)],
+        ])
+        engine.completeResult = "You slept 7 hours last night."
+        let (service, _, _) = try makeService(engine: engine)
+
+        let reply = await service.captureOrAnswer(
+            text: "how did I sleep?", tools: waterRegistry()
+        )
+
+        #expect(reply == .answered("You slept 7 hours last night."))
+    }
+
+    @Test func captureOrAnswerFallsBackToFriendlyStringOnTotalFailure() async throws {
+        let engine = StubEngine()
+        let (service, _, _) = try makeService(engine: engine, keys: [:])
+
+        let reply = await service.captureOrAnswer(
+            text: "how did I sleep?", tools: waterRegistry()
+        )
+
+        #expect(reply == .answered("Couldn't reach the assistant."))
+    }
 }
 
 /// In-memory OfflineCache for tests.
