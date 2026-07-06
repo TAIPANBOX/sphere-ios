@@ -12,7 +12,7 @@ struct HomeStoreTests {
         let database = try AppDatabase.inMemory()
         let agent = engine.map { engine in
             AgentService(
-                keyStore: InMemoryAPIKeyStore([.anthropic: "key"]),
+                keyStore: InMemoryAPIKeyStore([.openrouter: "key"]),
                 engram: try! EngramStore.inMemory(),
                 cache: InMemoryCache(),
                 engineFactory: { _ in engine }

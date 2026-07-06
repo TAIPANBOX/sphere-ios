@@ -2,8 +2,7 @@ import Foundation
 
 /// Which backend answers the agents. On-device (Apple Foundation Models) is
 /// the free, no-key default; a downloaded Tier-1 model is the free path for
-/// devices without Apple Intelligence; the four cloud providers are the
-/// optional power tier.
+/// devices without Apple Intelligence; OpenRouter is the optional cloud tier.
 public enum AIBackend: Equatable, Hashable, Sendable {
     case onDevice
     /// The active model downloaded via the model manager (AI Tier 1). Which
@@ -42,29 +41,20 @@ public enum AIBackend: Equatable, Hashable, Sendable {
     }
 }
 
-/// The four user-facing AI providers. Anthropic gets the native engine;
-/// OpenAI, Gemini, and OpenRouter all ride ``OpenAICompatibleEngine`` with
-/// their own base URL, default model, and headers.
+/// The single cloud provider. One OpenRouter key gives access to every hosted
+/// model (Claude, GPT, Gemini, …) through the OpenAI-compatible API, so the
+/// app never talks to vendor APIs directly.
 public enum LLMProviderID: String, CaseIterable, Codable, Sendable {
-    case anthropic
-    case openai
-    case gemini
     case openrouter
 
     public var displayName: String {
         switch self {
-        case .anthropic: "Claude"
-        case .openai: "ChatGPT"
-        case .gemini: "Gemini"
         case .openrouter: "OpenRouter"
         }
     }
 
     public var defaultModel: String {
         switch self {
-        case .anthropic: "claude-haiku-4-5"
-        case .openai: "gpt-5-mini"
-        case .gemini: "gemini-2.5-flash"
         case .openrouter: "anthropic/claude-haiku-4.5"
         }
     }
@@ -75,20 +65,6 @@ public enum LLMProviderID: String, CaseIterable, Codable, Sendable {
     ) -> any LLMEngine {
         let model = model ?? defaultModel
         switch self {
-        case .anthropic:
-            return AnthropicEngine(model: model, transport: transport)
-        case .openai:
-            return OpenAICompatibleEngine(
-                baseURL: URL(string: "https://api.openai.com/v1")!,
-                model: model,
-                transport: transport
-            )
-        case .gemini:
-            return OpenAICompatibleEngine(
-                baseURL: URL(string: "https://generativelanguage.googleapis.com/v1beta/openai")!,
-                model: model,
-                transport: transport
-            )
         case .openrouter:
             return OpenAICompatibleEngine(
                 baseURL: URL(string: "https://openrouter.ai/api/v1")!,

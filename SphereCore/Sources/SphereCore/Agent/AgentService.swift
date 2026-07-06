@@ -58,8 +58,7 @@ public final class AgentService: Sendable {
     /// 1. the user's explicit choice, if usable;
     /// 2. free on-device (Apple) when available;
     /// 3. the active downloaded model (Tier 1), when installed;
-    /// 4. the first configured cloud key (Anthropic → OpenAI → Gemini →
-    ///    OpenRouter).
+    /// 4. the OpenRouter key, when configured.
     /// Throws `noApiKey` only when none of the above is available.
     private func resolveBackend() throws -> (engine: any LLMEngine, apiKey: String, label: String) {
         if let preferred = preferredBackend() {

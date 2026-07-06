@@ -10,7 +10,7 @@ struct ChatSessionTests {
         sphereName: String = "Goals",
         sphereType: SphereType? = .goals,
         tools: SphereToolRegistry? = nil,
-        keys: [LLMProviderID: String] = [.anthropic: "key"]
+        keys: [LLMProviderID: String] = [.openrouter: "key"]
     ) throws -> ChatSession {
         let agent = AgentService(
             keyStore: InMemoryAPIKeyStore(keys),

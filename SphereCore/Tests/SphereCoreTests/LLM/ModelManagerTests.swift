@@ -4,10 +4,12 @@ import Testing
 
 @Suite("ModelFit & Catalog")
 struct ModelFitTests {
-    @Test func catalogHasFiveCuratedModels() {
-        #expect(ModelCatalog.all.count == 5)
-        #expect(ModelCatalog.model(id: "llama-3.2-3b-q4")?.family == "Llama")
+    @Test func catalogHasThreeSmallCuratedModels() {
+        #expect(ModelCatalog.all.count == 3)
+        #expect(ModelCatalog.model(id: "qwen2.5-1.5b-q4")?.family == "Qwen")
         #expect(ModelCatalog.model(id: "nope") == nil)
+        // The catalog is small-models-only by design.
+        #expect(ModelCatalog.all.allSatisfy { $0.sizeMB <= 1_600 })
     }
 
     @Test func ramFitTiers() {
@@ -122,14 +124,14 @@ struct ModelManagerTests {
     @Test func setActivePersists() {
         let prefs = FakePreferences()
         let mgr = manager(prefs: prefs)
-        mgr.setActive("phi-3.5-mini-q4")
-        #expect(mgr.activeModelID == "phi-3.5-mini-q4")
-        #expect(prefs.active == "phi-3.5-mini-q4")
+        mgr.setActive("qwen2.5-1.5b-q4")
+        #expect(mgr.activeModelID == "qwen2.5-1.5b-q4")
+        #expect(prefs.active == "qwen2.5-1.5b-q4")
     }
 
     @Test func ramAndDiskFitUseDeviceValues() {
-        let mgr = manager(downloader: FakeDownloader(ram: 3000, disk: 500))
-        let big = ModelCatalog.model(id: "phi-3.5-mini-q4")!  // 3500 MB RAM, 2300 MB disk
+        let mgr = manager(downloader: FakeDownloader(ram: 2000, disk: 500))
+        let big = ModelCatalog.model(id: "gemma-2-2b-q4")!  // 2400 MB RAM, 1600 MB disk
         #expect(mgr.ramFit(for: big) == .insufficient)
         #expect(mgr.fitsOnDisk(big) == false)
     }

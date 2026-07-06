@@ -34,25 +34,25 @@ struct BackendSelectionTests {
     }
 
     @Test func autoPrefersOnDeviceOverCloudKey() throws {
-        let agent = try make(keys: [.anthropic: "sk-x"], onDevice: true)
+        let agent = try make(keys: [.openrouter: "sk-x"], onDevice: true)
         #expect(agent.activeProviderName() == "On-device (free)")
     }
 
     @Test func fallsBackToCloudKeyWhenNoDevice() throws {
-        let agent = try make(keys: [.openai: "sk-x"], onDevice: false)
-        #expect(agent.activeProviderName() == "ChatGPT")
+        let agent = try make(keys: [.openrouter: "sk-x"], onDevice: false)
+        #expect(agent.activeProviderName() == "OpenRouter")
     }
 
     @Test func explicitCloudChoiceWinsWhenKeyPresent() throws {
         let agent = try make(
-            keys: [.anthropic: "sk-a"], onDevice: true, preferred: .cloud(.anthropic)
+            keys: [.openrouter: "sk-a"], onDevice: true, preferred: .cloud(.openrouter)
         )
-        #expect(agent.activeProviderName() == "Claude")
+        #expect(agent.activeProviderName() == "OpenRouter")
     }
 
     @Test func explicitCloudChoiceFallsBackWhenKeyMissing() throws {
-        // Chose Gemini but never entered a key → auto-resolve to on-device.
-        let agent = try make(onDevice: true, preferred: .cloud(.gemini))
+        // Chose OpenRouter but never entered a key → auto-resolve to on-device.
+        let agent = try make(onDevice: true, preferred: .cloud(.openrouter))
         #expect(agent.activeProviderName() == "On-device (free)")
     }
 
@@ -70,13 +70,13 @@ struct BackendSelectionTests {
     }
 
     @Test func autoPrefersLocalModelOverCloudKey() throws {
-        let agent = try make(keys: [.anthropic: "sk-x"], onDevice: false, localModel: true)
+        let agent = try make(keys: [.openrouter: "sk-x"], onDevice: false, localModel: true)
         #expect(agent.activeProviderName() == "Downloaded model")
     }
 
     @Test func explicitLocalModelChoiceWins() throws {
         let agent = try make(
-            keys: [.anthropic: "sk-x"], onDevice: true, localModel: true, preferred: .localModel
+            keys: [.openrouter: "sk-x"], onDevice: true, localModel: true, preferred: .localModel
         )
         #expect(agent.activeProviderName() == "Downloaded model")
     }

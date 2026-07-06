@@ -384,11 +384,12 @@ gate.
   | SmolLM2-1.7B-Instruct | ~1.0 GB | smallest/fastest, basic |
   | Qwen2.5-1.5B-Instruct | ~1.0 GB | strong tool-use per byte |
   | Gemma-2-2B-it | ~1.6 GB | best quality/size balance |
-  | Llama-3.2-3B-Instruct | ~2.0 GB | balanced default |
-  | Phi-3.5-mini-instruct | ~2.2 GB | strongest reasoning, heaviest |
-- **Tier 2 — Bring-your-own cloud (power).** Existing Anthropic / OpenAI /
-  Gemini / OpenRouter engines for max quality, older/low-RAM devices, or
-  heavy chat. Includes the subscription-auth work below.
+  (Decision 2026-07-06: the catalog is capped at small models — ≤ ~2.6B
+  params / ≤ 1.6 GB download; larger candidates like Llama-3.2-3B and
+  Phi-3.5-mini were dropped.)
+- **Tier 2 — Bring-your-own cloud (power).** OpenRouter only (decision
+  2026-07-06): one key covers Claude / GPT / Gemini / everything else, so the
+  direct Anthropic/OpenAI/Gemini engines were removed.
 
 Resolution order at launch: user's explicit choice → else Apple FM if
 available → else a downloaded model if present → else rule-based capture only
@@ -396,7 +397,7 @@ available → else a downloaded model if present → else rule-based capture onl
 
 ### 9.2 Architecture fit (additive — the loop doesn't change)
 
-Our LLM layer is already abstracted (`LLMProviderID`, `AnthropicEngine` /
+Our LLM layer is already abstracted (`LLMProviderID`,
 `OpenAICompatibleEngine`, `AgentService` tool loop, `ChatSession`). On-device
 is **one or two new engines** behind the same seam:
 - `FoundationModelsEngine` (wraps `LanguageModelSession`; map our
@@ -407,7 +408,7 @@ is **one or two new engines** behind the same seam:
   assembly the OpenAI-compatible engine already produces).
 `LLMProviderID` gains `.appleOnDevice` and `.localModel(id)`. AgentService,
 SphereTools, the brief, capture — all unchanged. This is the same "add an
-engine" move that gave us 4 providers from 2 engines.
+engine" move the engine seam was designed for.
 
 ### 9.3 Model manager (new, small subsystem)
 

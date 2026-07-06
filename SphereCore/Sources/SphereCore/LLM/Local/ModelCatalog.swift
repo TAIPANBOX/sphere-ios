@@ -37,7 +37,9 @@ public struct ModelInfo: Codable, Equatable, Identifiable, Sendable {
     }
 }
 
-/// The curated Tier-1 models (EXPANSION_PLAN §9.1). Small, 4-bit, on-device.
+/// The curated Tier-1 models (EXPANSION_PLAN §9.1). Deliberately small only
+/// (≤ ~2.6B params, ≤ 1.6 GB download): they fit every supported device and
+/// keep the download respectful of storage and cellular data.
 public enum ModelCatalog {
     public static let all: [ModelInfo] = [
         ModelInfo(
@@ -54,16 +56,6 @@ public enum ModelCatalog {
             id: "gemma-2-2b-q4", name: "Gemma 2 2B", family: "Gemma",
             paramsB: 2.6, quant: "Q4", sizeMB: 1_600, minRAMMB: 2_400, contextTokens: 8_192,
             url: "https://huggingface.co/mlx-community/gemma-2-2b-it-4bit"
-        ),
-        ModelInfo(
-            id: "llama-3.2-3b-q4", name: "Llama 3.2 3B", family: "Llama",
-            paramsB: 3.2, quant: "Q4", sizeMB: 2_000, minRAMMB: 3_000, contextTokens: 131_072,
-            url: "https://huggingface.co/mlx-community/Llama-3.2-3B-Instruct-4bit"
-        ),
-        ModelInfo(
-            id: "phi-3.5-mini-q4", name: "Phi-3.5 mini", family: "Phi",
-            paramsB: 3.8, quant: "Q4", sizeMB: 2_300, minRAMMB: 3_500, contextTokens: 131_072,
-            url: "https://huggingface.co/mlx-community/Phi-3.5-mini-instruct-4bit"
         ),
     ]
 

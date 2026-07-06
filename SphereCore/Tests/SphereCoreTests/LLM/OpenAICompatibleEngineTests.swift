@@ -151,16 +151,15 @@ struct OpenAICompatibleEngineTests {
     }
 
     @Test func providerRegistryWiresEnginesAndModels() throws {
-        #expect(LLMProviderID.anthropic.makeEngine() is AnthropicEngine)
-        #expect(LLMProviderID.openai.makeEngine() is OpenAICompatibleEngine)
-        #expect(LLMProviderID.gemini.makeEngine() is OpenAICompatibleEngine)
+        #expect(LLMProviderID.allCases == [.openrouter])
 
         let openrouter = try #require(LLMProviderID.openrouter.makeEngine() as? OpenAICompatibleEngine)
         #expect(openrouter.baseURL.absoluteString == "https://openrouter.ai/api/v1")
         #expect(openrouter.extraHeaders["X-Title"] == "Sphere")
 
-        let gemini = try #require(LLMProviderID.gemini.makeEngine(model: "gemini-2.5-pro") as? OpenAICompatibleEngine)
-        #expect(gemini.model == "gemini-2.5-pro")
-        #expect(gemini.baseURL.absoluteString.contains("generativelanguage.googleapis.com"))
+        let custom = try #require(
+            LLMProviderID.openrouter.makeEngine(model: "google/gemini-2.5-pro") as? OpenAICompatibleEngine
+        )
+        #expect(custom.model == "google/gemini-2.5-pro")
     }
 }

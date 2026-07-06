@@ -36,8 +36,8 @@ public struct LLMToolResult: Sendable, Equatable {
 
 /// A unified message representation across engines.
 ///
-/// Tool responses are represented as a `user` message carrying `toolResults`
-/// (Anthropic shape) — each engine translates to what its API expects.
+/// Tool responses are represented as a `user` message carrying `toolResults`;
+/// the engine translates to what its API expects.
 public struct LLMMessage: Sendable, Equatable {
     public enum Role: String, Sendable {
         case user
@@ -95,15 +95,6 @@ public enum StopReason: Sendable, Equatable {
     case maxTokens
     case other(String)
 
-    init(anthropic raw: String?) {
-        switch raw {
-        case "tool_use": self = .toolUse
-        case "max_tokens": self = .maxTokens
-        case "end_turn", nil: self = .endTurn
-        case .some(let value): self = .other(value)
-        }
-    }
-
     init(openAIFinishReason raw: String?) {
         switch raw {
         case "tool_calls": self = .toolUse
@@ -128,8 +119,8 @@ public enum LLMError: Error, Equatable, Sendable {
     case api(String)
 }
 
-/// One streaming LLM backend. Two implementations cover all four user-facing
-/// providers: ``AnthropicEngine`` and ``OpenAICompatibleEngine``.
+/// One streaming LLM backend. ``OpenAICompatibleEngine`` covers the cloud
+/// (OpenRouter); on-device engines are injected by the app target.
 public protocol LLMEngine: Sendable {
     func stream(
         apiKey: String,

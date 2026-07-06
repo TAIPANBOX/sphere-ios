@@ -10,9 +10,9 @@ before any non-trivial task.
 - **No Android**: this repo is iOS-only; the Flutter repo is the reference.
 - **SwiftUI + `@Observable` stores** (one per sphere), no architecture frameworks.
 - **GRDB.swift** for all persistence (sphere domain data + Engram, one DB family).
-- **LLM providers**: 4 user-facing (Anthropic, OpenAI, Gemini, OpenRouter) via
-  **2 engines** — Anthropic native + OpenAI-compatible (Gemini and OpenRouter
-  ride the OpenAI-compatible engine with custom base URLs).
+- **LLM providers**: cloud is **OpenRouter only** (one key, every hosted model)
+  via the OpenAI-compatible engine; no direct vendor APIs. Local models are
+  deliberately small only (≤ ~2.6B params / ≤ 1.6 GB, see `ModelCatalog`).
 - **Sync**: CloudKit (CKSyncEngine), no custom server. Wearables via HealthKit,
   no per-service OAuth.
 - Engram v2 (on-device reflection via Foundation Models, hybrid BM25+embedding

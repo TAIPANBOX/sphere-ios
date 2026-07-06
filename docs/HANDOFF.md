@@ -13,7 +13,7 @@ Repo rules: `../CLAUDE.md`. Flutter reference app: `../../sphere` (frozen).
 | Piece | Where | Notes |
 |---|---|---|
 | Engram v1.5 | `SphereCore/Sources/SphereCore/Engram/` | Episodic memory, FTS5+BM25, access reinforcement, Ebbinghaus decay + prune. Schema import-compatible with the Dart `sphere.engram.db`. |
-| LLM engines | `.../LLM/` | `AnthropicEngine` + `OpenAICompatibleEngine` (OpenAI, Gemini, OpenRouter) behind `LLMEngine`. Byte-level SSE parser. `LLMProviderID` maps 4 providers → 2 engines. |
+| LLM engines | `.../LLM/` | `OpenAICompatibleEngine` (OpenRouter — the only cloud provider) behind `LLMEngine`. Byte-level SSE parser. |
 | Agent layer | `.../Agent/` | `AgentService` (chat tool-loop, brief, insight + offline cache), `SphereToolRegistry`, `SpherePrompts`, `APIKeyStore` protocol. |
 | Golden template | `.../Spheres/GoalsStore.swift`, `SphereUI/Goals/GoalsScreen.swift` | THE pattern to copy for the other 11 spheres. |
 | Tests | `SphereCore/Tests/` | 83 tests, all green. `cd SphereCore && swift test`. |
@@ -71,7 +71,7 @@ passes, screen compiles in `swift build`.
   string-splitting; chunk boundaries tear UTF-8 and lines otherwise. Tests
   slice fixtures into 5–7-byte chunks to prove this.
 - **Tool-call arguments stream as JSON fragments.** Accumulate per index;
-  Anthropic flushes on `content_block_stop`, OpenAI-compatible on `[DONE]`.
+  the OpenAI-compatible engine flushes on `[DONE]`.
   Malformed accumulated JSON degrades to `{}` input, never a crash.
 - **`AsyncThrowingStream` + inner `Task`** needs
   `continuation.onTermination = { _ in task.cancel() }` or cancelled

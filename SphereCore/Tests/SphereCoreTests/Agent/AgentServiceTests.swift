@@ -6,7 +6,7 @@ import Testing
 struct AgentServiceTests {
     private func makeService(
         engine: StubEngine,
-        keys: [LLMProviderID: String] = [.anthropic: "key"],
+        keys: [LLMProviderID: String] = [.openrouter: "key"],
         cache: (any OfflineCache)? = nil
     ) throws -> (service: AgentService, engram: EngramStore, cache: InMemoryCache) {
         let engram = try EngramStore.inMemory()
@@ -163,13 +163,13 @@ struct AgentServiceTests {
         }
     }
 
-    @Test func providerPriorityPrefersEarlierProvider() throws {
+    @Test func openRouterKeyMakesServiceAvailable() throws {
         let engine = StubEngine()
         let (service, _, _) = try makeService(
             engine: engine,
-            keys: [.gemini: "g-key", .openrouter: "or-key"]
+            keys: [.openrouter: "or-key"]
         )
-        #expect(service.activeProviderName() == "Gemini")
+        #expect(service.activeProviderName() == "OpenRouter")
         #expect(service.isAvailable())
     }
 

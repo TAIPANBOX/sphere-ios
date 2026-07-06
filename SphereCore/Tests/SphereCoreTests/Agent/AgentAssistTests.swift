@@ -5,7 +5,7 @@ import Testing
 @Suite("AgentService.assist")
 struct AgentAssistTests {
     private func makeService(
-        engine: StubEngine, keys: [LLMProviderID: String] = [.anthropic: "key"]
+        engine: StubEngine, keys: [LLMProviderID: String] = [.openrouter: "key"]
     ) throws -> (AgentService, EngramStore) {
         let engram = try EngramStore.inMemory()
         let service = AgentService(
