@@ -19,7 +19,7 @@ updates, **P3** = later / opportunistic.
 | C3 | **Siri / Shortcuts via App Intents** — "log a glass of water", "log mood 4", "how's my day" | Same intents as C2, one implementation | P1 |
 | C4 | **HealthKit write-back** — workouts, mindful minutes, weight, water written TO HealthKit, not just read | Two-way trust; users expect Apple Health to be source of truth | P1 |
 | C5 | **Global search** — one search field over goals/tasks/contacts/books/journal; Engram FTS5 + per-store filters already give 80% | Data is scattered across 12 spheres; finding beats browsing | P2 |
-| C6 | **Face ID / passcode app lock** — health, finance, journal are sensitive | Table stakes for a life-data app | P1 |
+| C6 | ~~**Face ID / passcode app lock** — health, finance, journal are sensitive.~~ DONE (2026-07-06): `LockGate` wraps the whole app, biometrics with passcode fallback, re-auth after background; opt-in in Settings, mirrored to `UserProfile.appLockEnabled` for export. Hardened this pass: an opaque privacy cover on any non-active scene phase (so the app-switcher snapshot can't leak data), and fail-open when the device has neither biometrics nor a passcode (never traps the user out). | Table stakes for a life-data app | P1 |
 | C7 | **Data export/backup (JSON/CSV)** — pre-CloudKit safety hatch | No sync until Phase 8; users need an exit | P1 |
 | C8 | **EventKit calendar context** in the Meta Agent brief (Flutter had it) + profile context (HANDOFF note) | Brief quality; parity | P2 |
 | C9 | **SphereUI localization (uk)** — known debt, strings in `app_uk.arb` | Mechanical, big volume | P1 |

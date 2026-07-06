@@ -16,10 +16,14 @@ struct LockGate<Content: View>: View {
     var body: some View {
         ZStack {
             content()
-                .opacity(shouldObscure ? 0 : 1)
+                .opacity(contentVisible ? 1 : 0)
+                .disabled(!contentVisible)
+                .accessibilityHidden(!contentVisible)
 
-            if shouldObscure {
+            if needsAuth {
                 LockedView(retry: authenticate)
+            } else if privacyCover {
+                PrivacyCoverView()
             }
         }
         .task(id: lockEnabled) {
@@ -37,7 +41,16 @@ struct LockGate<Content: View>: View {
         }
     }
 
-    private var shouldObscure: Bool { lockEnabled && !unlocked }
+    /// Face ID hasn't succeeded this session — show the unlock prompt.
+    private var needsAuth: Bool { lockEnabled && !unlocked }
+
+    /// Unlocked, but the scene isn't active (app switcher, Control Center, an
+    /// incoming call): hide the content from the snapshot without forcing a
+    /// re-auth for a momentary interruption. A real background still clears
+    /// `unlocked`, so returning from it re-authenticates.
+    private var privacyCover: Bool { lockEnabled && unlocked && scenePhase != .active }
+
+    private var contentVisible: Bool { !needsAuth && !privacyCover }
 
     @MainActor
     private func authenticate() async {
@@ -48,10 +61,20 @@ struct LockGate<Content: View>: View {
         let context = LAContext()
         context.localizedFallbackTitle = "Use passcode"
         var error: NSError?
-        let policy: LAPolicy = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+        let canBiometrics = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+        let canDeviceAuth = context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
+
+        // No biometrics AND no device passcode — there's nothing to
+        // authenticate against. Fail open so the lock can never trap the user
+        // out of their own data (a device with no passcode has no boundary).
+        guard canBiometrics || canDeviceAuth else {
+            unlocked = true
+            return
+        }
+
+        let policy: LAPolicy = canBiometrics
             ? .deviceOwnerAuthenticationWithBiometrics
             : .deviceOwnerAuthentication
-
         do {
             unlocked = try await context.evaluatePolicy(policy, localizedReason: "Unlock Sphere")
         } catch {
@@ -74,6 +97,19 @@ private struct LockedView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.background)
+    }
+}
+
+/// An opaque cover shown while unlocked but not foreground-active, so the
+/// app-switcher snapshot never captures the user's data. No button: it clears
+/// itself the moment the scene becomes active again.
+private struct PrivacyCoverView: View {
+    var body: some View {
+        Image(systemName: "lock.fill")
+            .font(.system(size: 44))
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(.background)
     }
 }
 
