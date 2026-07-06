@@ -17,7 +17,7 @@ updates, **P3** = later / opportunistic.
 | C1 | ~~**Notifications engine** — one opt-in center: water reminders, medication times, bedtime wind-down, plant watering, subscription renewals, morning brief.~~ DONE (2026-07-06): pure `NotificationPlanBuilder` builders per category, `AppContainer.syncReminders()` orchestrates every category from live store data in one idempotent sync, Settings exposes a per-category opt-in. Not yet: proactive-nudge notifications (`.nudge` category defined but unscheduled — nudges stay an in-app surface), and wellbeing-pause suppression of non-critical reminders. | Retention driver; the data is already in the stores | P1 |
 | C2 | ~~**Interactive widgets (App Intents, iOS 17)** — log water / mark meditation done directly from the home-screen widget without opening the app.~~ DONE (2026-07-06): `QuickLogIntents.swift` shared verbatim into the `SphereWidgetExtension` target (project.yml source entry) so `Button(intent:)` compiles there; the intents patch the persisted `WidgetSnapshot` (waterToday / meditatedToday) right after writing so a tap reflects instantly, then reload timelines. Water + meditation buttons on systemSmall (water only)/systemMedium/systemLarge (widget now supports `.systemLarge` too). Mood skipped (needs a value picker). App reload-on-foreground added (`SphereApp.swift` `.active` case) so a widget/Siri write isn't clobbered by stale in-memory stores. | Native killer feature; widget infra already exists | P1 |
 | C3 | ~~**Siri / Shortcuts via App Intents** — "log a glass of water", "log mood 4", "how's my day".~~ DONE (shipped earlier): `Sphere/Sources/QuickLogIntents.swift` — `LogWaterIntent`, `LogMoodIntent`, `LogMeditationIntent` + `SphereShortcuts` (`AppShortcutsProvider`) registering Siri phrases, confirmed already in place before this pass. | Same intents as C2, one implementation | P1 |
-| C4 | **HealthKit write-back** — workouts, mindful minutes, weight, water written TO HealthKit, not just read | Two-way trust; users expect Apple Health to be source of truth | P1 |
+| C4 | ~~**HealthKit write-back** — workouts, mindful minutes, weight, water written TO HealthKit, not just read.~~ DONE (2026-07-06): workouts/weight/water already wrote via `HealthKitService` (`HKWorkoutBuilder`, `HKQuantitySample`); this pass added mindful minutes — `MindfulSessionWriting` protocol (`writeMindfulSession(start:end:)`), `HealthKitService` conforms and saves an `HKCategorySample` of type `.mindfulSession` (value `.notApplicable`), added to the share/write authorization set. `MindfulnessStore` takes an injected `mindfulWriter` and fires the write-back from `add(_ session:)` (covers meditation, breathing, and focus sessions — all route through `add`), skipping zero/negative durations; failures are silently swallowed (fire-and-forget), matching `HealthStore`. Not covered: the widget/Siri `LogMeditationIntent` path writes straight to the shared DB from the extension process and does not mirror to HealthKit (extension-process auth complexity) — the store path is the intended deliverable. | Two-way trust; users expect Apple Health to be source of truth | P1 |
 | C5 | **Global search** — one search field over goals/tasks/contacts/books/journal; Engram FTS5 + per-store filters already give 80% | Data is scattered across 12 spheres; finding beats browsing | P2 |
 | C6 | ~~**Face ID / passcode app lock** — health, finance, journal are sensitive.~~ DONE (2026-07-06): `LockGate` wraps the whole app, biometrics with passcode fallback, re-auth after background; opt-in in Settings, mirrored to `UserProfile.appLockEnabled` for export. Hardened this pass: an opaque privacy cover on any non-active scene phase (so the app-switcher snapshot can't leak data), and fail-open when the device has neither biometrics nor a passcode (never traps the user out). | Table stakes for a life-data app | P1 |
 | C7 | **Data export/backup (JSON/CSV)** — pre-CloudKit safety hatch | No sync until Phase 8; users need an exit | P1 |
@@ -67,7 +67,7 @@ updates, **P3** = later / opportunistic.
 ## Mindfulness
 
 - Parity: daily affirmation card, streak calendar heatmap, body-scan guide, session notes. **P1** (affirmations are cheap + loved), heatmap **P2**
-- New: more breathing patterns (box 4-4-4-4, coherent 5-5) with haptic-guided pacing (no need to look at screen); write mindful minutes to HealthKit (C4); journal prompts from the agent based on recent mood; mood↔sleep correlation insight (cross-sphere, data exists). **P2**
+- New: more breathing patterns (box 4-4-4-4, coherent 5-5) with haptic-guided pacing (no need to look at screen); ~~write mindful minutes to HealthKit (C4)~~ DONE (2026-07-06); journal prompts from the agent based on recent mood; mood↔sleep correlation insight (cross-sphere, data exists). **P2**
 
 ## Rest
 
@@ -193,7 +193,7 @@ no single-sphere app can correlate across life domains.
 6. Finance: monthly category chart; Home sphere: recurring chores
 7. C11 empty states + Mindfulness affirmations (cheap delight)
 8. C9 SphereUI uk localization (mechanical, pre-launch)
-9. C4 HealthKit write-back
+9. ~~C4 HealthKit write-back~~ DONE (2026-07-06)
 10. Learning: Pomodoro + Live Activity (post-launch headline feature)
 
 Phases 8 (CloudKit) and 9 (Engram v2) remain post-launch as planned; C7
