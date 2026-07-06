@@ -7,8 +7,9 @@ import SphereCore
 /// spheres on its own. Text-only input also works with the free rule-based
 /// capture; images need a vision-capable backend.
 public struct AgentCaptureSheet: View {
-    /// Runs the capture. `(text, images)` in, logged results out.
-    private let onCapture: (String, [Data]) async -> [CaptureResult]
+    /// Runs the capture. `(text, images)` in, logged results plus follow-up
+    /// suggestions out.
+    private let onCapture: (String, [Data]) async -> CaptureOutcome
     private let onConfigureProvider: (() -> Void)?
     private let agentAvailable: Bool
 
@@ -20,11 +21,14 @@ public struct AgentCaptureSheet: View {
     @State private var results: [CaptureResult] = []
     /// Chips revealed so far, staggered in behind `results` (see `stageResults`).
     @State private var revealedResults: [CaptureResult] = []
+    /// Follow-up suggestions from the latest capture, revealed one by one.
+    @State private var revealedSuggestions: [AgentSuggestion] = []
     @State private var working = false
     @State private var missed = false
     @State private var showingCamera = false
     @State private var successTick = 0
     @State private var warningTick = 0
+    @State private var suggestionTick = 0
     #if os(iOS)
     @State private var dictation = SpeechDictation()
     #endif
@@ -37,7 +41,7 @@ public struct AgentCaptureSheet: View {
     public init(
         agentAvailable: Bool = false,
         onConfigureProvider: (() -> Void)? = nil,
-        onCapture: @escaping (String, [Data]) async -> [CaptureResult]
+        onCapture: @escaping (String, [Data]) async -> CaptureOutcome
     ) {
         self.agentAvailable = agentAvailable
         self.onConfigureProvider = onConfigureProvider
@@ -52,10 +56,12 @@ public struct AgentCaptureSheet: View {
                     if !images.isEmpty { attachments }
                     if working { thinking }
                     if !revealedResults.isEmpty { resultsList }
+                    if !revealedSuggestions.isEmpty { suggestionsList }
                     if missed { missHint }
                 }
                 .padding()
                 .sphereAnimation(SphereMotion.gentle, value: revealedResults.count)
+                .sphereAnimation(SphereMotion.gentle, value: revealedSuggestions.count)
             }
             .safeAreaInset(edge: .bottom) { composer }
             .navigationTitle("Your agent")
@@ -142,6 +148,28 @@ public struct AgentCaptureSheet: View {
         .sphereHaptic(.success, trigger: successTick)
     }
 
+    private var suggestionsList: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Continue").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+            ForEach(revealedSuggestions) { suggestion in
+                Button {
+                    Task { await run(suggestion) }
+                } label: {
+                    Text(suggestion.title)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.bordered)
+                .tint(SphereTheme.accent(for: .mindfulness))
+                .disabled(working)
+                .transition(.move(edge: .leading).combined(with: .opacity))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .sphereHaptic(.tap, trigger: suggestionTick)
+    }
+
     private var missHint: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("I couldn't sort that automatically.")
@@ -199,19 +227,43 @@ public struct AgentCaptureSheet: View {
         working = true
         missed = false
         revealedResults = []
+        revealedSuggestions = []
         #if os(iOS)
         dictation.stop()
         #endif
-        let output = await onCapture(input, images)
-        results = output
-        missed = output.isEmpty
+        let outcome = await onCapture(input, images)
+        results = outcome.results
+        missed = outcome.results.isEmpty
         if missed {
             warningTick += 1
         } else {
             text = ""
             images = []
             successTick += 1
-            await stageResults(output)
+            await stageResults(outcome.results)
+            await stageSuggestions(outcome.suggestions)
+        }
+        working = false
+    }
+
+    /// Runs a tapped suggestion as a fresh capture (self-contained prompt, no
+    /// images), replacing the results and suggestion row with the new ones.
+    private func run(_ suggestion: AgentSuggestion) async {
+        guard !working else { return }
+        suggestionTick += 1
+        working = true
+        missed = false
+        revealedResults = []
+        revealedSuggestions = []
+        let outcome = await onCapture(suggestion.prompt, [])
+        results = outcome.results
+        missed = outcome.results.isEmpty
+        if missed {
+            warningTick += 1
+        } else {
+            successTick += 1
+            await stageResults(outcome.results)
+            await stageSuggestions(outcome.suggestions)
         }
         working = false
     }
@@ -234,6 +286,24 @@ public struct AgentCaptureSheet: View {
             }
             withAnimation(SphereMotion.gentle) {
                 revealedResults.append(result)
+            }
+        }
+    }
+
+    /// Reveals suggestion buttons one by one (gentle preset), after the result
+    /// chips. Under Reduce Motion they all appear at once.
+    private func stageSuggestions(_ suggestions: [AgentSuggestion]) async {
+        guard !suggestions.isEmpty else { return }
+        guard !reduceMotion else {
+            revealedSuggestions = suggestions
+            return
+        }
+        for (index, suggestion) in suggestions.enumerated() {
+            if index > 0 {
+                try? await Task.sleep(nanoseconds: Self.staggerStepNanoseconds)
+            }
+            withAnimation(SphereMotion.gentle) {
+                revealedSuggestions.append(suggestion)
             }
         }
     }

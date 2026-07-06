@@ -6,7 +6,7 @@ public struct HomeScreen: View {
     private let userName: String
     private let onConfigureProvider: (() -> Void)?
     private let onQuickCapture: ((String) async -> [CaptureResult])?
-    private let onAgentCapture: ((String, [Data]) async -> [CaptureResult])?
+    private let onAgentCapture: ((String, [Data]) async -> CaptureOutcome)?
     private let ritual: RitualStore?
     private let insights: InsightsStore?
     private let nudges: NudgeStore?
@@ -37,7 +37,7 @@ public struct HomeScreen: View {
         userName: String = "",
         onConfigureProvider: (() -> Void)? = nil,
         onQuickCapture: ((String) async -> [CaptureResult])? = nil,
-        onAgentCapture: ((String, [Data]) async -> [CaptureResult])? = nil,
+        onAgentCapture: ((String, [Data]) async -> CaptureOutcome)? = nil,
         ritual: RitualStore? = nil,
         insights: InsightsStore? = nil,
         nudges: NudgeStore? = nil,
@@ -153,8 +153,10 @@ public struct HomeScreen: View {
             onConfigureProvider: onConfigureProvider,
             onCapture: { text, images in
                 if let onAgentCapture { return await onAgentCapture(text, images) }
-                if let onQuickCapture, !text.isEmpty { return await onQuickCapture(text) }
-                return []
+                if let onQuickCapture, !text.isEmpty {
+                    return CaptureOutcome(results: await onQuickCapture(text))
+                }
+                return CaptureOutcome(results: [])
             }
         )
     }

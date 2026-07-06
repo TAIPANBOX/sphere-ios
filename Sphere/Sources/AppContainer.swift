@@ -340,10 +340,11 @@ final class AppContainer {
     }
 
     /// Agent-driven capture: when a tool-capable backend is available, the
-    /// agent routes the note (and any photos) across every sphere; otherwise it
-    /// falls back to the free rule-based parser for plain text. Refreshes the
-    /// widget when anything was logged.
-    func agentCapture(_ text: String, images: [Data]) async -> [CaptureResult] {
+    /// agent routes the note (and any photos) across every sphere, then
+    /// proposes follow-up suggestions; otherwise it falls back to the free
+    /// rule-based parser for plain text (no suggestions). Refreshes the widget
+    /// when anything was logged.
+    func agentCapture(_ text: String, images: [Data]) async -> CaptureOutcome {
         if agent.isAvailable() {
             let llmImages = images.map {
                 LLMImage(mimeType: "image/jpeg", base64Data: $0.base64EncodedString())
@@ -351,13 +352,18 @@ final class AppContainer {
             if let results = try? await agent.capture(
                 text: text, images: llmImages, tools: toolRegistry
             ), !results.isEmpty {
+                let suggestions = results.contains(where: { !$0.isError })
+                    ? await agent.followUps(for: text, captured: results)
+                    : []
+                lastSuggestions = suggestions
                 refreshWidget()
-                return results
+                return CaptureOutcome(results: results, suggestions: suggestions)
             }
         }
         // No agent (or it routed nothing): the free rule parser handles text.
-        guard !text.isEmpty else { return [] }
-        return await quickCapture(text)
+        guard !text.isEmpty else { return CaptureOutcome(results: []) }
+        lastSuggestions = []
+        return CaptureOutcome(results: await quickCapture(text))
     }
 
     /// Applies a quick-log command sent from the watch, then pushes a fresh
@@ -390,15 +396,22 @@ final class AppContainer {
             lastAgentReply = (try? await agent.answer(query))
                 ?? "Couldn't reach the assistant."
             lastCaptureResults = []
+            lastSuggestions = []
             lastAgentReplyAt = Date()
         case .capture(let text):
             switch await agent.captureOrAnswer(text: text, tools: toolRegistry) {
-            case .captured(let results):
+            case .captured(let results, let fromAgent):
                 lastCaptureResults = results
                 lastAgentReply = nil
+                // Only spend an extra LLM call on suggestions after the agent
+                // path logged something real — never after a trivial rule log.
+                lastSuggestions = (fromAgent && results.contains(where: { !$0.isError }))
+                    ? await agent.followUps(for: text, captured: results)
+                    : []
             case .answered(let text):
                 lastAgentReply = text
                 lastCaptureResults = []
+                lastSuggestions = []
             }
             // Stamped in both branches: the watch's Thinking… state ends as
             // soon as this is newer than the submission time, regardless of
@@ -413,6 +426,9 @@ final class AppContainer {
     /// Confirmation chips from the last wrist capture, surfaced on the next
     /// snapshot. Mutually exclusive with `lastAgentReply`.
     private var lastCaptureResults: [CaptureResult] = []
+    /// Follow-up suggestions from the last agent capture, surfaced on the next
+    /// snapshot. Cleared on any capture/answer that produced none.
+    private var lastSuggestions: [AgentSuggestion] = []
     /// When `lastAgentReply`/`lastCaptureResults` was last updated; nil until
     /// the first watch submission resolves. The watch uses this to detect a
     /// fresh reply and to render a relative "Xm ago" timestamp under it.
@@ -447,6 +463,9 @@ final class AppContainer {
             agentReplyAt: lastAgentReplyAt,
             captureResults: lastCaptureResults.map {
                 WidgetSnapshot.CaptureLine(summary: $0.summary, isError: $0.isError)
+            },
+            suggestions: lastSuggestions.map {
+                WidgetSnapshot.SuggestionLine(id: $0.id, title: $0.title, prompt: $0.prompt)
             },
             waterToday: health.waterToday,
             waterGoal: HealthStore.waterGoalGlasses,

@@ -204,6 +204,9 @@ struct WatchRootView: View {
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                if !snapshot.suggestions.isEmpty {
+                    suggestionButtons
+                }
                 if let at = snapshot.agentReplyAt,
                    !snapshot.captureResults.isEmpty || !(snapshot.agentReply ?? "").isEmpty {
                     TimelineView(.periodic(from: at, by: 60)) { context in
@@ -225,6 +228,25 @@ struct WatchRootView: View {
                 Text("Will ask when your iPhone is nearby.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var suggestionButtons: some View {
+        VStack(spacing: 4) {
+            ForEach(snapshot.suggestions.prefix(3)) { suggestion in
+                Button {
+                    let reachable = sendCommand(.capture(text: suggestion.prompt))
+                    askState.submitted(reachable: reachable)
+                } label: {
+                    Text(suggestion.title)
+                        .font(.caption2)
+                        .lineLimit(2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.bordered)
+                .tint(accent)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

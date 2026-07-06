@@ -15,3 +15,15 @@ public struct AgentSuggestion: Sendable, Equatable, Codable, Identifiable {
         self.prompt = prompt
     }
 }
+
+/// The result of an agent capture surfaced to the UI: the logged chips plus
+/// any follow-up suggestions the agent proposed.
+public struct CaptureOutcome: Sendable, Equatable {
+    public let results: [CaptureResult]
+    public let suggestions: [AgentSuggestion]
+
+    public init(results: [CaptureResult], suggestions: [AgentSuggestion] = []) {
+        self.results = results
+        self.suggestions = suggestions
+    }
+}
