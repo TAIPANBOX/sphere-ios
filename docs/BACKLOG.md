@@ -20,10 +20,10 @@ updates, **P3** = later / opportunistic.
 | C4 | ~~**HealthKit write-back** — workouts, mindful minutes, weight, water written TO HealthKit, not just read.~~ DONE (2026-07-06): workouts/weight/water already wrote via `HealthKitService` (`HKWorkoutBuilder`, `HKQuantitySample`); this pass added mindful minutes — `MindfulSessionWriting` protocol (`writeMindfulSession(start:end:)`), `HealthKitService` conforms and saves an `HKCategorySample` of type `.mindfulSession` (value `.notApplicable`), added to the share/write authorization set. `MindfulnessStore` takes an injected `mindfulWriter` and fires the write-back from `add(_ session:)` (covers meditation, breathing, and focus sessions — all route through `add`), skipping zero/negative durations; failures are silently swallowed (fire-and-forget), matching `HealthStore`. Not covered: the widget/Siri `LogMeditationIntent` path writes straight to the shared DB from the extension process and does not mirror to HealthKit (extension-process auth complexity) — the store path is the intended deliverable. | Two-way trust; users expect Apple Health to be source of truth | P1 |
 | C5 | **Global search** — one search field over goals/tasks/contacts/books/journal; Engram FTS5 + per-store filters already give 80% | Data is scattered across 12 spheres; finding beats browsing | P2 |
 | C6 | ~~**Face ID / passcode app lock** — health, finance, journal are sensitive.~~ DONE (2026-07-06): `LockGate` wraps the whole app, biometrics with passcode fallback, re-auth after background; opt-in in Settings, mirrored to `UserProfile.appLockEnabled` for export. Hardened this pass: an opaque privacy cover on any non-active scene phase (so the app-switcher snapshot can't leak data), and fail-open when the device has neither biometrics nor a passcode (never traps the user out). | Table stakes for a life-data app | P1 |
-| C7 | **Data export/backup (JSON/CSV)** — pre-CloudKit safety hatch | No sync until Phase 8; users need an exit | P1 |
+| C7 | ~~**Data export/backup (JSON/CSV)** — pre-CloudKit safety hatch~~ DONE (verified done 2026-07-07, shipped earlier): Settings has "Export all data" (`SettingsScreen.swift` `runExport`) calling `DataExporter.exportJSON(from:)`, which reads every GRDB table and serializes to versioned JSON. | No sync until Phase 8; users need an exit | P1 |
 | C8 | **EventKit calendar context** in the Meta Agent brief (Flutter had it) + profile context (HANDOFF note) | Brief quality; parity | P2 |
 | C9 | ~~**SphereUI localization (uk)**~~ dropped by product decision 2026-07-07 — English-only market; localization effort reverted (recoverable from git history). | Mechanical, big volume | P1 |
-| C10 | **Watch voice agent query** — dictate from the wrist, phone runs AgentService, reply back | Planned watch increment | P2 |
+| C10 | ~~**Watch voice agent query** — dictate from the wrist, phone runs AgentService, reply back~~ DONE (verified done 2026-07-07, shipped earlier): `WatchCommand.capture(text:)` sent from the watch (`WatchConnectivityStore`/`WatchSession`) reaches `AppContainer.apply` on the phone, which calls `agent.captureOrAnswer(text:tools:)` and pushes the reply back via `WidgetSnapshot.agentReply`. | Planned watch increment | P2 |
 | C11 | ~~**Empty-state coaching** — every sphere screen gets a friendly zero-data state with one-tap seed actions ("Add your first…")~~ DONE (2026-07-06): shared `EmptyStateCard` (`SphereUI/Components/`) — sphere emoji, title, one warm guidance line, accent-tinted "Add your first…" button, gentle-motion fade/scale-in. Wired at the top of all 12 screens, each with its own emptiness condition (whole-screen, not per-section) and its existing add-flow sheet: Goals (goals+habits empty → Add Goal), Health (no weight + no workouts → Log Weight), Finance (no transactions+accounts+subscriptions → Add Transaction), Learning (no books+skills → Add Book), Career (no tasks+network → Add Task), Relationships (no contacts → Add Contact), Rest (no sleep entries → Log Sleep), Hobbies (no hobbies → Add Hobby), Travel (no plans+wishlist → Add Trip), Mindfulness (no sessions+journal → Log Meditation), Creativity (no projects+ideas → Add Project), Home (no tasks+plants+shopping → Add Task). | First-run experience across 12 screens | P1 |
 | C12 | **Haptics + undo** — haptic on quick logs; snackbar undo for destructive swipes | Perceived quality | P2 |
 
@@ -42,7 +42,7 @@ updates, **P3** = later / opportunistic.
 ## Finance
 
 - Parity: debts/loans, investments. **P2**
-- New: monthly category breakdown chart (donut/bars) — biggest missing visual; upcoming renewals feed Today's Focus; recurring-transaction detection ("this looks monthly — make it a subscription?"); budget month rollover option; CSV import. **P1** for the chart, rest **P2–P3**
+- New: ~~monthly category breakdown chart (donut/bars) — biggest missing visual~~ DONE (verified done 2026-07-07, shipped earlier): `FinanceScreen.categoryChartCard` renders a `Charts`/`BarMark` breakdown over `store.categorySpendingThisMonth()`. Remaining in this line: upcoming renewals feed Today's Focus; recurring-transaction detection ("this looks monthly — make it a subscription?"); budget month rollover option; CSV import. **P1** for the chart, rest **P2–P3**
 - New: net-worth trend line from account balances. **P3**
 
 ## Learning
@@ -66,13 +66,13 @@ updates, **P3** = later / opportunistic.
 
 ## Mindfulness
 
-- Parity: daily affirmation card, streak calendar heatmap, body-scan guide, session notes. **P1** (affirmations are cheap + loved), heatmap **P2**
+- Parity: ~~daily affirmation card~~ DONE (verified done 2026-07-07, shipped earlier): `MindfulnessStore.customAffirmations`/`dailyAffirmation(for:)` (stable per-day pick) plus `addAffirmation`/`removeAffirmation`; streak calendar heatmap, body-scan guide, session notes still open. **P1** (affirmations are cheap + loved), heatmap **P2**
 - New: more breathing patterns (box 4-4-4-4, coherent 5-5) with haptic-guided pacing (no need to look at screen); ~~write mindful minutes to HealthKit (C4)~~ DONE (2026-07-06); journal prompts from the agent based on recent mood; mood↔sleep correlation insight (cross-sphere, data exists). **P2**
 
 ## Rest
 
 - Parity: relaxation section (music/podcast links), detox schedule (not just day toggle). **P3**
-- New: **HealthKit sleep auto-import** — kills manual sleep logging, the single biggest UX upgrade in the sphere. **P1**
+- New: ~~**HealthKit sleep auto-import** — kills manual sleep logging, the single biggest UX upgrade in the sphere.~~ DONE (verified done 2026-07-07, shipped earlier): `RestScreen.healthImportRow` auto-triggers `RestStore.importSleepFromHealth(days:)` on appear (manual fallback button still present); `HealthKitService` queries real `HKCategoryType(.sleepAnalysis)` samples. **P1**
 - New: bedtime wind-down notification from schedule (C1); sleep debt number (target vs 7-day actual); burnout warning surfaced in Today's Focus when work-hours trend high. **P2**
 
 ## Travel
@@ -84,7 +84,7 @@ updates, **P3** = later / opportunistic.
 ## Home sphere
 
 - Parity: appliances (warranty/purchase), utilities meters/bills, renovation projects, home inventory. **P2** (appliances+utilities), **P3** (renovation, inventory)
-- New: recurring chores (weekly cleaning auto-respawn) — biggest practical gap; plant watering notification (C1); shopping list on the Watch (check off in the store!). **P1** (recurring chores), **P2** (watch list)
+- New: ~~recurring chores (weekly cleaning auto-respawn) — biggest practical gap~~ DONE (verified done 2026-07-07, shipped earlier): `HomeSphereStore.toggle(id:)` calls `RecurringChore.nextOccurrence(after:)` and inserts the next occurrence on completion; plant watering notification (C1); shopping list on the Watch (check off in the store!) still open. **P1** (recurring chores), **P2** (watch list)
 
 ## Creativity
 
@@ -99,7 +99,7 @@ updates, **P3** = later / opportunistic.
 ## Relationships
 
 - Parity: contact detail editing sheet polish. **P2**
-- New: **import from iOS Contacts** (names + birthdays) — removes the cold-start wall, biggest win in the sphere. **P1**
+- New: ~~**import from iOS Contacts** (names + birthdays) — removes the cold-start wall, biggest win in the sphere.~~ DONE (verified done 2026-07-07, shipped earlier): `ContactsService`/`CNContactStore` wraps device Contacts, `ContactsImport.newContacts` in SphereCore, wired via `RelationshipsStore.importableContacts()`/`importContacts(_:)` and the Relationships screen's "Import from Contacts" menu action. **P1**
 - New: check-in quick action (prefilled iMessage draft via `sms:`); anniversaries/custom dates, not just birthdays; gift idea → Home shopping list link. **P2–P3**
 
 ---
@@ -116,13 +116,13 @@ no single-sphere app can correlate across life domains.
 
 | # | Idea | Notes | Pri |
 |---|------|-------|-----|
-| N1 | **Universal quick capture** — one "+" field (and Share/Action extension): type or dictate "coffee 4.50, mood 4, ran 5k"; the local agent routes it through existing sphere tools | Kills logging fatigue, reuses SphereToolRegistry as-is | P1 |
-| N2 | **Cross-sphere correlation insights** — weekly on-device stats over day-keyed data: "mood averages +1.2 on workout days", "spending spikes on poor-sleep days" | Impossible for single-sphere apps; data already exists | P1 |
+| N1 | ~~**Universal quick capture** — one "+" field (and Share/Action extension): type or dictate "coffee 4.50, mood 4, ran 5k"; the local agent routes it through existing sphere tools~~ DONE (verified done 2026-07-07, shipped earlier): `QuickCapture.run`/`CaptureRuleParser.parse` route free text through `SphereToolRegistry`; reachable from Home via the "Tell your agent anything" sheet (`HomeScreen.swift` → `QuickCaptureSheet`). | Kills logging fatigue, reuses SphereToolRegistry as-is | P1 |
+| N2 | ~~**Cross-sphere correlation insights** — weekly on-device stats over day-keyed data: "mood averages +1.2 on workout days", "spending spikes on poor-sleep days"~~ DONE (verified done 2026-07-07, shipped earlier): `CorrelationEngine` + `InsightsStore` (`Insights/`) built in `AppContainer` and surfaced on Home via `insights.weeklyInsights(limit:)`. | Impossible for single-sphere apps; data already exists | P1 |
 | N3 | **Proactive agent** — pattern-triggered check-ins (stress up 3 days + no meditation → gentle suggestion), budget cap approaching, streak about to lapse | The "companion" promise made real; needs notification engine | P2 |
-| N4 | **Forgiveness mechanics everywhere** — sick mode / vacation mode pauses ALL streaks and softens Life Score; streak freeze tokens | Research-backed churn killer; humane by design | P1 |
+| N4 | ~~**Forgiveness mechanics everywhere** — sick mode / vacation mode pauses ALL streaks and softens Life Score; streak freeze tokens~~ DONE (verified done 2026-07-07, shipped earlier): `UserProfile.WellbeingMode` + `isWellbeingPaused(asOf:)`, `AppContainer.applyWellbeing(asOf:)`, and `StreakPolicy` (excused-day streak bridging, including mindfulness excused days). | Research-backed churn killer; humane by design | P1 |
 | N5 | **Weekly narrative review** — agent writes the story of your week across spheres + one reflective question; saved as a journal artifact | Insight > raw data; retention ritual | P2 |
 | N6 | **Life Wheel audit (quarterly)** — user self-rates all 12 spheres 1–10; delta vs computed Life Score is the insight ("you feel worse about Finance than your data says") | Classic coaching tool, perfect fit for the 12-sphere model | P2 |
-| N7 | **Privacy as a feature** — local-first + Face ID + explicit "your data never leaves the device except your own LLM key" screen | Users now ask for E2E/privacy explicitly; we already are this — say it | P1 |
+| N7 | ~~**Privacy as a feature** — local-first + Face ID + explicit "your data never leaves the device except your own LLM key" screen~~ DONE (verified done 2026-07-07, shipped earlier): `PrivacyScreen` (in `LockGate.swift`) with Face ID/Touch ID via `LAContext` and explicit local-first copy. | Users now ask for E2E/privacy explicitly; we already are this — say it | P1 |
 
 ### Per sphere
 
@@ -185,12 +185,12 @@ no single-sphere app can correlate across life domains.
 
 ## Suggested order (top 10)
 
-1. C6 Face ID lock + C7 data export (trust foundation, small)
+1. ~~C6 Face ID lock + C7 data export (trust foundation, small)~~ DONE (verified done 2026-07-07, shipped earlier)
 2. C1 notifications engine (water/meds/bedtime/plants/renewals/brief)
 3. C2+C3 App Intents: interactive widget + Siri quick logs
-4. Rest: HealthKit sleep auto-import
-5. Relationships: iOS Contacts import
-6. Finance: monthly category chart; Home sphere: recurring chores
+4. ~~Rest: HealthKit sleep auto-import~~ DONE (verified done 2026-07-07, shipped earlier)
+5. ~~Relationships: iOS Contacts import~~ DONE (verified done 2026-07-07, shipped earlier)
+6. ~~Finance: monthly category chart; Home sphere: recurring chores~~ DONE (verified done 2026-07-07, shipped earlier)
 7. ~~C11 empty states~~ DONE (2026-07-06) + Mindfulness affirmations (cheap delight, affirmations already shipped)
 8. ~~C9 SphereUI uk localization~~ dropped (2026-07-07): English-only market
 9. ~~C4 HealthKit write-back~~ DONE (2026-07-06)
