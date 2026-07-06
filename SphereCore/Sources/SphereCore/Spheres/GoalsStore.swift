@@ -110,6 +110,17 @@ public final class GoalsStore {
         habits = habits.map { $0.id == id ? toggled : $0 }
     }
 
+    /// Idempotently checks a habit in for `date`. Unlike `toggleHabit`, a
+    /// second call is a no-op — used by the notification "Done" action, whose
+    /// delivery is not guaranteed to happen exactly once.
+    public func checkInHabit(id: String, on date: Date = Date()) async throws {
+        guard let habit = habits.first(where: { $0.id == id }), !habit.checkedIn(on: date)
+        else { return }
+        let checked = habit.checkingIn(on: date)
+        try await database.writer.write { db in try checked.save(db) }
+        habits = habits.map { $0.id == id ? checked : $0 }
+    }
+
     // MARK: - Agent tools
 
     /// Tools this sphere contributes to the agent's registry.

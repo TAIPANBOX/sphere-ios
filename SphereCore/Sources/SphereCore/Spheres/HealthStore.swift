@@ -252,6 +252,18 @@ public final class HealthStore {
         medications = medications.map { $0.id == id ? toggled : $0 }
     }
 
+    /// Idempotently marks a medication taken for `date`. Unlike
+    /// `toggleMedication`, a second call is a no-op — used by the notification
+    /// "Mark taken" action, whose delivery is not guaranteed to be unique.
+    public func markMedicationTaken(id: String, on date: Date = Date()) async throws {
+        guard let medication = medications.first(where: { $0.id == id }),
+              !medication.takenToday(on: date)
+        else { return }
+        let taken = medication.markingTaken(on: date)
+        try await database.writer.write { db in try taken.save(db) }
+        medications = medications.map { $0.id == id ? taken : $0 }
+    }
+
     public func medicationsTakenToday(on date: Date = Date()) -> Int {
         medications.count { $0.takenToday(on: date) }
     }

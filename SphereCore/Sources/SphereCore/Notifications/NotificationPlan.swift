@@ -29,6 +29,13 @@ public enum NotificationCategory: String, CaseIterable, Sendable {
 /// A platform-agnostic description of one scheduled local notification. The
 /// app target maps this to `UNCalendarNotificationTrigger`; SphereCore stays
 /// free of UserNotifications so the builders are pure and unit-testable.
+///
+/// `actionCategoryIdentifier` and `userInfo` carry what an action handler on
+/// the app side needs to complete the reminder from the wrist or lock screen
+/// (e.g. the medication or plant id). They are optional so plans without
+/// actions (birthdays, morning brief) stay unchanged. `actionCategoryIdentifier`
+/// intentionally mirrors the `NotificationCategory` raw value for actionable
+/// categories, but is stored explicitly so the mapping stays with the plan.
 public struct NotificationPlan: Sendable, Equatable, Identifiable {
     public let id: String
     public let category: NotificationCategory
@@ -36,6 +43,13 @@ public struct NotificationPlan: Sendable, Equatable, Identifiable {
     public let body: String
     public let dateComponents: DateComponents
     public let repeats: Bool
+    /// The `UNNotificationCategory` identifier whose actions this plan offers,
+    /// or nil for a plain (non-actionable) notification.
+    public let actionCategoryIdentifier: String?
+    /// Payload the action handler reads (e.g. `["medicationId": "..."]`).
+    /// String-keyed strings so it round-trips cleanly through
+    /// `UNNotificationContent.userInfo` and stays `Sendable`/`Equatable`.
+    public let userInfo: [String: String]
 
     public init(
         id: String,
@@ -43,7 +57,9 @@ public struct NotificationPlan: Sendable, Equatable, Identifiable {
         title: String,
         body: String,
         dateComponents: DateComponents,
-        repeats: Bool
+        repeats: Bool,
+        actionCategoryIdentifier: String? = nil,
+        userInfo: [String: String] = [:]
     ) {
         self.id = id
         self.category = category
@@ -51,7 +67,32 @@ public struct NotificationPlan: Sendable, Equatable, Identifiable {
         self.body = body
         self.dateComponents = dateComponents
         self.repeats = repeats
+        self.actionCategoryIdentifier = actionCategoryIdentifier
+        self.userInfo = userInfo
     }
+}
+
+/// The action identifiers and userInfo keys shared between the pure builders
+/// (which stamp them onto plans) and the app's `UNNotificationCategory`
+/// registration + action handler. Kept in SphereCore so both sides agree.
+public enum NotificationAction {
+    /// `UNNotificationCategory` identifiers (one per actionable category).
+    public static let waterCategory = "WATER_ACTIONS"
+    public static let medicationCategory = "MEDICATION_ACTIONS"
+    public static let plantCategory = "PLANT_ACTIONS"
+    public static let habitCategory = "HABIT_ACTIONS"
+
+    /// `UNNotificationAction` identifiers.
+    public static let logWater = "LOG_WATER"
+    public static let snoozeWater = "SNOOZE_WATER"
+    public static let markMedicationTaken = "MARK_MED_TAKEN"
+    public static let markPlantWatered = "MARK_PLANT_WATERED"
+    public static let markHabitDone = "MARK_HABIT_DONE"
+
+    /// `userInfo` keys.
+    public static let medicationIdKey = "medicationId"
+    public static let plantIdKey = "plantId"
+    public static let habitIdKey = "habitId"
 }
 
 /// Pure builders turning sphere data into notification plans. Each returns a
@@ -99,7 +140,9 @@ public enum NotificationPlanBuilder {
                         ? "Time to check in on your habit."
                         : "A small vote for \(habit.identity).",
                     dateComponents: parts,
-                    repeats: true
+                    repeats: true,
+                    actionCategoryIdentifier: NotificationAction.habitCategory,
+                    userInfo: [NotificationAction.habitIdKey: habit.id]
                 ))
             }
         }
@@ -134,7 +177,9 @@ public enum NotificationPlanBuilder {
         body: String,
         date: Date,
         hour: Int = 9,
-        asOf now: Date = Date()
+        asOf now: Date = Date(),
+        actionCategoryIdentifier: String? = nil,
+        userInfo: [String: String] = [:]
     ) -> NotificationPlan? {
         let calendar = gregorian
         guard calendar.startOfDay(for: date) >= calendar.startOfDay(for: now) else { return nil }
@@ -147,7 +192,9 @@ public enum NotificationPlanBuilder {
             title: title,
             body: body,
             dateComponents: parts,
-            repeats: false
+            repeats: false,
+            actionCategoryIdentifier: actionCategoryIdentifier,
+            userInfo: userInfo
         )
     }
 
@@ -161,7 +208,8 @@ public enum NotificationPlanBuilder {
                 title: "Time for some water 💧",
                 body: "A glass now keeps you on track for the day.",
                 dateComponents: DateComponents(hour: hour, minute: 0),
-                repeats: true
+                repeats: true,
+                actionCategoryIdentifier: NotificationAction.waterCategory
             )
         }
     }
@@ -188,7 +236,9 @@ public enum NotificationPlanBuilder {
                         ? "Time for your dose."
                         : "Take your \(med.dosage) dose.",
                     dateComponents: DateComponents(hour: hour, minute: 0),
-                    repeats: true
+                    repeats: true,
+                    actionCategoryIdentifier: NotificationAction.medicationCategory,
+                    userInfo: [NotificationAction.medicationIdKey: med.id]
                 ))
             }
         }
@@ -229,7 +279,9 @@ public enum NotificationPlanBuilder {
                 category: .plant, id: plant.id,
                 title: "\(plant.emoji) Water \(plant.name)",
                 body: "It's watering day — every \(plant.intervalDays) day\(plant.intervalDays == 1 ? "" : "s").",
-                date: clamped, hour: hour, asOf: now
+                date: clamped, hour: hour, asOf: now,
+                actionCategoryIdentifier: NotificationAction.plantCategory,
+                userInfo: [NotificationAction.plantIdKey: plant.id]
             )
         }
     }

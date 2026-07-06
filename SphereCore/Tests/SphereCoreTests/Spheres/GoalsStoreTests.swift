@@ -109,6 +109,23 @@ struct GoalsStoreTests {
         #expect(reloaded.habits[0].checkedIn())
     }
 
+    @Test func checkInHabitIsIdempotent() async throws {
+        let (store, database) = try makeStore()
+        try await store.addHabit(Habit(id: "h1", name: "Read"))
+
+        try await store.checkInHabit(id: "h1")
+        #expect(store.habits[0].checkedIn())
+        #expect(store.habits[0].checkInDates.count == 1)
+
+        // A second call (e.g. the notification action firing twice) is a no-op.
+        try await store.checkInHabit(id: "h1")
+        #expect(store.habits[0].checkInDates.count == 1)
+
+        let reloaded = GoalsStore(database: database)
+        try await reloaded.load()
+        #expect(reloaded.habits[0].checkedIn())
+    }
+
     // MARK: - Agent tools
 
     @Test func addGoalToolCreatesGoalAndConfirms() async throws {

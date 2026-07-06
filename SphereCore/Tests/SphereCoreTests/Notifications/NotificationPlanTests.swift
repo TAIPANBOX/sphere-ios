@@ -133,6 +133,47 @@ struct NotificationPlanTests {
         #expect(plans[0].body.contains("£12.99"))
         #expect(plans[0].body.contains("10th"))
     }
+
+    // MARK: - Actionable plans (Watch/lock-screen quick actions)
+
+    @Test func waterRemindersCarryWaterActionCategory() {
+        let plans = NotificationPlanBuilder.waterReminders(hours: [10])
+        #expect(plans[0].actionCategoryIdentifier == NotificationAction.waterCategory)
+        // Water is a fixed cadence with no per-item id.
+        #expect(plans[0].userInfo.isEmpty)
+    }
+
+    @Test func medicationRemindersCarryMedIdInUserInfo() {
+        let meds = [Medication(id: "m1", name: "Vitamin D", frequency: .once)]
+        let plans = NotificationPlanBuilder.medicationReminders(meds)
+        #expect(plans[0].actionCategoryIdentifier == NotificationAction.medicationCategory)
+        #expect(plans[0].userInfo[NotificationAction.medicationIdKey] == "m1")
+    }
+
+    @Test func plantWateringCarriesPlantIdInUserInfo() {
+        let now = date(2026, 7, 4)
+        let plans = NotificationPlanBuilder.plantWatering(
+            [Plant(id: "p1", name: "Fern", lastWatered: nil, intervalDays: 3)], asOf: now
+        )
+        #expect(plans[0].actionCategoryIdentifier == NotificationAction.plantCategory)
+        #expect(plans[0].userInfo[NotificationAction.plantIdKey] == "p1")
+    }
+
+    @Test func habitRemindersCarryHabitIdInUserInfo() {
+        let habit = Habit(id: "h1", name: "Read", emoji: "📖", reminderWeekdays: [2])
+        let plans = NotificationPlanBuilder.habitReminders([habit])
+        #expect(plans.count == 1)
+        #expect(plans[0].actionCategoryIdentifier == NotificationAction.habitCategory)
+        #expect(plans[0].userInfo[NotificationAction.habitIdKey] == "h1")
+    }
+
+    @Test func birthdaysHaveNoActionCategory() {
+        let plans = NotificationPlanBuilder.birthdays(
+            [Contact(id: "c1", name: "Iryna", birthday: date(1990, 3, 14))]
+        )
+        #expect(plans[0].actionCategoryIdentifier == nil)
+        #expect(plans[0].userInfo.isEmpty)
+    }
 }
 
 @Suite("UserProfile tolerant decoding + profile-v2")

@@ -167,6 +167,23 @@ struct HealthStoreTests {
         #expect(store.thisWeekCount() == 1)
     }
 
+    @Test func markMedicationTakenIsIdempotent() async throws {
+        let (store, database) = try makeStore()
+        try await store.addMedication(Medication(id: "m1", name: "Vitamin D"))
+
+        try await store.markMedicationTaken(id: "m1")
+        #expect(store.medications[0].takenToday())
+        #expect(store.medications[0].takenDates.count == 1)
+
+        // Firing the notification action twice must not duplicate the dose.
+        try await store.markMedicationTaken(id: "m1")
+        #expect(store.medications[0].takenDates.count == 1)
+
+        let reloaded = HealthStore(database: database)
+        try await reloaded.load()
+        #expect(reloaded.medications[0].takenToday())
+    }
+
     // MARK: - Metrics
 
     @Test func refreshMetricsPullsFromProvider() async throws {

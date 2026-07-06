@@ -1,5 +1,6 @@
 import Foundation
 import SphereCore
+import UserNotifications
 import WidgetKit
 
 /// Composition root: builds the databases, services, and one store per
@@ -41,6 +42,9 @@ final class AppContainer {
     let cloudModels: OpenRouterModelCatalog
 
     private var chatSessions: [String: ChatSession] = [:]
+
+    /// Retained because `UNUserNotificationCenter.delegate` is a weak reference.
+    private var notificationHandler: NotificationActionHandler?
 
     init() {
         // Databases live in the App Group container (shared with the widget /
@@ -164,6 +168,14 @@ final class AppContainer {
         WatchBridge.shared.onCommand = { [weak self] command in
             Task { @MainActor in await self?.apply(command) }
         }
+
+        // Actionable reminders: register the category set and install the
+        // delegate so "Log a glass", "Mark taken", etc. (and their mirrored
+        // watch equivalents) complete the reminder without opening the app.
+        NotificationEngine.registerCategories()
+        let handler = NotificationActionHandler(container: self)
+        notificationHandler = handler
+        UNUserNotificationCenter.current().delegate = handler
     }
 
     /// Loads every sphere store once at launch so grids, Life Score, and
@@ -418,6 +430,44 @@ final class AppContainer {
             // soon as this is newer than the submission time, regardless of
             // which branch answered.
             lastAgentReplyAt = Date()
+        }
+        refreshWidget()
+    }
+
+    /// Handles a notification action response (from the phone lock screen or a
+    /// mirrored watch notification, both of which route here). Reloads the
+    /// affected store, performs the write idempotently, reschedules reminders
+    /// (so a completed one-off drops), and refreshes the widget. Returns after
+    /// the write so the delegate's completion handler can be called.
+    func applyNotificationAction(
+        _ actionIdentifier: String, payload: [String: String]
+    ) async {
+        switch actionIdentifier {
+        case NotificationAction.logWater:
+            try? await health.load()
+            try? await health.incrementWater()
+        case NotificationAction.snoozeWater:
+            await NotificationEngine.scheduleWaterSnooze()
+        case NotificationAction.markMedicationTaken:
+            guard let id = payload[NotificationAction.medicationIdKey] else { return }
+            try? await health.load()
+            try? await health.markMedicationTaken(id: id)
+        case NotificationAction.markPlantWatered:
+            guard let id = payload[NotificationAction.plantIdKey] else { return }
+            try? await homeSphere.load()
+            try? await homeSphere.water(id: id)
+        case NotificationAction.markHabitDone:
+            guard let id = payload[NotificationAction.habitIdKey] else { return }
+            try? await goals.load()
+            try? await goals.checkInHabit(id: id)
+        default:
+            return
+        }
+        // A completed one-off (plant/med for today) should not linger; a full
+        // resync rebuilds from current store state. Skipped for snooze, which
+        // already scheduled its own one-off above.
+        if actionIdentifier != NotificationAction.snoozeWater {
+            await syncReminders()
         }
         refreshWidget()
     }
