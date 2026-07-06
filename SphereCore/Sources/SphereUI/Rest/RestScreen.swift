@@ -23,6 +23,17 @@ public struct RestScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.sleepEntries.isEmpty {
+                    EmptyStateCard(
+                        emoji: "🌊",
+                        accent: accent,
+                        title: "Start your Rest sphere",
+                        message: "Log last night's sleep to see your recovery score and debt build up here.",
+                        buttonLabel: "Log your first night's sleep"
+                    ) {
+                        showingLogSleep = true
+                    }
+                }
                 recoveryCard
                 if store.sleepDebtLast7() >= 1 {
                     sleepDebtCard

@@ -20,6 +20,17 @@ public struct FinanceScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.transactions.isEmpty && store.accounts.isEmpty && store.subscriptions.isEmpty {
+                    EmptyStateCard(
+                        emoji: "💰",
+                        accent: accent,
+                        title: "Start your Finance sphere",
+                        message: "Log a transaction to see where your money is actually going.",
+                        buttonLabel: "Add your first transaction"
+                    ) {
+                        showingAddTransaction = true
+                    }
+                }
                 if store.safeToSpendToday() != nil {
                     safeToSpendCard
                 }

@@ -16,6 +16,17 @@ public struct TravelScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.plans.isEmpty && store.wishlist.isEmpty {
+                    EmptyStateCard(
+                        emoji: "✈️",
+                        accent: accent,
+                        title: "Start your Travel sphere",
+                        message: "Plan a trip, or drop a dream destination on the list for someday.",
+                        buttonLabel: "Add your first trip"
+                    ) {
+                        showingAddTrip = true
+                    }
+                }
                 if let next = store.nextTrip() {
                     nextTripCard(next)
                 }

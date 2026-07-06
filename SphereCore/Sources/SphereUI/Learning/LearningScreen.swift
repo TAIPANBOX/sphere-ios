@@ -16,6 +16,17 @@ public struct LearningScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.books.isEmpty && store.skills.isEmpty {
+                    EmptyStateCard(
+                        emoji: "📚",
+                        accent: accent,
+                        title: "Start your Learning sphere",
+                        message: "Add the book you're reading now, or a skill you're building.",
+                        buttonLabel: "Add your first book"
+                    ) {
+                        showingAddBook = true
+                    }
+                }
                 if !store.flashcards.isEmpty {
                     flashcardsCard
                 }

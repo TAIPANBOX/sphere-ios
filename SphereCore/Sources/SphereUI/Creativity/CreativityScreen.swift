@@ -16,6 +16,17 @@ public struct CreativityScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.projects.isEmpty && store.recentIdeas.isEmpty {
+                    EmptyStateCard(
+                        emoji: "🎨",
+                        accent: accent,
+                        title: "Start your Creativity sphere",
+                        message: "Capture the idea you keep meaning to start, or the project you're already circling.",
+                        buttonLabel: "Add your first project"
+                    ) {
+                        showingAddProject = true
+                    }
+                }
                 momentumCard
                 ideaCaptureCard
                 projectSection("In Progress", projects: store.inProgress, empty: "No active projects — start with an idea below.")

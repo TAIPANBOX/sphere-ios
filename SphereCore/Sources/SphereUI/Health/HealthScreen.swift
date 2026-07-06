@@ -22,6 +22,17 @@ public struct HealthScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.latestWeight == nil && store.workouts.isEmpty {
+                    EmptyStateCard(
+                        emoji: "🫀",
+                        accent: accent,
+                        title: "Start your Health sphere",
+                        message: "Log a workout or your weight and this screen starts filling in around you.",
+                        buttonLabel: "Log your first weight"
+                    ) {
+                        showingLogWeight = true
+                    }
+                }
                 metricsGrid
                 if showsCycle {
                     cycleCard

@@ -16,6 +16,17 @@ public struct HobbiesScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.hobbies.isEmpty {
+                    EmptyStateCard(
+                        emoji: "🎸",
+                        accent: accent,
+                        title: "Start your Hobbies sphere",
+                        message: "Add something you do for the joy of it, and start making time for it.",
+                        buttonLabel: "Add your first hobby"
+                    ) {
+                        showingAddHobby = true
+                    }
+                }
                 weeklyCard
                 hobbiesSection
                 sessionsSection

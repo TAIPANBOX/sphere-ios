@@ -29,6 +29,17 @@ public struct RelationshipsScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.contacts.isEmpty {
+                    EmptyStateCard(
+                        emoji: "💜",
+                        accent: accent,
+                        title: "Start your Relationships sphere",
+                        message: "Add someone you want to stay close to — a friend, family member, or mentor.",
+                        buttonLabel: "Add your first contact"
+                    ) {
+                        showingAddContact = true
+                    }
+                }
                 if !store.upcomingBirthdays().isEmpty {
                     birthdaysCard
                 }

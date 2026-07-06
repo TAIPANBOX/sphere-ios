@@ -22,6 +22,17 @@ public struct MindfulnessScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.sessions.isEmpty && store.recentJournal.isEmpty {
+                    EmptyStateCard(
+                        emoji: "🧘",
+                        accent: accent,
+                        title: "Start your Mindfulness sphere",
+                        message: "A few minutes of meditation is enough to begin — the streak builds from there.",
+                        buttonLabel: "Log your first session"
+                    ) {
+                        showingLogMeditation = true
+                    }
+                }
                 affirmationCard
                 focusCard
                 moodCard

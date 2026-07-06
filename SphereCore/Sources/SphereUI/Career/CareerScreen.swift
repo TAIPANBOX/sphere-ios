@@ -25,6 +25,17 @@ public struct CareerScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.tasks.isEmpty && store.network.isEmpty {
+                    EmptyStateCard(
+                        emoji: "💼",
+                        accent: accent,
+                        title: "Start your Career sphere",
+                        message: "Add a task you're on the hook for, or someone in your network worth staying close to.",
+                        buttonLabel: "Add your first task"
+                    ) {
+                        showingAddTask = true
+                    }
+                }
                 statsCard
                 tasksSection
                 projectsSection

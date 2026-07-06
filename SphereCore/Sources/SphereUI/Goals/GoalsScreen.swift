@@ -28,6 +28,18 @@ public struct GoalsScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.goals.isEmpty && store.habits.isEmpty {
+                    EmptyStateCard(
+                        emoji: "🎯",
+                        accent: accent,
+                        title: "Start your Goals sphere",
+                        message: "Pick one goal that matters right now — you can always break it down later.",
+                        buttonLabel: "Add your first goal"
+                    ) {
+                        showingAddGoal = true
+                    }
+                }
+
                 lifeProgressCard
 
                 section(title: "Active Goals") {

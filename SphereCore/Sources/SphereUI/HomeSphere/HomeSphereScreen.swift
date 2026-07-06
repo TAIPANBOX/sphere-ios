@@ -16,6 +16,17 @@ public struct HomeSphereScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.tasks.isEmpty && store.plants.isEmpty && store.shopping.isEmpty {
+                    EmptyStateCard(
+                        emoji: "🏠",
+                        accent: accent,
+                        title: "Start your Home sphere",
+                        message: "Add a household task, a plant to keep alive, or the next thing you need to buy.",
+                        buttonLabel: "Add your first task"
+                    ) {
+                        showingAddTask = true
+                    }
+                }
                 if !store.warrantyExpiringSoon().isEmpty {
                     warrantyCard
                 }
