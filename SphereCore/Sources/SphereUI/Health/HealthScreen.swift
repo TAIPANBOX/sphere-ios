@@ -26,9 +26,9 @@ public struct HealthScreen: View {
                     EmptyStateCard(
                         emoji: "🫀",
                         accent: accent,
-                        title: uiString("Start your Health sphere"),
-                        message: uiString("Log a workout or your weight and this screen starts filling in around you."),
-                        buttonLabel: uiString("Log your first weight")
+                        title: "Start your Health sphere",
+                        message: "Log a workout or your weight and this screen starts filling in around you.",
+                        buttonLabel: "Log your first weight"
                     ) {
                         showingLogWeight = true
                     }
@@ -45,7 +45,7 @@ public struct HealthScreen: View {
             }
             .padding()
         }
-        .navigationTitle(Text(ui: "Health"))
+        .navigationTitle("Health")
         .sheet(isPresented: $showingLogPeriod) {
             LogPeriodSheet { start, flow, symptoms in
                 Task { try? await store.logPeriod(start: start, flow: flow, symptoms: symptoms) }
@@ -100,7 +100,7 @@ public struct HealthScreen: View {
 
     private var stepsChartCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(ui: "Weekly Steps").font(.headline)
+            Text("Weekly Steps").font(.headline)
             Chart {
                 ForEach(Array(weeklyStepsData.enumerated()), id: \.offset) { _, day in
                     BarMark(x: .value("Day", day.label), y: .value("Steps", day.steps))
@@ -111,7 +111,7 @@ public struct HealthScreen: View {
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4]))
                     .foregroundStyle(.secondary)
                     .annotation(position: .top, alignment: .trailing) {
-                        Text(ui: "10k goal").font(.caption2).foregroundStyle(.secondary)
+                        Text("10k goal").font(.caption2).foregroundStyle(.secondary)
                     }
             }
             .frame(height: 160)
@@ -146,7 +146,7 @@ public struct HealthScreen: View {
     private var waterCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Label { Text(ui: "Water") } icon: { Image(systemName: "drop.fill") }
+                Label("Water", systemImage: "drop.fill")
                     .font(.headline)
                     .foregroundStyle(.blue)
                 Spacer()
@@ -154,7 +154,7 @@ public struct HealthScreen: View {
                     Text("\(store.waterToday)")
                         .contentTransition(.numericText())
                         .sphereAnimation(SphereMotion.snappy, value: store.waterToday)
-                    Text(ui: "/ \(HealthStore.waterGoalGlasses) glasses")
+                    Text("/ \(HealthStore.waterGoalGlasses) glasses")
                 }
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -194,13 +194,13 @@ public struct HealthScreen: View {
     private var energyMealCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             RatingSelector(
-                title: uiString("Energy today"), systemImage: "bolt.fill",
+                title: "Energy today", systemImage: "bolt.fill",
                 selection: store.todayEnergy(), tint: .yellow
             ) { level in
                 Task { try? await store.logEnergy(level) }
             }
             RatingSelector(
-                title: uiString("Meal quality"), systemImage: "fork.knife",
+                title: "Meal quality", systemImage: "fork.knife",
                 selection: store.todayMeal(), tint: .green
             ) { quality in
                 Task { try? await store.logMeal(quality) }
@@ -214,10 +214,10 @@ public struct HealthScreen: View {
     private var weightCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Label { Text(ui: "Weight") } icon: { Image(systemName: "scalemass.fill") }
+                Label("Weight", systemImage: "scalemass.fill")
                     .font(.headline)
                 Spacer()
-                Button { showingLogWeight = true } label: { Text(ui: "Log") }
+                Button("Log") { showingLogWeight = true }
                     .font(.subheadline.weight(.semibold))
             }
             HStack(alignment: .lastTextBaseline, spacing: 16) {
@@ -230,7 +230,7 @@ public struct HealthScreen: View {
                             .foregroundStyle(.secondary)
                     }
                 } else {
-                    Text(ui: "No entries yet")
+                    Text("No entries yet")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -243,20 +243,20 @@ public struct HealthScreen: View {
 
     private var moreSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "More").font(.title3.weight(.semibold))
+            Text("More").font(.title3.weight(.semibold))
             VStack(spacing: 0) {
                 MoreLink(
-                    uiString("Medications"), systemImage: "pills.fill",
+                    "Medications", systemImage: "pills.fill",
                     count: store.medications.isEmpty ? nil : store.medications.count
                 ) { medicationsList }
                 Divider().padding(.leading, 38)
                 MoreLink(
-                    uiString("Lab results"), systemImage: "cross.case.fill",
+                    "Lab results", systemImage: "cross.case.fill",
                     count: store.labResults.isEmpty ? nil : store.labResults.count
                 ) { labResultsList }
                 Divider().padding(.leading, 38)
                 MoreLink(
-                    uiString("Workouts"), systemImage: "figure.run",
+                    "Workouts", systemImage: "figure.run",
                     count: store.workouts.isEmpty ? nil : store.workouts.count
                 ) { workoutsList }
             }
@@ -266,9 +266,9 @@ public struct HealthScreen: View {
 
     private var medicationsList: some View {
         CRUDListScreen(
-            title: uiString("Medications"),
+            title: "Medications",
             items: store.medications,
-            emptyTitle: uiString("No medications"),
+            emptyTitle: "No medications",
             emptySystemImage: "pills",
             addSheet: {
                 AddMedicationSheet { medication in
@@ -307,9 +307,9 @@ public struct HealthScreen: View {
 
     private var labResultsList: some View {
         CRUDListScreen(
-            title: uiString("Lab Results"),
+            title: "Lab Results",
             items: store.labResults,
-            emptyTitle: uiString("No lab results"),
+            emptyTitle: "No lab results",
             emptySystemImage: "cross.case",
             addSheet: {
                 AddLabResultSheet { result in
@@ -333,7 +333,7 @@ public struct HealthScreen: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(result.name).font(.body.weight(.medium))
                 if !result.refRange.isEmpty {
-                    Text(ui: "ref \(result.refRange)").font(.caption).foregroundStyle(.secondary)
+                    Text("ref \(result.refRange)").font(.caption).foregroundStyle(.secondary)
                 }
             }
             Spacer()
@@ -348,9 +348,9 @@ public struct HealthScreen: View {
 
     private var workoutsList: some View {
         CRUDListScreen(
-            title: uiString("Workouts"),
+            title: "Workouts",
             items: store.sortedWorkouts,
-            emptyTitle: uiString("No workouts logged"),
+            emptyTitle: "No workouts logged",
             emptySystemImage: "figure.run",
             addSheet: {
                 AddWorkoutSheet { workout in
@@ -375,7 +375,7 @@ public struct HealthScreen: View {
                 Text(workout.date, style: .date).font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            Text(ui: "\(workout.durationMinutes) min")
+            Text("\(workout.durationMinutes) min")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(accent)
         }
@@ -388,17 +388,17 @@ public struct HealthScreen: View {
     private var cycleCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label { Text(ui: "Cycle") } icon: { Image(systemName: "circle.circle") }
+                Label("Cycle", systemImage: "circle.circle")
                     .font(.headline)
                     .foregroundStyle(cycleTint)
                 Spacer()
-                Button { showingLogPeriod = true } label: { Text(ui: "Log period") }
+                Button("Log period") { showingLogPeriod = true }
                     .font(.subheadline.weight(.semibold))
             }
 
             if let prediction = store.cyclePrediction() {
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text(ui: "Day \(prediction.currentCycleDay)")
+                    Text("Day \(prediction.currentCycleDay)")
                         .font(.system(size: 30, weight: .bold, design: .rounded))
                     Text("\(prediction.phase.emoji) \(prediction.phase.label)")
                         .font(.subheadline.weight(.medium))
@@ -419,19 +419,23 @@ public struct HealthScreen: View {
                     )
                     cycleRow(
                         icon: "sparkles",
-                        text: uiString("Fertile window \(prediction.fertileWindow.lowerBound.formatted(.dateTime.month().day()))–\(prediction.fertileWindow.upperBound.formatted(.dateTime.month().day())) · ovulation ~\(prediction.ovulationDate.formatted(.dateTime.month().day()))")
+                        text: "Fertile window "
+                            + "\(prediction.fertileWindow.lowerBound.formatted(.dateTime.month().day()))"
+                            + "–\(prediction.fertileWindow.upperBound.formatted(.dateTime.month().day()))"
+                            + " · ovulation ~\(prediction.ovulationDate.formatted(.dateTime.month().day()))"
                     )
                     if prediction.isEstimate {
                         cycleRow(
                             icon: "info.circle",
-                            text: uiString("Estimate — log a couple more periods for accuracy.")
+                            text: "Estimate — log a couple more periods for accuracy."
                         )
                     }
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
             } else {
-                Text(ui: "Log your first period to see cycle day, next-period and fertile-window predictions.")
+                Text("Log your first period to see cycle day, next-period and "
+                    + "fertile-window predictions.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -472,26 +476,26 @@ public struct HealthScreen: View {
     }
 
     private func nextPeriodText(_ p: CyclePrediction) -> String {
-        if p.isOnPeriod { return uiString("On your period now") }
+        if p.isOnPeriod { return "On your period now" }
         switch p.daysUntilNextPeriod {
-        case ..<0: return uiString("Period \(-p.daysUntilNextPeriod) day(s) late")
-        case 0: return uiString("Period expected today")
+        case ..<0: return "Period \(-p.daysUntilNextPeriod) day(s) late"
+        case 0: return "Period expected today"
         default:
-            return uiString("Next period in \(p.daysUntilNextPeriod) day(s)") + " · "
+            return "Next period in \(p.daysUntilNextPeriod) day(s) · "
                 + p.nextPeriodStart.formatted(.dateTime.month().day())
         }
     }
 }
 
 struct MetricCard: View {
-    let title: LocalizedStringKey
+    let title: String
     let value: String
     let icon: String
     let tint: Color
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label { Text(ui: title) } icon: { Image(systemName: icon) }
+            Label(title, systemImage: icon)
                 .font(.caption)
                 .foregroundStyle(tint)
             Text(value)
@@ -517,21 +521,19 @@ struct LogWeightSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $kgText) { Text(ui: "Weight, kg") }
+                TextField("Weight, kg", text: $kgText)
             }
-            .navigationTitle(Text(ui: "Log Weight"))
+            .navigationTitle("Log Weight")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Save") {
                         if let kg {
                             onLog(kg)
                         }
                         dismiss()
-                    } label: {
-                        Text(ui: "Save")
                     }
                     .disabled(kg.map { !(20...400).contains($0) } ?? true)
                 }
@@ -551,23 +553,21 @@ struct AddMedicationSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Name") }
-                TextField(text: $dosage) { Text(ui: "Dosage (e.g. 50 mcg)") }
-                Picker(selection: $frequency) {
+                TextField("Name", text: $name)
+                TextField("Dosage (e.g. 50 mcg)", text: $dosage)
+                Picker("Frequency", selection: $frequency) {
                     ForEach(MedFrequency.allCases, id: \.self) { frequency in
                         Text(frequency.label).tag(frequency)
                     }
-                } label: {
-                    Text(ui: "Frequency")
                 }
             }
-            .navigationTitle(Text(ui: "Add Medication"))
+            .navigationTitle("Add Medication")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Medication(
                             id: Medication.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -575,8 +575,6 @@ struct AddMedicationSheet: View {
                             frequency: frequency
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -599,20 +597,20 @@ struct AddLabResultSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Test name") }
-                TextField(text: $value) { Text(ui: "Value") }
-                TextField(text: $unit) { Text(ui: "Unit (e.g. mg/dL)") }
-                TextField(text: $refRange) { Text(ui: "Reference range") }
-                Toggle(isOn: $isNormal) { Text(ui: "Within normal range") }
-                DatePicker(selection: $date, displayedComponents: .date) { Text(ui: "Date") }
+                TextField("Test name", text: $name)
+                TextField("Value", text: $value)
+                TextField("Unit (e.g. mg/dL)", text: $unit)
+                TextField("Reference range", text: $refRange)
+                Toggle("Within normal range", isOn: $isNormal)
+                DatePicker("Date", selection: $date, displayedComponents: .date)
             }
-            .navigationTitle(Text(ui: "Add Lab Result"))
+            .navigationTitle("Add Lab Result")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(LabResult(
                             id: LabResult.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -623,8 +621,6 @@ struct AddLabResultSheet: View {
                             isNormal: isNormal
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(
                         name.trimmingCharacters(in: .whitespaces).isEmpty
@@ -648,16 +644,14 @@ struct LogPeriodSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    DatePicker(selection: $startDate, displayedComponents: .date) { Text(ui: "Start date") }
-                    Picker(selection: $flow) {
+                    DatePicker("Start date", selection: $startDate, displayedComponents: .date)
+                    Picker("Flow", selection: $flow) {
                         ForEach(FlowLevel.allCases, id: \.self) { level in
                             Text("\(level.emoji) \(level.label)").tag(level)
                         }
-                    } label: {
-                        Text(ui: "Flow")
                     }
                 }
-                Section {
+                Section("Symptoms") {
                     ForEach(CycleSymptom.allCases, id: \.self) { symptom in
                         Button {
                             if symptoms.contains(symptom.rawValue) {
@@ -675,22 +669,18 @@ struct LogPeriodSheet: View {
                             }
                         }
                     }
-                } header: {
-                    Text(ui: "Symptoms")
                 }
             }
-            .navigationTitle(Text(ui: "Log Period"))
+            .navigationTitle("Log Period")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Save") {
                         onLog(startDate, flow, CycleSymptom.allCases
                             .map(\.rawValue).filter(symptoms.contains))
                         dismiss()
-                    } label: {
-                        Text(ui: "Save")
                     }
                 }
             }
@@ -708,24 +698,20 @@ struct AddWorkoutSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Picker(selection: $type) {
+                Picker("Type", selection: $type) {
                     ForEach(WorkoutType.allCases, id: \.self) { type in
                         Text("\(type.emoji) \(type.label)").tag(type)
                     }
-                } label: {
-                    Text(ui: "Type")
                 }
-                Stepper(value: $minutes, in: 5...240, step: 5) {
-                    Text(ui: "Duration: \(minutes) min")
-                }
+                Stepper("Duration: \(minutes) min", value: $minutes, in: 5...240, step: 5)
             }
-            .navigationTitle(Text(ui: "Add Workout"))
+            .navigationTitle("Add Workout")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Workout(
                             id: Workout.newID(),
                             type: type,
@@ -733,8 +719,6 @@ struct AddWorkoutSheet: View {
                             date: Date()
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                 }
             }

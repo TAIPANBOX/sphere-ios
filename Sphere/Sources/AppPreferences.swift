@@ -14,9 +14,6 @@ enum Prefs {
     static let activeModel = "pref.activeModel"
     /// Chosen OpenRouter model id (empty/nil = provider default).
     static let cloudModel = "pref.cloudModel"
-    /// In-app language override: "" = System, or a supported language code
-    /// ("en", "uk"). See `LanguagePreference`.
-    static let language = "pref.language"
 }
 
 /// Reads/writes the user's chosen OpenRouter model id (nil = provider default).
@@ -39,23 +36,6 @@ enum AppBackendPreference {
         guard let raw = UserDefaults.standard.string(forKey: Prefs.aiBackend),
               !raw.isEmpty else { return nil }
         return AIBackend(storageValue: raw)
-    }
-}
-
-/// Applies (or clears) the `AppleLanguages` override so the next cold launch
-/// starts fully in the chosen language, including formatters and
-/// `String(localized:)` snapshot sites (see `AppLanguage` for why this is
-/// needed in addition to the immediate `.environment(\.locale, ...)` override
-/// applied in `SphereApp`). Safe to call every time the preference changes;
-/// `.system` removes any override.
-extension AppLanguage {
-    func applyAppleLanguagesOverride() {
-        switch self {
-        case .system:
-            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
-        default:
-            UserDefaults.standard.set([rawValue], forKey: "AppleLanguages")
-        }
     }
 }
 
@@ -84,18 +64,6 @@ extension View {
     /// typed `Currency`.
     func storedCurrency(_ raw: String) -> Currency {
         Currency(rawValue: raw) ?? .deviceDefault
-    }
-
-    /// Applies the chosen in-app language as a SwiftUI environment override.
-    /// `.system` leaves the environment untouched so the app follows the
-    /// device locale exactly as before this feature existed.
-    @ViewBuilder
-    func appLanguage(_ language: AppLanguage) -> some View {
-        if let locale = language.locale {
-            self.environment(\.locale, locale)
-        } else {
-            self
-        }
     }
 }
 

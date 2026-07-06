@@ -26,9 +26,9 @@ public struct MindfulnessScreen: View {
                     EmptyStateCard(
                         emoji: "🧘",
                         accent: accent,
-                        title: uiString("Start your Mindfulness sphere"),
-                        message: uiString("A few minutes of meditation is enough to begin — the streak builds from there."),
-                        buttonLabel: uiString("Log your first session")
+                        title: "Start your Mindfulness sphere",
+                        message: "A few minutes of meditation is enough to begin — the streak builds from there.",
+                        buttonLabel: "Log your first session"
                     ) {
                         showingLogMeditation = true
                     }
@@ -44,7 +44,7 @@ public struct MindfulnessScreen: View {
             }
             .padding()
         }
-        .navigationTitle(Text(ui: "Mindfulness"))
+        .navigationTitle("Mindfulness")
         .sheet(isPresented: $showingLogMeditation) {
             LogMeditationSheet { session in
                 meditationTick += 1
@@ -85,22 +85,20 @@ public struct MindfulnessScreen: View {
     private var focusCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Label { Text(ui: "Focus") } icon: { Image(systemName: "scope") }
-                    .font(.headline).foregroundStyle(accent)
+                Label("Focus", systemImage: "scope").font(.headline).foregroundStyle(accent)
                 Spacer()
                 Text("Discipline \(store.disciplineScore())/100")
                     .font(.subheadline.weight(.semibold))
             }
             ProgressView(value: Double(store.disciplineScore()), total: 100).tint(accent)
             HStack(spacing: 16) {
-                stat("\(store.focusMinutesToday())m", uiString("focused today"))
-                stat("\(store.focusStreak())d", uiString("streak"))
+                stat("\(store.focusMinutesToday())m", "focused today")
+                stat("\(store.focusStreak())d", "streak")
             }
             Button {
                 showingFocus = true
             } label: {
-                Label { Text(ui: "Start a focus session") } icon: { Image(systemName: "play.fill") }
-                    .frame(maxWidth: .infinity)
+                Label("Start a focus session", systemImage: "play.fill").frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .tint(accent)
@@ -119,7 +117,7 @@ public struct MindfulnessScreen: View {
 
     private var affirmationCard: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label { Text(ui: "Today's affirmation") } icon: { Image(systemName: "quote.opening") }
+            Label("Today's affirmation", systemImage: "quote.opening")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(accent)
             Text(store.dailyAffirmation())
@@ -134,11 +132,11 @@ public struct MindfulnessScreen: View {
 
     private var gratitudeCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label { Text(ui: "Gratitude") } icon: { Image(systemName: "heart.fill") }
+            Label("Gratitude", systemImage: "heart.fill")
                 .font(.headline)
                 .foregroundStyle(.pink)
             HStack(spacing: 8) {
-                TextField(text: $gratitudeDraft, axis: .vertical) { Text(ui: "One thing you're grateful for") }
+                TextField("One thing you're grateful for", text: $gratitudeDraft, axis: .vertical)
                     .textFieldStyle(.roundedBorder)
                     .onSubmit(addGratitude)
                 Button(action: addGratitude) {
@@ -170,7 +168,7 @@ public struct MindfulnessScreen: View {
 
     private var moodCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "How are you today?").font(.headline)
+            Text("How are you today?").font(.headline)
             HStack(spacing: 14) {
                 ForEach(1...5, id: \.self) { score in
                     Button {
@@ -213,21 +211,21 @@ public struct MindfulnessScreen: View {
     private var meditationCard: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(ui: "Meditation").font(.headline)
+                Text("Meditation").font(.headline)
                 HStack(spacing: 0) {
                     Text("\(store.currentStreak())")
                         .contentTransition(.numericText())
-                    Text(ui: "-day streak · ")
+                    Text("-day streak · ")
                     Text("\(store.totalMinutes)")
                         .contentTransition(.numericText())
-                    Text(ui: " min total")
+                    Text(" min total")
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .sphereAnimation(SphereMotion.snappy, value: store.totalMinutes)
             }
             Spacer()
-            Button { showingLogMeditation = true } label: { Text(ui: "Log") }
+            Button("Log") { showingLogMeditation = true }
                 .font(.subheadline.weight(.semibold))
         }
         .sphereCard()
@@ -248,8 +246,8 @@ public struct MindfulnessScreen: View {
             HStack {
                 Text("🌬️").font(.system(size: 30))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(ui: "Breathing Exercise").font(.body.weight(.medium)).foregroundStyle(.primary)
-                    Text(ui: "Pick a pattern — 4-7-8, box, or coherent")
+                    Text("Breathing Exercise").font(.body.weight(.medium)).foregroundStyle(.primary)
+                    Text("Pick a pattern — 4-7-8, box, or coherent")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -266,7 +264,7 @@ public struct MindfulnessScreen: View {
     private var stressCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(ui: "Stress").font(.headline)
+                Text("Stress").font(.headline)
                 Spacer()
                 if let today = store.todayStress() {
                     Text("\(today)/10")
@@ -303,7 +301,7 @@ public struct MindfulnessScreen: View {
     private var journalSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(ui: "Journal").font(.title3.weight(.semibold))
+                Text("Journal").font(.title3.weight(.semibold))
                 Spacer()
                 Button {
                     showingAddJournal = true
@@ -312,7 +310,7 @@ public struct MindfulnessScreen: View {
                 }
             }
             if store.recentJournal.isEmpty {
-                Text(ui: "Write down one insight from today.")
+                Text("Write down one insight from today.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -344,20 +342,20 @@ struct LogMeditationSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Stepper(value: $minutes, in: 1...240, step: 5) { Text(ui: "\(minutes) minutes") }
-                Picker(selection: $type) {
+                Stepper("\(minutes) minutes", value: $minutes, in: 1...240, step: 5)
+                Picker("Type", selection: $type) {
                     ForEach(MeditationType.allCases, id: \.self) { type in
                         Text("\(type.emoji) \(type.label)").tag(type)
                     }
-                } label: { Text(ui: "Type") }
+                }
             }
-            .navigationTitle(Text(ui: "Log Meditation"))
+            .navigationTitle("Log Meditation")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Save") {
                         onLog(MeditationSession(
                             id: MeditationSession.newID(),
                             type: type,
@@ -365,8 +363,6 @@ struct LogMeditationSheet: View {
                             date: Date()
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Save")
                     }
                 }
             }
@@ -383,20 +379,18 @@ struct AddJournalSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $text, axis: .vertical) { Text(ui: "What's on your mind?") }
+                TextField("What's on your mind?", text: $text, axis: .vertical)
                     .lineLimit(5...12)
             }
-            .navigationTitle(Text(ui: "Journal"))
+            .navigationTitle("Journal")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Save") {
                         onAdd(text.trimmingCharacters(in: .whitespacesAndNewlines))
                         dismiss()
-                    } label: {
-                        Text(ui: "Save")
                     }
                     .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
@@ -413,7 +407,7 @@ struct BreathingExerciseView: View {
     let onFinish: (Int) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var label = uiString("Breathe in")
+    @State private var label = "Breathe in"
     @State private var scale: CGFloat = 1.0
     @State private var animationDuration: Double = 4
     @State private var startedAt = Date()
@@ -421,10 +415,10 @@ struct BreathingExerciseView: View {
     private var phases: [(label: String, seconds: Double, scale: CGFloat)] {
         let timing = pattern.timing
         var result: [(String, Double, CGFloat)] = []
-        if timing.inhale > 0 { result.append((uiString("Breathe in"), Double(timing.inhale), 1.0)) }
-        if timing.holdIn > 0 { result.append((uiString("Hold"), Double(timing.holdIn), 1.0)) }
-        if timing.exhale > 0 { result.append((uiString("Breathe out"), Double(timing.exhale), 0.45)) }
-        if timing.holdOut > 0 { result.append((uiString("Hold"), Double(timing.holdOut), 0.45)) }
+        if timing.inhale > 0 { result.append(("Breathe in", Double(timing.inhale), 1.0)) }
+        if timing.holdIn > 0 { result.append(("Hold", Double(timing.holdIn), 1.0)) }
+        if timing.exhale > 0 { result.append(("Breathe out", Double(timing.exhale), 0.45)) }
+        if timing.holdOut > 0 { result.append(("Hold", Double(timing.holdOut), 0.45)) }
         return result.map { (label: $0.0, seconds: $0.1, scale: $0.2) }
     }
 
@@ -440,11 +434,9 @@ struct BreathingExerciseView: View {
                 .frame(width: 220, height: 220)
                 .scaleEffect(scale)
                 .animation(.easeInOut(duration: animationDuration), value: scale)
-            Button {
+            Button("Done") {
                 onFinish(Int(Date().timeIntervalSince(startedAt) / 60))
                 dismiss()
-            } label: {
-                Text(ui: "Done")
             }
             .buttonStyle(.borderedProminent)
             .tint(accent)
@@ -483,22 +475,22 @@ struct FocusTimerSheet: View {
                 if running {
                     Text(timeString(remaining))
                         .font(.system(size: 60, weight: .bold, design: .monospaced))
-                    Text(ui: "Stay with one thing.").foregroundStyle(.secondary)
-                    Button { finish() } label: { Text(ui: "Finish now") }
+                    Text("Stay with one thing.").foregroundStyle(.secondary)
+                    Button("Finish now") { finish() }
                         .buttonStyle(.bordered).tint(accent)
                 } else {
                     Image(systemName: "scope").font(.system(size: 44)).foregroundStyle(accent)
-                    Stepper(value: $totalMinutes, in: 5...120, step: 5) { Text(ui: "Focus for \(totalMinutes) min") }
+                    Stepper("Focus for \(totalMinutes) min", value: $totalMinutes, in: 5...120, step: 5)
                         .padding(.horizontal, 40)
-                    Button { start() } label: { Text(ui: "Start") }
+                    Button("Start") { start() }
                         .buttonStyle(.borderedProminent).tint(accent)
                 }
                 Spacer()
             }
             .padding()
-            .navigationTitle(Text(ui: "Focus session"))
+            .navigationTitle("Focus session")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text(ui: "Cancel") } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
             }
             .task(id: running) {
                 guard running else { return }

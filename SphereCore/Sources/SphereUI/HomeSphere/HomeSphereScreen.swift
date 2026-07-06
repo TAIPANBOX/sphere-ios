@@ -20,9 +20,9 @@ public struct HomeSphereScreen: View {
                     EmptyStateCard(
                         emoji: "🏠",
                         accent: accent,
-                        title: uiString("Start your Home sphere"),
-                        message: uiString("Add a household task, a plant to keep alive, or the next thing you need to buy."),
-                        buttonLabel: uiString("Add your first task")
+                        title: "Start your Home sphere",
+                        message: "Add a household task, a plant to keep alive, or the next thing you need to buy.",
+                        buttonLabel: "Add your first task"
                     ) {
                         showingAddTask = true
                     }
@@ -37,11 +37,11 @@ public struct HomeSphereScreen: View {
             }
             .padding()
         }
-        .navigationTitle(Text(ui: "Home sphere"))
+        .navigationTitle("Home")
         .toolbar {
             Menu {
-                Button { showingAddTask = true } label: { Text(ui: "Add Task") }
-                Button { showingAddPlant = true } label: { Text(ui: "Add Plant") }
+                Button("Add Task") { showingAddTask = true }
+                Button("Add Plant") { showingAddPlant = true }
             } label: {
                 Image(systemName: "plus")
             }
@@ -65,7 +65,7 @@ public struct HomeSphereScreen: View {
 
     private var warrantyCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label { Text(ui: "Warranties ending soon") } icon: { Image(systemName: "shield.lefthalf.filled") }
+            Label("Warranties ending soon", systemImage: "shield.lefthalf.filled")
                 .font(.headline).foregroundStyle(.orange)
             ForEach(store.warrantyExpiringSoon()) { appliance in
                 HStack {
@@ -84,18 +84,18 @@ public struct HomeSphereScreen: View {
 
     private var moreSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "More").font(.title3.weight(.semibold))
+            Text("More").font(.title3.weight(.semibold))
             VStack(spacing: 0) {
-                MoreLink(uiString("Appliances"), systemImage: "washer.fill",
+                MoreLink("Appliances", systemImage: "washer.fill",
                          count: store.appliances.isEmpty ? nil : store.appliances.count) { appliancesList }
                 Divider().padding(.leading, 38)
-                MoreLink(uiString("Utilities"), systemImage: "bolt.fill",
+                MoreLink("Utilities", systemImage: "bolt.fill",
                          count: store.utilityReadings.isEmpty ? nil : store.utilityReadings.count) { utilitiesList }
                 Divider().padding(.leading, 38)
-                MoreLink(uiString("Renovation"), systemImage: "hammer.fill",
+                MoreLink("Renovation", systemImage: "hammer.fill",
                          count: store.renovations.isEmpty ? nil : store.renovations.count) { renovationList }
                 Divider().padding(.leading, 38)
-                MoreLink(uiString("Inventory"), systemImage: "shippingbox.fill",
+                MoreLink("Inventory", systemImage: "shippingbox.fill",
                          count: store.inventory.isEmpty ? nil : store.inventory.count) { inventoryList }
             }
             .sphereCard()
@@ -104,16 +104,16 @@ public struct HomeSphereScreen: View {
 
     private var appliancesList: some View {
         CRUDListScreen(
-            title: uiString("Appliances"),
+            title: "Appliances",
             items: store.appliances,
-            emptyTitle: uiString("No appliances tracked"),
+            emptyTitle: "No appliances tracked",
             emptySystemImage: "washer",
             addSheet: { AddApplianceSheet { a in Task { try? await store.addAppliance(a) } } },
             row: { appliance in
                 VStack(alignment: .leading, spacing: 2) {
                     Text(appliance.name).font(.body.weight(.medium))
                     if let days = appliance.warrantyDaysLeft() {
-                        Text(days >= 0 ? uiString("Warranty: \(days)d left") : uiString("Warranty expired"))
+                        Text(days >= 0 ? "Warranty: \(days)d left" : "Warranty expired")
                             .font(.caption)
                             .foregroundStyle(days >= 0 ? Color.secondary : Color.red)
                     } else if !appliance.brand.isEmpty {
@@ -128,9 +128,9 @@ public struct HomeSphereScreen: View {
 
     private var utilitiesList: some View {
         CRUDListScreen(
-            title: uiString("Utilities"),
+            title: "Utilities",
             items: store.utilityReadings,
-            emptyTitle: uiString("No readings yet"),
+            emptyTitle: "No readings yet",
             emptySystemImage: "bolt",
             addSheet: { AddUtilitySheet { r in Task { try? await store.addUtilityReading(r) } } },
             row: { reading in
@@ -154,9 +154,9 @@ public struct HomeSphereScreen: View {
 
     private var renovationList: some View {
         CRUDListScreen(
-            title: uiString("Renovation"),
+            title: "Renovation",
             items: store.renovations,
-            emptyTitle: uiString("No projects"),
+            emptyTitle: "No projects",
             emptySystemImage: "hammer",
             addSheet: { AddRenovationSheet { p in Task { try? await store.addRenovation(p) } } },
             row: { project in
@@ -180,9 +180,9 @@ public struct HomeSphereScreen: View {
 
     private var inventoryList: some View {
         CRUDListScreen(
-            title: uiString("Inventory"),
+            title: "Inventory",
             items: store.inventory,
-            emptyTitle: uiString("Nothing catalogued"),
+            emptyTitle: "Nothing catalogued",
             emptySystemImage: "shippingbox",
             addSheet: { AddInventorySheet { i in Task { try? await store.addInventoryItem(i) } } },
             row: { item in
@@ -209,7 +209,7 @@ public struct HomeSphereScreen: View {
     private var tasksSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(ui: "Household Tasks").font(.title3.weight(.semibold))
+                Text("Household Tasks").font(.title3.weight(.semibold))
                 Spacer()
                 if !store.overdueTasks().isEmpty {
                     Text("\(store.overdueTasks().count) overdue")
@@ -218,7 +218,7 @@ public struct HomeSphereScreen: View {
                 }
             }
             if store.openTasks.isEmpty {
-                Text(ui: "Nothing to do around the house 🎉")
+                Text("Nothing to do around the house 🎉")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -252,10 +252,8 @@ public struct HomeSphereScreen: View {
                     }
                     Spacer()
                     Menu {
-                        Button(role: .destructive) {
+                        Button("Delete", role: .destructive) {
                             Task { try? await store.remove(id: task.id) }
-                        } label: {
-                            Text(ui: "Delete")
                         }
                     } label: {
                         Image(systemName: "ellipsis").foregroundStyle(.secondary)
@@ -271,7 +269,7 @@ public struct HomeSphereScreen: View {
     private var plantsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(ui: "Plants").font(.title3.weight(.semibold))
+                Text("Plants").font(.title3.weight(.semibold))
                 Spacer()
                 if store.needsWateringCount() > 0 {
                     Text("💧 \(store.needsWateringCount()) thirsty")
@@ -286,8 +284,8 @@ public struct HomeSphereScreen: View {
                         Text(plant.name).font(.body.weight(.medium))
                         Text(
                             plant.needsWatering()
-                                ? uiString("Needs watering")
-                                : uiString("Water in \(plant.daysUntilWatering()) d")
+                                ? "Needs watering"
+                                : "Water in \(plant.daysUntilWatering()) d"
                         )
                         .font(.caption)
                         .foregroundStyle(plant.needsWatering() ? Color.blue : Color.secondary)
@@ -311,19 +309,17 @@ public struct HomeSphereScreen: View {
     private var shoppingSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(ui: "Shopping List").font(.title3.weight(.semibold))
+                Text("Shopping List").font(.title3.weight(.semibold))
                 Spacer()
                 if store.shopping.contains(where: \.checked) {
-                    Button {
+                    Button("Clear done") {
                         Task { try? await store.clearChecked() }
-                    } label: {
-                        Text(ui: "Clear done")
                     }
                     .font(.caption.weight(.semibold))
                 }
             }
             HStack {
-                TextField(text: $newShoppingItem) { Text(ui: "Add item…") }
+                TextField("Add item…", text: $newShoppingItem)
                     .textFieldStyle(.roundedBorder)
                     .onSubmit(addShoppingItem)
                 Button(action: addShoppingItem) {
@@ -377,28 +373,28 @@ struct AddHomeTaskSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $title) { Text(ui: "Task") }
-                Picker(selection: $category) {
+                TextField("Task", text: $title)
+                Picker("Category", selection: $category) {
                     ForEach(HomeCategory.allCases, id: \.self) { category in
                         Text("\(category.emoji) \(category.label)").tag(category)
                     }
-                } label: { Text(ui: "Category") }
-                Toggle(isOn: $hasDueDate) { Text(ui: "Due date") }
-                if hasDueDate {
-                    DatePicker(selection: $dueDate, displayedComponents: .date) { Text(ui: "Due") }
                 }
-                Toggle(isOn: $isRecurring) { Text(ui: "Recurring") }
+                Toggle("Due date", isOn: $hasDueDate)
+                if hasDueDate {
+                    DatePicker("Due", selection: $dueDate, displayedComponents: .date)
+                }
+                Toggle("Recurring", isOn: $isRecurring)
                 if isRecurring {
-                    Stepper(value: $recurrenceDays, in: 1...90) { Text(ui: "Every \(recurrenceDays) days") }
+                    Stepper("Every \(recurrenceDays) days", value: $recurrenceDays, in: 1...90)
                 }
             }
-            .navigationTitle(Text(ui: "New Home Task"))
+            .navigationTitle("New Home Task")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(HomeTask(
                             id: HomeTask.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
@@ -409,8 +405,6 @@ struct AddHomeTaskSheet: View {
                             createdAt: Date()
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -430,17 +424,17 @@ struct AddPlantSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Plant name") }
-                TextField(text: $emoji) { Text(ui: "Emoji") }
-                Stepper(value: $intervalDays, in: 1...30) { Text(ui: "Water every \(intervalDays) d") }
+                TextField("Plant name", text: $name)
+                TextField("Emoji", text: $emoji)
+                Stepper("Water every \(intervalDays) d", value: $intervalDays, in: 1...30)
             }
-            .navigationTitle(Text(ui: "New Plant"))
+            .navigationTitle("New Plant")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Plant(
                             id: Plant.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -448,8 +442,6 @@ struct AddPlantSheet: View {
                             intervalDays: intervalDays
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -469,18 +461,18 @@ struct AddApplianceSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Name (e.g. Washing machine)") }
-                TextField(text: $brand) { Text(ui: "Brand") }
-                Toggle(isOn: $hasWarranty) { Text(ui: "Has warranty") }
+                TextField("Name (e.g. Washing machine)", text: $name)
+                TextField("Brand", text: $brand)
+                Toggle("Has warranty", isOn: $hasWarranty)
                 if hasWarranty {
-                    DatePicker(selection: $warrantyUntil, displayedComponents: .date) { Text(ui: "Warranty until") }
+                    DatePicker("Warranty until", selection: $warrantyUntil, displayedComponents: .date)
                 }
             }
-            .navigationTitle(Text(ui: "Add Appliance"))
+            .navigationTitle("Add Appliance")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text(ui: "Cancel") } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Appliance(
                             id: Appliance.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -488,8 +480,6 @@ struct AddApplianceSheet: View {
                             warrantyUntil: hasWarranty ? warrantyUntil : nil
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -510,19 +500,19 @@ struct AddUtilitySheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Picker(selection: $kind) {
+                Picker("Utility", selection: $kind) {
                     ForEach(UtilityKind.allCases, id: \.self) { k in
                         Text("\(k.emoji) \(k.rawValue.capitalized)").tag(k)
                     }
-                } label: { Text(ui: "Utility") }
-                TextField(text: $valueText) { Text(ui: "Meter reading") }
-                TextField(text: $costText) { Text(ui: "Cost (optional)") }
+                }
+                TextField("Meter reading", text: $valueText)
+                TextField("Cost (optional)", text: $costText)
             }
-            .navigationTitle(Text(ui: "Add Reading"))
+            .navigationTitle("Add Reading")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text(ui: "Cancel") } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(UtilityReading(
                             id: UtilityReading.newID(),
                             kind: kind,
@@ -531,8 +521,6 @@ struct AddUtilitySheet: View {
                             date: Date()
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(value == nil)
                 }
@@ -551,17 +539,17 @@ struct AddRenovationSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Project (e.g. Kitchen remodel)") }
-                Picker(selection: $status) {
+                TextField("Project (e.g. Kitchen remodel)", text: $name)
+                Picker("Status", selection: $status) {
                     ForEach(RenovationStatus.allCases, id: \.self) { Text($0.label).tag($0) }
-                } label: { Text(ui: "Status") }
-                TextField(text: $budgetText) { Text(ui: "Budget (optional)") }
+                }
+                TextField("Budget (optional)", text: $budgetText)
             }
-            .navigationTitle(Text(ui: "Add Project"))
+            .navigationTitle("Add Project")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text(ui: "Cancel") } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(RenovationProject(
                             id: RenovationProject.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -569,8 +557,6 @@ struct AddRenovationSheet: View {
                             budget: Double(budgetText.replacingOccurrences(of: ",", with: ".")) ?? 0
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -590,16 +576,16 @@ struct AddInventorySheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Item") }
-                Stepper(value: $quantity, in: 1...999) { Text(ui: "Quantity: \(quantity)") }
-                TextField(text: $location) { Text(ui: "Location (e.g. Garage)") }
-                TextField(text: $lentTo) { Text(ui: "Lent to (if anyone)") }
+                TextField("Item", text: $name)
+                Stepper("Quantity: \(quantity)", value: $quantity, in: 1...999)
+                TextField("Location (e.g. Garage)", text: $location)
+                TextField("Lent to (if anyone)", text: $lentTo)
             }
-            .navigationTitle(Text(ui: "Add Item"))
+            .navigationTitle("Add Item")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text(ui: "Cancel") } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(InventoryItem(
                             id: InventoryItem.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -608,8 +594,6 @@ struct AddInventorySheet: View {
                             lentTo: lentTo.trimmingCharacters(in: .whitespaces)
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }

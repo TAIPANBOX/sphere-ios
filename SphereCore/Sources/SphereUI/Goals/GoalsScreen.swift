@@ -32,9 +32,9 @@ public struct GoalsScreen: View {
                     EmptyStateCard(
                         emoji: "🎯",
                         accent: accent,
-                        title: uiString("Start your Goals sphere"),
-                        message: uiString("Pick one goal that matters right now — you can always break it down later."),
-                        buttonLabel: uiString("Add your first goal")
+                        title: "Start your Goals sphere",
+                        message: "Pick one goal that matters right now — you can always break it down later.",
+                        buttonLabel: "Add your first goal"
                     ) {
                         showingAddGoal = true
                     }
@@ -89,12 +89,12 @@ public struct GoalsScreen: View {
             }
             .padding()
         }
-        .navigationTitle(Text(ui: "Goals"))
+        .navigationTitle("Goals")
         .toolbar {
             Menu {
-                Button { showingAddGoal = true } label: { Text(ui: "Add Goal") }
-                Button { showingAddHabit = true } label: { Text(ui: "Add Habit") }
-                Button { showingAddAntiGoal = true } label: { Text(ui: "Add Anti-goal") }
+                Button("Add Goal") { showingAddGoal = true }
+                Button("Add Habit") { showingAddHabit = true }
+                Button("Add Anti-goal") { showingAddAntiGoal = true }
             } label: {
                 Image(systemName: "plus")
             }
@@ -116,7 +116,7 @@ public struct GoalsScreen: View {
         }
         .sheet(item: $breakdownGoal) { goal in
             AgentResultSheet(
-                title: uiString("Break it down"),
+                title: "Break it down",
                 subtitle: goal.title,
                 systemImage: "list.bullet.rectangle",
                 tint: accent,
@@ -167,15 +167,15 @@ public struct GoalsScreen: View {
 
     private var lifeProgressCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(ui: "Overall Life Progress")
+            Text("Overall Life Progress")
                 .font(.headline)
             HStack(alignment: .lastTextBaseline, spacing: 4) {
                 Text("\(store.overallProgress)")
                     .font(.system(size: 44, weight: .bold, design: .rounded))
                     .foregroundStyle(accent)
-                Text(ui: "%").font(.title3).foregroundStyle(.secondary)
+                Text("%").font(.title3).foregroundStyle(.secondary)
                 Spacer()
-                Text(ui: "\(activeGoals.count) active")
+                Text("\(activeGoals.count) active")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -185,17 +185,17 @@ public struct GoalsScreen: View {
         .sphereCard()
     }
 
-    private func section(title: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {
+    private func section(title: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: title)
+            Text(title)
                 .font(.title3.weight(.semibold))
                 .frame(maxWidth: .infinity, alignment: .leading)
             content()
         }
     }
 
-    private func emptyState(_ text: LocalizedStringKey) -> some View {
-        Text(ui: text)
+    private func emptyState(_ text: String) -> some View {
+        Text(text)
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -223,7 +223,7 @@ struct GoalCard: View {
                 }
                 Spacer()
                 if goal.status == .paused {
-                    Text(ui: "Paused")
+                    Text("Paused")
                         .font(.caption.weight(.semibold))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
@@ -232,15 +232,11 @@ struct GoalCard: View {
                 }
                 Menu {
                     if let onBreakDown {
-                        Button(action: onBreakDown) {
-                            Label { Text(ui: "Break this down") } icon: { Image(systemName: "sparkles") }
-                        }
+                        Button("Break this down", systemImage: "sparkles", action: onBreakDown)
                     }
-                    Button(action: onTogglePause) {
-                        Text(ui: goal.status == .paused ? "Resume" : "Pause")
-                    }
-                    Button { onProgress(goal.progressPercent + 10) } label: { Text(ui: "+10% progress") }
-                    Button(role: .destructive, action: onDelete) { Text(ui: "Delete") }
+                    Button(goal.status == .paused ? "Resume" : "Pause", action: onTogglePause)
+                    Button("+10% progress") { onProgress(goal.progressPercent + 10) }
+                    Button("Delete", role: .destructive, action: onDelete)
                 } label: {
                     Image(systemName: "ellipsis")
                         .foregroundStyle(.secondary)
@@ -258,13 +254,13 @@ struct GoalCard: View {
                     .foregroundStyle(.secondary)
             }
             if !goal.keyResults.isEmpty {
-                Text(ui: "\(goal.keyResults.count) key results")
+                Text("\(goal.keyResults.count) key results")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
             // Resurface the "why" while the goal is stalled.
             if goal.progressPercent < 20, !goal.why.isEmpty {
-                Text(ui: "💭 Remember why: \(goal.why)")
+                Text("💭 Remember why: \(goal.why)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -286,7 +282,7 @@ struct HabitRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(habit.name)
                     if !habit.identity.isEmpty {
-                        Text(ui: "A vote for \(habit.identity)")
+                        Text("A vote for \(habit.identity)")
                             .font(.caption2).foregroundStyle(.secondary)
                     }
                 }
@@ -329,30 +325,27 @@ struct AddGoalSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $title) { Text(ui: "Goal title") }
-                TextField(text: $details) { Text(ui: "Description (optional)") }
-                TextField(text: $emoji) { Text(ui: "Emoji") }
-                Picker(selection: $horizon) {
+                TextField("Goal title", text: $title)
+                TextField("Description (optional)", text: $details)
+                TextField("Emoji", text: $emoji)
+                Picker("Horizon", selection: $horizon) {
                     ForEach(GoalHorizon.allCases, id: \.self) { horizon in
                         Text(horizon.label).tag(horizon)
                     }
-                } label: {
-                    Text(ui: "Horizon")
                 }
                 Section {
-                    TextField(text: $why, axis: .vertical) { Text(ui: "Why does this matter?") }
-                        .lineLimit(2...4)
+                    TextField("Why does this matter?", text: $why, axis: .vertical).lineLimit(2...4)
                 } footer: {
-                    Text(ui: "Your reason is resurfaced whenever the goal stalls.")
+                    Text("Your reason is resurfaced whenever the goal stalls.")
                 }
             }
-            .navigationTitle(Text(ui: "New Goal"))
+            .navigationTitle("New Goal")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Goal(
                             id: Goal.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
@@ -362,8 +355,6 @@ struct AddGoalSheet: View {
                             why: why.trimmingCharacters(in: .whitespaces)
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -385,16 +376,16 @@ struct AddHabitSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Habit (e.g. Read 10 pages)") }
-                TextField(text: $emoji) { Text(ui: "Emoji") }
+                TextField("Habit (e.g. Read 10 pages)", text: $name)
+                TextField("Emoji", text: $emoji)
                 Section {
-                    TextField(text: $identity) { Text(ui: "I am… (e.g. a reader)") }
+                    TextField("I am… (e.g. a reader)", text: $identity)
                 } header: {
-                    Text(ui: "Identity")
+                    Text("Identity")
                 } footer: {
-                    Text(ui: "Each check-in is a vote for who you're becoming.")
+                    Text("Each check-in is a vote for who you're becoming.")
                 }
-                Section {
+                Section("Remind me on") {
                     HStack(spacing: 6) {
                         ForEach(dayLabels, id: \.0) { day, label in
                             Button {
@@ -412,17 +403,13 @@ struct AddHabitSheet: View {
                             .buttonStyle(.plain)
                         }
                     }
-                } header: {
-                    Text(ui: "Remind me on")
                 }
             }
-            .navigationTitle(Text(ui: "New Habit"))
+            .navigationTitle("New Habit")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Habit(
                             id: Habit.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -431,8 +418,6 @@ struct AddHabitSheet: View {
                             reminderWeekdays: weekdays.sorted()
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -451,28 +436,23 @@ struct AddAntiGoalSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField(text: $title) { Text(ui: "What will you say no to?") }
-                    TextField(text: $note, axis: .vertical) { Text(ui: "Why (optional)") }
-                        .lineLimit(2...4)
+                    TextField("What will you say no to?", text: $title)
+                    TextField("Why (optional)", text: $note, axis: .vertical).lineLimit(2...4)
                 } footer: {
-                    Text(ui: "A boundary, not a target — clarity on what you won't do.")
+                    Text("A boundary, not a target — clarity on what you won't do.")
                 }
             }
-            .navigationTitle(Text(ui: "New Anti-goal"))
+            .navigationTitle("New Anti-goal")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(AntiGoal(
                             id: AntiGoal.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
                             note: note.trimmingCharacters(in: .whitespaces)
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }

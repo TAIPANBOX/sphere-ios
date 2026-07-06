@@ -93,19 +93,20 @@ struct ProfileScreen: View {
             } header: {
                 Text("About me")
             } footer: {
-                Text("The most useful thing you can tell your agents. Shared with every sphere so advice fits your life.")
+                Text("The most useful thing you can tell your agents. Shared with "
+                    + "every sphere so advice fits your life.")
             }
 
             Section("Body") {
                 Picker("Gender", selection: $gender) {
                     Text("—").tag(Gender?.none)
-                    ForEach(Gender.allCases, id: \.self) { Text($0.localizedTitle).tag(Gender?.some($0)) }
+                    ForEach(Gender.allCases, id: \.self) { Text($0.label).tag(Gender?.some($0)) }
                 }
                 TextField("Height, cm", text: $heightText)
                     .keyboardType(.numberPad)
                 Picker("Blood type", selection: $bloodType) {
                     Text("—").tag(BloodType?.none)
-                    ForEach(BloodType.allCases, id: \.self) { Text($0.localizedTitle).tag(BloodType?.some($0)) }
+                    ForEach(BloodType.allCases, id: \.self) { Text($0.label).tag(BloodType?.some($0)) }
                 }
                 Picker("Children", selection: $hasChildren) {
                     Text("—").tag(Bool?.none)
@@ -125,12 +126,13 @@ struct ProfileScreen: View {
             } header: {
                 Text("Health conditions")
             } footer: {
-                Text("Everything here flows into every agent's context — dietary tags shape Travel advice, conditions shape Health advice.")
+                Text("Everything here flows into every agent's context — "
+                    + "dietary tags shape Travel advice, conditions shape Health advice.")
             }
 
             Section {
                 Picker("Mode", selection: $wellbeing) {
-                    ForEach(WellbeingMode.allCases, id: \.self) { Text($0.localizedTitle).tag($0) }
+                    ForEach(WellbeingMode.allCases, id: \.self) { Text($0.label).tag($0) }
                 }
                 if wellbeing != .normal {
                     Toggle("Set an end date", isOn: $hasWellbeingUntil)
@@ -141,7 +143,8 @@ struct ProfileScreen: View {
             } header: {
                 Text("Wellbeing")
             } footer: {
-                Text("Sick or vacation mode pauses your streaks and mutes daily nudges, so a break never costs you your progress.")
+                Text("Sick or vacation mode pauses your streaks and mutes daily "
+                    + "nudges, so a break never costs you your progress.")
             }
             .onChange(of: wellbeing) { _, _ in applyWellbeing() }
             .onChange(of: hasWellbeingUntil) { _, _ in applyWellbeing() }
@@ -162,7 +165,8 @@ struct ProfileScreen: View {
             } header: {
                 Label("What your agents know about you", systemImage: "eye")
             } footer: {
-                Text("This is the entire context shared with your agents — nothing else about you leaves this device. Updates when you save.")
+                Text("This is the entire context shared with your agents — nothing "
+                    + "else about you leaves this device. Updates when you save.")
             }
         }
         .navigationTitle("Profile")

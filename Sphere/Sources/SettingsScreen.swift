@@ -17,12 +17,11 @@ struct SettingsScreen: View {
     @AppStorage(Prefs.appLock) private var appLock = false
     @AppStorage(Prefs.aiBackend) private var aiBackend = ""
     @AppStorage(Prefs.cloudModel) private var cloudModel = ""
-    @AppStorage(Prefs.language) private var language = AppLanguage.system.rawValue
     @State private var cloudModelName: String?
     private let onDeviceAvailable = OnDeviceAI.isAvailable
 
     private var cloudModelLabel: String {
-        guard !cloudModel.isEmpty else { return String(localized: "Default") }
+        guard !cloudModel.isEmpty else { return "Default" }
         return cloudModelName ?? cloudModel
     }
 
@@ -38,13 +37,13 @@ struct SettingsScreen: View {
                 Picker("Assistant", selection: $aiBackend) {
                     Text("Automatic").tag("")
                     if onDeviceAvailable {
-                        Text(AIBackend.onDevice.localizedTitle).tag("onDevice")
+                        Text("On-device (free)").tag("onDevice")
                     }
                     if !container.models.installedModels.isEmpty {
-                        Text(AIBackend.localModel.localizedTitle).tag("localModel")
+                        Text("Downloaded model").tag("localModel")
                     }
                     ForEach(LLMProviderID.allCases, id: \.self) { provider in
-                        Text(provider.localizedTitle).tag(provider.rawValue)
+                        Text(provider.displayName).tag(provider.rawValue)
                     }
                 }
                 NavigationLink("Downloadable models") {
@@ -53,17 +52,19 @@ struct SettingsScreen: View {
             } header: {
                 Text("AI")
             } footer: {
-                if onDeviceAvailable {
-                    Text("On-device AI is free and private — nothing leaves your iPhone, no key needed. Add a key below only if you want a cloud model.")
-                } else {
-                    Text("Add a provider key below, or use this iPhone's free on-device AI where available (iPhone 15 Pro or newer on iOS 26).")
-                }
+                Text(onDeviceAvailable
+                    ? "On-device AI is free and private — nothing leaves your "
+                        + "iPhone, no key needed. Add a key below only if you want "
+                        + "a cloud model."
+                    : "Add a provider key below, or use this iPhone's free "
+                        + "on-device AI where available (iPhone 15 Pro or newer on "
+                        + "iOS 26).")
             }
 
             Section {
                 ForEach(LLMProviderID.allCases, id: \.self) { provider in
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(provider.localizedTitle).font(.subheadline.weight(.medium))
+                        Text(provider.displayName).font(.subheadline.weight(.medium))
                         SecureField("API key", text: keyBinding(for: provider))
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
@@ -90,22 +91,25 @@ struct SettingsScreen: View {
             } header: {
                 Text("API keys (optional)")
             } footer: {
-                Text("Keys are stored in the iCloud Keychain and never leave your devices. Used only when you select a cloud model above.")
+                Text("Keys are stored in the iCloud Keychain and never leave "
+                    + "your devices. Used only when you select a cloud model above.")
             }
 
             Section {
-                Toggle(isOn: notificationBinding(.morningBrief)) { Text(NotificationCategory.morningBrief.localizedTitle) }
-                Toggle(isOn: notificationBinding(.water)) { Text(NotificationCategory.water.localizedTitle) }
-                Toggle(isOn: notificationBinding(.medication)) { Text(NotificationCategory.medication.localizedTitle) }
-                Toggle(isOn: notificationBinding(.bedtime)) { Text(NotificationCategory.bedtime.localizedTitle) }
-                Toggle(isOn: notificationBinding(.plant)) { Text(NotificationCategory.plant.localizedTitle) }
-                Toggle(isOn: notificationBinding(.subscription)) { Text(NotificationCategory.subscription.localizedTitle) }
-                Toggle(isOn: notificationBinding(.habit)) { Text(NotificationCategory.habit.localizedTitle) }
-                Toggle(isOn: notificationBinding(.birthday)) { Text(NotificationCategory.birthday.localizedTitle) }
+                Toggle(NotificationCategory.morningBrief.label, isOn: notificationBinding(.morningBrief))
+                Toggle(NotificationCategory.water.label, isOn: notificationBinding(.water))
+                Toggle(NotificationCategory.medication.label, isOn: notificationBinding(.medication))
+                Toggle(NotificationCategory.bedtime.label, isOn: notificationBinding(.bedtime))
+                Toggle(NotificationCategory.plant.label, isOn: notificationBinding(.plant))
+                Toggle(NotificationCategory.subscription.label, isOn: notificationBinding(.subscription))
+                Toggle(NotificationCategory.habit.label, isOn: notificationBinding(.habit))
+                Toggle(NotificationCategory.birthday.label, isOn: notificationBinding(.birthday))
             } header: {
                 Text("Notifications")
             } footer: {
-                Text("Reminders are built from your own data and stay on this device. Bedtime needs a bedtime set in Rest; medication and plant reminders appear once you add them.")
+                Text("Reminders are built from your own data and stay on this "
+                    + "device. Bedtime needs a bedtime set in Rest; medication and "
+                    + "plant reminders appear once you add them.")
             }
 
             Section {
@@ -124,13 +128,14 @@ struct SettingsScreen: View {
             } header: {
                 Text("Privacy & Data")
             } footer: {
-                Text("Everything stays on this device. Export saves a JSON copy of all your data; Face ID keeps it private.")
+                Text("Everything stays on this device. Export saves a JSON copy "
+                    + "of all your data; Face ID keeps it private.")
             }
 
             Section("Appearance") {
                 Picker("Theme", selection: $theme) {
                     ForEach(ThemePreference.allCases, id: \.rawValue) { pref in
-                        Text(LocalizedStringKey(pref.label)).tag(pref.rawValue)
+                        Text(pref.label).tag(pref.rawValue)
                     }
                 }
                 Picker("Currency", selection: $currency) {
@@ -140,17 +145,21 @@ struct SettingsScreen: View {
                 }
             }
 
-            Section {
+            Section("General") {
                 NavigationLink("My Spheres") { MySpheresScreen(container: container) }
-                Picker("Language", selection: $language) {
-                    ForEach(AppLanguage.allCases, id: \.rawValue) { option in
-                        Text(option.nativeName).tag(option.rawValue)
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    HStack {
+                        Text("Language").foregroundStyle(.primary)
+                        Spacer()
+                        Image(systemName: "arrow.up.forward.app")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
-            } header: {
-                Text("General")
-            } footer: {
-                Text("Takes full effect after reopening the app.")
             }
 
             Section {

@@ -189,7 +189,6 @@ struct LifeScoreWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "SphereLifeScore", provider: SnapshotProvider()) { entry in
             LifeScoreView(snapshot: entry.snapshot)
-                .environment(\.locale, SharedAppLanguage.current().locale ?? .autoupdatingCurrent)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Life Score")

@@ -27,7 +27,7 @@ public struct CRUDListScreen<Item: Identifiable, Row: View, AddSheet: View>: Vie
         items: [Item],
         emptyTitle: String,
         emptySystemImage: String = "tray",
-        addLabel: String? = nil,
+        addLabel: String = "Add",
         @ViewBuilder addSheet: @escaping () -> AddSheet,
         @ViewBuilder row: @escaping (Item) -> Row,
         onDelete: @escaping (Item) -> Void,
@@ -37,7 +37,7 @@ public struct CRUDListScreen<Item: Identifiable, Row: View, AddSheet: View>: Vie
         self.items = items
         self.emptyTitle = emptyTitle
         self.emptySystemImage = emptySystemImage
-        self.addLabel = addLabel ?? uiString("Add")
+        self.addLabel = addLabel
         self.rowContent = row
         self.addSheet = addSheet
         self.onDelete = onDelete
@@ -81,13 +81,11 @@ public struct CRUDListScreen<Item: Identifiable, Row: View, AddSheet: View>: Vie
     private var undoBar: some View {
         if let item = recentlyDeleted, let onRestore {
             HStack(spacing: 12) {
-                Text(ui: "Deleted").font(.subheadline)
+                Text("Deleted").font(.subheadline)
                 Spacer()
-                Button {
+                Button("Undo") {
                     onRestore(item)
                     recentlyDeleted = nil
-                } label: {
-                    Text(ui: "Undo")
                 }
                 .font(.subheadline.weight(.semibold))
             }

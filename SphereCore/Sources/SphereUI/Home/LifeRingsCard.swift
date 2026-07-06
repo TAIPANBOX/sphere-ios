@@ -22,10 +22,10 @@ struct LifeRingsCard: View {
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 5..<12: return uiString("Good morning")
-        case 12..<17: return uiString("Good afternoon")
-        case 17..<22: return uiString("Good evening")
-        default: return uiString("Good night")
+        case 5..<12: return "Good morning"
+        case 12..<17: return "Good afternoon"
+        case 17..<22: return "Good evening"
+        default: return "Good night"
         }
     }
 
@@ -109,7 +109,7 @@ struct LifeRingsCard: View {
                         .font(.system(size: 48, weight: .bold, design: .rounded))
                         .contentTransition(.numericText())
                         .sphereAnimation(SphereMotion.snappy, value: lifeScore)
-                    Text(ui: "Life balance").font(.caption).foregroundStyle(.secondary)
+                    Text("Life balance").font(.caption).foregroundStyle(.secondary)
                 }
             }
             .frame(width: 160, height: 160)

@@ -24,9 +24,9 @@ public struct FinanceScreen: View {
                     EmptyStateCard(
                         emoji: "💰",
                         accent: accent,
-                        title: uiString("Start your Finance sphere"),
-                        message: uiString("Log a transaction to see where your money is actually going."),
-                        buttonLabel: uiString("Add your first transaction")
+                        title: "Start your Finance sphere",
+                        message: "Log a transaction to see where your money is actually going.",
+                        buttonLabel: "Add your first transaction"
                     ) {
                         showingAddTransaction = true
                     }
@@ -50,7 +50,7 @@ public struct FinanceScreen: View {
             }
             .padding()
         }
-        .navigationTitle(Text(ui: "Finance"))
+        .navigationTitle("Finance")
         .sheet(isPresented: $showingAddAccount) {
             AddAccountSheet { account in
                 Task { try? await store.addAccount(account) }
@@ -61,7 +61,7 @@ public struct FinanceScreen: View {
                 Task { try? await store.addSavingsGoal(goal) }
             }
         }
-        .alert(Text(ui: "Add to goal"), isPresented: Binding(
+        .alert("Add to goal", isPresented: Binding(
             get: { addToGoalId != nil },
             set: { if !$0 { addToGoalId = nil } }
         )) {
@@ -106,9 +106,9 @@ public struct FinanceScreen: View {
         .sphereCard()
     }
 
-    private func summaryColumn(_ title: LocalizedStringKey, value: Double, tint: Color) -> some View {
+    private func summaryColumn(_ title: String, value: Double, tint: Color) -> some View {
         VStack(spacing: 4) {
-            Text(ui: title).font(.caption).foregroundStyle(.secondary)
+            Text(title).font(.caption).foregroundStyle(.secondary)
             Text(money(value))
                 .font(.headline)
                 .foregroundStyle(tint)
@@ -122,12 +122,12 @@ public struct FinanceScreen: View {
 
     private var safeToSpendCard: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label { Text(ui: "Safe to spend today") } icon: { Image(systemName: "wallet.pass.fill") }
+            Label("Safe to spend today", systemImage: "wallet.pass.fill")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(accent)
             Text(money(store.safeToSpendToday() ?? 0))
                 .font(.system(size: 34, weight: .bold, design: .rounded))
-            Text(ui: "Your remaining monthly budget, spread over the days left.")
+            Text("Your remaining monthly budget, spread over the days left.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -140,7 +140,7 @@ public struct FinanceScreen: View {
     private var categoryChartCard: some View {
         let data = Array(store.categorySpendingThisMonth().prefix(6))
         return VStack(alignment: .leading, spacing: 8) {
-            Text(ui: "This month by category").font(.headline)
+            Text("This month by category").font(.headline)
             Chart(data, id: \.0) { entry in
                 BarMark(
                     x: .value("Spent", entry.1),
@@ -162,15 +162,15 @@ public struct FinanceScreen: View {
 
     private var moreSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "More").font(.title3.weight(.semibold))
+            Text("More").font(.title3.weight(.semibold))
             VStack(spacing: 0) {
-                MoreLink(uiString("Debts"), systemImage: "creditcard.fill",
+                MoreLink("Debts", systemImage: "creditcard.fill",
                          count: store.debts.isEmpty ? nil : store.debts.count) { debtsList }
                 Divider().padding(.leading, 38)
-                MoreLink(uiString("Investments"), systemImage: "chart.line.uptrend.xyaxis",
+                MoreLink("Investments", systemImage: "chart.line.uptrend.xyaxis",
                          count: store.investments.isEmpty ? nil : store.investments.count) { investmentsList }
                 Divider().padding(.leading, 38)
-                MoreLink(uiString("Wishlist"), systemImage: "sparkles",
+                MoreLink("Wishlist", systemImage: "sparkles",
                          count: store.wishlist.isEmpty ? nil : store.wishlist.count) { wishlistList }
             }
             .sphereCard()
@@ -179,9 +179,9 @@ public struct FinanceScreen: View {
 
     private var debtsList: some View {
         CRUDListScreen(
-            title: uiString("Debts"),
+            title: "Debts",
             items: store.debts,
-            emptyTitle: uiString("No debts tracked"),
+            emptyTitle: "No debts tracked",
             emptySystemImage: "creditcard",
             addSheet: { AddDebtSheet { debt in Task { try? await store.addDebt(debt) } } },
             row: { debt in
@@ -193,7 +193,7 @@ public struct FinanceScreen: View {
                     }
                     ProgressView(value: debt.progress).tint(accent)
                     if debt.monthlyPayment > 0 {
-                        Text(ui: "\(money(debt.monthlyPayment))/mo").font(.caption).foregroundStyle(.secondary)
+                        Text("\(money(debt.monthlyPayment))/mo").font(.caption).foregroundStyle(.secondary)
                     }
                 }
             },
@@ -204,9 +204,9 @@ public struct FinanceScreen: View {
 
     private var investmentsList: some View {
         CRUDListScreen(
-            title: uiString("Investments"),
+            title: "Investments",
             items: store.investments,
-            emptyTitle: uiString("No investments tracked"),
+            emptyTitle: "No investments tracked",
             emptySystemImage: "chart.line.uptrend.xyaxis",
             addSheet: { AddInvestmentSheet { inv in Task { try? await store.addInvestment(inv) } } },
             row: { inv in
@@ -226,9 +226,9 @@ public struct FinanceScreen: View {
 
     private var wishlistList: some View {
         CRUDListScreen(
-            title: uiString("Wishlist"),
+            title: "Wishlist",
             items: store.wishlist,
-            emptyTitle: uiString("Nothing on the list"),
+            emptyTitle: "Nothing on the list",
             emptySystemImage: "sparkles",
             addSheet: { AddWishlistSheet { item in Task { try? await store.addWishlistItem(item) } } },
             row: { item in wishlistRow(item) },
@@ -242,9 +242,9 @@ public struct FinanceScreen: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.title).font(.body.weight(.medium))
                 if item.isRipe() {
-                    Text(ui: "Ready — buy it or let it go").font(.caption).foregroundStyle(.orange)
+                    Text("Ready — buy it or let it go").font(.caption).foregroundStyle(.orange)
                 } else {
-                    Text(ui: "Cooling off · ripens in \(item.hoursUntilRipe())h")
+                    Text("Cooling off · ripens in \(item.hoursUntilRipe())h")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -258,7 +258,7 @@ public struct FinanceScreen: View {
     private var accountsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(ui: "Accounts").font(.title3.weight(.semibold))
+                Text("Accounts").font(.title3.weight(.semibold))
                 Spacer()
                 if !store.accounts.isEmpty {
                     Text(money(store.totalAccountBalance))
@@ -287,7 +287,7 @@ public struct FinanceScreen: View {
                     Button(role: .destructive) {
                         Task { try? await store.removeAccount(id: account.id) }
                     } label: {
-                        Label { Text(ui: "Delete") } icon: { Image(systemName: "trash") }
+                        Label("Delete", systemImage: "trash")
                     }
                 }
             }
@@ -299,7 +299,7 @@ public struct FinanceScreen: View {
     private var savingsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(ui: "Savings Goals").font(.title3.weight(.semibold))
+                Text("Savings Goals").font(.title3.weight(.semibold))
                 Spacer()
                 Button {
                     showingAddSavings = true
@@ -335,7 +335,7 @@ public struct FinanceScreen: View {
                     Button(role: .destructive) {
                         Task { try? await store.removeSavingsGoal(id: goal.id) }
                     } label: {
-                        Label { Text(ui: "Delete") } icon: { Image(systemName: "trash") }
+                        Label("Delete", systemImage: "trash")
                     }
                 }
             }
@@ -345,11 +345,10 @@ public struct FinanceScreen: View {
     // MARK: - Budgets
 
     private var overBudgetWarning: some View {
-        Label {
-            Text(ui: "Over budget: \(store.overBudget().map(\.category.label).joined(separator: ", "))")
-        } icon: {
-            Image(systemName: "exclamationmark.triangle.fill")
-        }
+        Label(
+            "Over budget: \(store.overBudget().map(\.category.label).joined(separator: ", "))",
+            systemImage: "exclamationmark.triangle.fill"
+        )
         .font(.subheadline.weight(.medium))
         .foregroundStyle(.red)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -358,9 +357,9 @@ public struct FinanceScreen: View {
 
     private var budgetsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "Budgets").font(.title3.weight(.semibold))
+            Text("Budgets").font(.title3.weight(.semibold))
             if store.budgets.isEmpty {
-                Text(ui: "No budgets set.")
+                Text("No budgets set.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -391,9 +390,9 @@ public struct FinanceScreen: View {
     private var subscriptionsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(ui: "Subscriptions").font(.title3.weight(.semibold))
+                Text("Subscriptions").font(.title3.weight(.semibold))
                 Spacer()
-                Text(ui: "\(money(store.totalMonthlySubscriptions))/mo")
+                Text("\(money(store.totalMonthlySubscriptions))/mo")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -404,7 +403,7 @@ public struct FinanceScreen: View {
                         Text(subscription.name)
                             .font(.body.weight(.medium))
                             .foregroundStyle(subscription.isActive ? .primary : .secondary)
-                        Text(ui: "bills in \(subscription.daysUntilBilling()) d")
+                        Text("bills in \(subscription.daysUntilBilling()) d")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -426,9 +425,9 @@ public struct FinanceScreen: View {
 
     private var transactionsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "Transactions").font(.title3.weight(.semibold))
+            Text("Transactions").font(.title3.weight(.semibold))
             if store.transactions.isEmpty {
-                Text(ui: "No transactions yet — add one or tell your agent.")
+                Text("No transactions yet — add one or tell your agent.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -469,23 +468,21 @@ struct AddAccountSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Account name") }
-                Picker(selection: $type) {
+                TextField("Account name", text: $name)
+                Picker("Type", selection: $type) {
                     ForEach(AccountType.allCases, id: \.self) { type in
                         Text("\(type.emoji) \(type.label)").tag(type)
                     }
-                } label: {
-                    Text(ui: "Type")
                 }
-                TextField(text: $balanceText) { Text(ui: "Balance") }
+                TextField("Balance", text: $balanceText)
             }
-            .navigationTitle(Text(ui: "Add Account"))
+            .navigationTitle("Add Account")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Account(
                             id: Account.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -493,8 +490,6 @@ struct AddAccountSheet: View {
                             balance: balance
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -518,17 +513,17 @@ struct AddSavingsGoalSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Goal name") }
-                TextField(text: $emoji) { Text(ui: "Emoji") }
-                TextField(text: $targetText) { Text(ui: "Target amount") }
+                TextField("Goal name", text: $name)
+                TextField("Emoji", text: $emoji)
+                TextField("Target amount", text: $targetText)
             }
-            .navigationTitle(Text(ui: "New Savings Goal"))
+            .navigationTitle("New Savings Goal")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         if let target, target > 0 {
                             onAdd(SavingsGoal(
                                 id: SavingsGoal.newID(),
@@ -538,8 +533,6 @@ struct AddSavingsGoalSheet: View {
                             ))
                         }
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(
                         name.trimmingCharacters(in: .whitespaces).isEmpty
@@ -558,15 +551,13 @@ struct AddToGoalAlert: View {
     @State private var amountText = ""
 
     var body: some View {
-        TextField(text: $amountText) { Text(ui: "Amount") }
-        Button {
+        TextField("Amount", text: $amountText)
+        Button("Add") {
             if let amount = Double(amountText.replacingOccurrences(of: ",", with: ".")) {
                 onAdd(amount)
             }
-        } label: {
-            Text(ui: "Add")
         }
-        Button(role: .cancel) {} label: { Text(ui: "Cancel") }
+        Button("Cancel", role: .cancel) {}
     }
 }
 
@@ -586,30 +577,26 @@ struct AddTransactionSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $title) { Text(ui: "Title") }
-                TextField(text: $amountText) { Text(ui: "Amount") }
-                Picker(selection: $type) {
-                    Text(ui: "Expense").tag(TransactionType.expense)
-                    Text(ui: "Income").tag(TransactionType.income)
-                } label: {
-                    Text(ui: "Type")
+                TextField("Title", text: $title)
+                TextField("Amount", text: $amountText)
+                Picker("Type", selection: $type) {
+                    Text("Expense").tag(TransactionType.expense)
+                    Text("Income").tag(TransactionType.income)
                 }
                 .pickerStyle(.segmented)
-                Picker(selection: $category) {
+                Picker("Category", selection: $category) {
                     ForEach(TransactionCategory.allCases, id: \.self) { category in
                         Text("\(category.emoji) \(category.label)").tag(category)
                     }
-                } label: {
-                    Text(ui: "Category")
                 }
             }
-            .navigationTitle(Text(ui: "Add Transaction"))
+            .navigationTitle("Add Transaction")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         if let amount {
                             onAdd(SphereCore.Transaction(
                                 id: Transaction.newID(),
@@ -621,8 +608,6 @@ struct AddTransactionSheet: View {
                             ))
                         }
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(
                         title.trimmingCharacters(in: .whitespaces).isEmpty
@@ -649,19 +634,17 @@ struct AddDebtSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Name (e.g. Car loan)") }
-                TextField(text: $lender) { Text(ui: "Lender") }
-                TextField(text: $totalText) { Text(ui: "Total amount") }
-                TextField(text: $remainingText) { Text(ui: "Remaining") }
-                TextField(text: $monthlyText) { Text(ui: "Monthly payment") }
+                TextField("Name (e.g. Car loan)", text: $name)
+                TextField("Lender", text: $lender)
+                TextField("Total amount", text: $totalText)
+                TextField("Remaining", text: $remainingText)
+                TextField("Monthly payment", text: $monthlyText)
             }
-            .navigationTitle(Text(ui: "Add Debt"))
+            .navigationTitle("Add Debt")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Debt(
                             id: Debt.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -671,8 +654,6 @@ struct AddDebtSheet: View {
                             monthlyPayment: Double(monthlyText.replacingOccurrences(of: ",", with: ".")) ?? 0
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || total == nil)
                 }
@@ -693,21 +674,17 @@ struct AddInvestmentSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Name") }
-                Picker(selection: $type) {
+                TextField("Name", text: $name)
+                Picker("Type", selection: $type) {
                     ForEach(InvestmentType.allCases, id: \.self) { Text($0.label).tag($0) }
-                } label: {
-                    Text(ui: "Type")
                 }
-                TextField(text: $valueText) { Text(ui: "Current value") }
+                TextField("Current value", text: $valueText)
             }
-            .navigationTitle(Text(ui: "Add Investment"))
+            .navigationTitle("Add Investment")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Investment(
                             id: Investment.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -715,8 +692,6 @@ struct AddInvestmentSheet: View {
                             value: value ?? 0
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || value == nil)
                 }
@@ -737,19 +712,18 @@ struct AddWishlistSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField(text: $title) { Text(ui: "What do you want?") }
-                    TextField(text: $amountText) { Text(ui: "Price") }
+                    TextField("What do you want?", text: $title)
+                    TextField("Price", text: $amountText)
                 } footer: {
-                    Text(ui: "It waits 72 hours before becoming a buy-or-drop decision — a simple guard against impulse buys.")
+                    Text("It waits 72 hours before becoming a buy-or-drop decision — "
+                        + "a simple guard against impulse buys.")
                 }
             }
-            .navigationTitle(Text(ui: "Add to Wishlist"))
+            .navigationTitle("Add to Wishlist")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(WishlistItem(
                             id: WishlistItem.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
@@ -757,8 +731,6 @@ struct AddWishlistSheet: View {
                             createdAt: Date()
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty || amount == nil)
                 }

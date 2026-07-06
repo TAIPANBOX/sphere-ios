@@ -20,9 +20,9 @@ public struct TravelScreen: View {
                     EmptyStateCard(
                         emoji: "✈️",
                         accent: accent,
-                        title: uiString("Start your Travel sphere"),
-                        message: uiString("Plan a trip, or drop a dream destination on the list for someday."),
-                        buttonLabel: uiString("Add your first trip")
+                        title: "Start your Travel sphere",
+                        message: "Plan a trip, or drop a dream destination on the list for someday.",
+                        buttonLabel: "Add your first trip"
                     ) {
                         showingAddTrip = true
                     }
@@ -36,11 +36,11 @@ public struct TravelScreen: View {
             }
             .padding()
         }
-        .navigationTitle(Text(ui: "Travel"))
+        .navigationTitle("Travel")
         .toolbar {
             Menu {
-                Button { showingAddTrip = true } label: { Text(ui: "Add Trip") }
-                Button { showingAddWish = true } label: { Text(ui: "Add Dream Destination") }
+                Button("Add Trip") { showingAddTrip = true }
+                Button("Add Dream Destination") { showingAddWish = true }
             } label: {
                 Image(systemName: "plus")
             }
@@ -67,7 +67,7 @@ public struct TravelScreen: View {
 
     private func nextTripCard(_ trip: TravelPlan) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(ui: "Next Trip").font(.headline)
+            Text("Next Trip").font(.headline)
             HStack {
                 Text(trip.emoji).font(.system(size: 36))
                 VStack(alignment: .leading, spacing: 2) {
@@ -82,7 +82,7 @@ public struct TravelScreen: View {
                         Text("\(days)")
                             .font(.system(size: 30, weight: .bold, design: .rounded))
                             .foregroundStyle(accent)
-                        (days == 1 ? Text(ui: "day") : Text(ui: "days")).font(.caption2).foregroundStyle(.secondary)
+                        Text(days == 1 ? "day" : "days").font(.caption2).foregroundStyle(.secondary)
                     }
                 }
             }
@@ -95,9 +95,9 @@ public struct TravelScreen: View {
 
     private var tripsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "Trips").font(.title3.weight(.semibold))
+            Text("Trips").font(.title3.weight(.semibold))
             if store.plans.isEmpty {
-                Text(ui: "No trips yet — plan one or ask your agent for ideas.")
+                Text("No trips yet — plan one or ask your agent for ideas.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -119,14 +119,13 @@ public struct TravelScreen: View {
     private var visitedSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(ui: "Countries Visited").font(.title3.weight(.semibold))
+                Text("Countries Visited").font(.title3.weight(.semibold))
                 Spacer()
                 if !store.visited.isEmpty {
                     NavigationLink {
                         VisitedMapScreen(visited: store.visited)
                     } label: {
-                        Label { Text(ui: "Map") } icon: { Image(systemName: "map.fill") }
-                            .font(.caption.weight(.medium))
+                        Label("Map", systemImage: "map.fill").font(.caption.weight(.medium))
                     }
                 }
                 Text("\(store.visited.count)")
@@ -153,7 +152,7 @@ public struct TravelScreen: View {
 
     private var wishlistSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "Dream List").font(.title3.weight(.semibold))
+            Text("Dream List").font(.title3.weight(.semibold))
             ForEach(store.wishlist) { wish in
                 HStack(spacing: 12) {
                     Text(wish.flag)
@@ -234,27 +233,23 @@ struct TripDetailView: View {
                 }
                 photosSection
                 journalSection
-                Section {
+                Section("Packing List") {
                     ForEach(plan.packingList.keys.sorted(), id: \.self) { item in
                         checkRow(item, checked: plan.packingList[item] ?? false) {
                             Task { try? await store.togglePackingItem(planId: planId, item: item) }
                         }
                     }
-                } header: {
-                    Text(ui: "Packing List")
                 }
-                Section {
+                Section("Documents") {
                     ForEach(plan.documents.keys.sorted(), id: \.self) { document in
                         checkRow(document, checked: plan.documents[document] ?? false) {
                             Task { try? await store.toggleDocument(planId: planId, document: document) }
                         }
                     }
-                } header: {
-                    Text(ui: "Documents")
                 }
             }
         }
-        .navigationTitle(plan.map { Text($0.destination) } ?? Text(ui: "Trip"))
+        .navigationTitle(plan?.destination ?? "Trip")
         .task {
             try? await store.initPackingAndDocs(planId: planId)
             spentText = plan.map { $0.spent > 0 ? String(Int($0.spent)) : "" } ?? ""
@@ -262,10 +257,10 @@ struct TripDetailView: View {
     }
 
     @ViewBuilder private var photosSection: some View {
-        Section {
+        Section("Photo memories") {
             if store.hasPhotoStore {
                 PhotosPicker(selection: $pickerItems, maxSelectionCount: 6, matching: .images) {
-                    Label { Text(ui: "Add photos") } icon: { Image(systemName: "photo.badge.plus") }
+                    Label("Add photos", systemImage: "photo.badge.plus")
                 }
             }
             let photos = store.photos(for: planId)
@@ -275,10 +270,8 @@ struct TripDetailView: View {
                         ForEach(photos) { photo in
                             TripPhotoThumb(url: store.photoURL(for: photo))
                                 .contextMenu {
-                                    Button(role: .destructive) {
+                                    Button("Delete", systemImage: "trash", role: .destructive) {
                                         Task { await store.removePhoto(id: photo.id) }
-                                    } label: {
-                                        Label { Text(ui: "Delete") } icon: { Image(systemName: "trash") }
                                     }
                                 }
                         }
@@ -287,8 +280,6 @@ struct TripDetailView: View {
                 }
                 .listRowInsets(EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12))
             }
-        } header: {
-            Text(ui: "Photo memories")
         }
         .onChange(of: pickerItems) { _, items in
             guard !items.isEmpty else { return }
@@ -306,16 +297,16 @@ struct TripDetailView: View {
     }
 
     @ViewBuilder private func budgetSection(_ plan: TravelPlan) -> some View {
-        Section {
+        Section("Budget") {
             HStack {
-                Text(ui: "Planned")
+                Text("Planned")
                 Spacer()
                 Text(plan.budget > 0 ? String(Int(plan.budget)) : "—").foregroundStyle(.secondary)
             }
             HStack {
-                Text(ui: "Spent")
+                Text("Spent")
                 Spacer()
-                TextField(text: $spentText) { Text(ui: "0") }
+                TextField("0", text: $spentText)
                     .multilineTextAlignment(.trailing)
                     .frame(maxWidth: 100)
                     .onSubmit {
@@ -330,40 +321,34 @@ struct TripDetailView: View {
                         .font(.caption).foregroundStyle(.orange)
                 }
             }
-        } header: {
-            Text(ui: "Budget")
         }
     }
 
     private var jetLagSection: some View {
         Section {
-            Stepper(value: $jetLagHours, in: -12...12) {
-                Text(ui: "Time difference: \(jetLagHours > 0 ? "+" : "")\(jetLagHours)h")
-            }
+            Stepper("Time difference: \(jetLagHours > 0 ? "+" : "")\(jetLagHours)h", value: $jetLagHours, in: -12...12)
             ForEach(store.jetLagPlan(hoursDifference: jetLagHours), id: \.daysBefore) { step in
                 Label(step.advice, systemImage: "moon.stars").labelStyle(.titleAndIcon)
             }
         } header: {
-            Text(ui: "Jet-lag plan")
+            Text("Jet-lag plan")
         } footer: {
-            Text(ui: "Shift bedtime toward the destination in the days before you fly.")
+            Text("Shift bedtime toward the destination in the days before you fly.")
         }
     }
 
     @ViewBuilder private func offlineSection(_ info: CountryInfo, country: String) -> some View {
-        Section {
+        Section("Good to know — \(country)") {
             LabeledContent("Emergency", value: info.emergency)
             LabeledContent("Plug / voltage", value: info.plug)
             if !info.note.isEmpty { LabeledContent("Note", value: info.note) }
-        } header: {
-            Text(ui: "Good to know — \(country)")
         }
     }
 
     private var journalSection: some View {
-        Section {
+        Section("Journal") {
             HStack {
-                TextField(text: $journalDraft, axis: .vertical) { Text(ui: "How's the trip going?") }
+                TextField("How's the trip going?", text: $journalDraft, axis: .vertical)
                 Button {
                     let text = journalDraft
                     journalDraft = ""
@@ -379,8 +364,6 @@ struct TripDetailView: View {
                     Text(entry.date, style: .date).font(.caption2).foregroundStyle(.secondary)
                 }
             }
-        } header: {
-            Text(ui: "Journal")
         }
     }
 
@@ -411,30 +394,30 @@ struct AddTripSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $destination) { Text(ui: "Destination") }
-                TextField(text: $country) { Text(ui: "Country") }
-                Picker(selection: $type) {
+                TextField("Destination", text: $destination)
+                TextField("Country", text: $country)
+                Picker("Type", selection: $type) {
                     ForEach(TravelType.allCases, id: \.self) { type in
                         Text("\(type.emoji) \(type.label)").tag(type)
                     }
-                } label: { Text(ui: "Type") }
-                Picker(selection: $status) {
+                }
+                Picker("Status", selection: $status) {
                     ForEach(TravelStatus.allCases, id: \.self) { status in
-                        Text(LocalizedStringKey(status.rawValue.capitalized)).tag(status)
+                        Text(status.rawValue.capitalized).tag(status)
                     }
-                } label: { Text(ui: "Status") }
-                Toggle(isOn: $hasStartDate) { Text(ui: "Start date") }
+                }
+                Toggle("Start date", isOn: $hasStartDate)
                 if hasStartDate {
-                    DatePicker(selection: $startDate, displayedComponents: .date) { Text(ui: "Departure") }
+                    DatePicker("Departure", selection: $startDate, displayedComponents: .date)
                 }
             }
-            .navigationTitle(Text(ui: "New Trip"))
+            .navigationTitle("New Trip")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(TravelPlan(
                             id: TravelPlan.newID(),
                             destination: destination.trimmingCharacters(in: .whitespaces),
@@ -445,8 +428,6 @@ struct AddTripSheet: View {
                             startDate: hasStartDate ? startDate : nil
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(destination.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -466,17 +447,17 @@ struct AddWishSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $destination) { Text(ui: "Destination") }
-                TextField(text: $country) { Text(ui: "Country") }
-                TextField(text: $flag) { Text(ui: "Flag emoji") }
+                TextField("Destination", text: $destination)
+                TextField("Country", text: $country)
+                TextField("Flag emoji", text: $flag)
             }
-            .navigationTitle(Text(ui: "Dream Destination"))
+            .navigationTitle("Dream Destination")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(WishlistDestination(
                             id: WishlistDestination.newID(),
                             destination: destination.trimmingCharacters(in: .whitespaces),
@@ -484,8 +465,6 @@ struct AddWishSheet: View {
                             flag: flag.isEmpty ? "🌍" : flag
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(destination.trimmingCharacters(in: .whitespaces).isEmpty)
                 }

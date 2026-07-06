@@ -27,14 +27,14 @@ public struct WeeklyReviewSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle(Text(ui: "Your week"))
+            .navigationTitle("Your week")
             .navigationBarTitleDisplayModeInline()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Close") }
+                    Button("Close") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button { Task { await save() } } label: { Text(ui: "Save") }
+                    Button("Save") { Task { await save() } }
                         .disabled(saving || (narrative.isEmpty && reflection.isEmpty))
                 }
             }
@@ -47,11 +47,11 @@ public struct WeeklyReviewSheet: View {
 
     private var digestCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label { Text(ui: "This week") } icon: { Image(systemName: "calendar") }
+            Label("This week", systemImage: "calendar")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(SphereTheme.accent(for: .goals))
             if digest.isEmpty {
-                Text(ui: "A quiet week — not much was logged.")
+                Text("A quiet week — not much was logged.")
                     .font(.body).foregroundStyle(.secondary)
             } else {
                 ForEach(digest, id: \.self) { line in
@@ -67,7 +67,7 @@ public struct WeeklyReviewSheet: View {
     private var narrativeCard: some View {
         if reviews.canNarrate {
             VStack(alignment: .leading, spacing: 8) {
-                Label { Text(ui: "Reflection") } icon: { Image(systemName: "sparkles") }
+                Label("Reflection", systemImage: "sparkles")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(SphereTheme.accent(for: .mindfulness))
                 if narrative.isEmpty && streaming {
@@ -79,8 +79,7 @@ public struct WeeklyReviewSheet: View {
                     Button {
                         Task { await generate() }
                     } label: {
-                        Label { Text(ui: "Regenerate") } icon: { Image(systemName: "arrow.clockwise") }
-                            .font(.caption)
+                        Label("Regenerate", systemImage: "arrow.clockwise").font(.caption)
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
@@ -93,12 +92,10 @@ public struct WeeklyReviewSheet: View {
 
     private var reflectionCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label { Text(ui: "Your note") } icon: { Image(systemName: "square.and.pencil") }
+            Label("Your note", systemImage: "square.and.pencil")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.secondary)
-            TextField(text: $reflection, axis: .vertical) {
-                Text(ui: "What stood out this week?")
-            }
+            TextField("What stood out this week?", text: $reflection, axis: .vertical)
                 .lineLimit(3...6)
                 .textFieldStyle(.roundedBorder)
         }
@@ -115,7 +112,7 @@ public struct WeeklyReviewSheet: View {
             for try await chunk in stream { narrative += chunk }
         } catch {
             if narrative.isEmpty {
-                narrative = uiString("Couldn't reach the agent — your week is summarised above.")
+                narrative = "Couldn't reach the agent — your week is summarised above."
             }
         }
         streaming = false
@@ -126,7 +123,7 @@ public struct WeeklyReviewSheet: View {
         var parts: [String] = []
         if !narrative.isEmpty { parts.append(narrative) }
         if !reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            parts.append(uiString("My note: \(reflection)"))
+            parts.append("My note: \(reflection)")
         }
         if parts.isEmpty { parts = digest }
         _ = try? await reviews.saveWeekly(content: parts.joined(separator: "\n\n"))
@@ -164,18 +161,17 @@ public struct LifeWheelSheet: View {
                     ratingView
                 }
             }
-            .navigationTitle(Text(ui: showResult ? "Feeling vs data" : "Life Wheel"))
+            .navigationTitle(showResult ? "Feeling vs data" : "Life Wheel")
             .navigationBarTitleDisplayModeInline()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Close") }
+                    Button("Close") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if showResult {
-                        Button { Task { await save() } } label: { Text(ui: "Save") }
-                            .disabled(saving)
+                        Button("Save") { Task { await save() } }.disabled(saving)
                     } else {
-                        Button { withAnimation { showResult = true } } label: { Text(ui: "See gap") }
+                        Button("See gap") { withAnimation { showResult = true } }
                     }
                 }
             }
@@ -184,7 +180,7 @@ public struct LifeWheelSheet: View {
 
     private var ratingView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(ui: "Rate how each area of life feels right now, 1 to 10.")
+            Text("Rate how each area of life feels right now, 1 to 10.")
                 .font(.subheadline).foregroundStyle(.secondary)
                 .padding(.horizontal)
             ForEach(SphereType.allCases, id: \.self) { sphere in
@@ -221,7 +217,7 @@ public struct LifeWheelSheet: View {
                     .sphereCard()
             }
             if deltas.isEmpty {
-                Text(ui: "Log a bit more data and the comparison chart will appear here.")
+                Text("Log a bit more data and the comparison chart will appear here.")
                     .font(.subheadline).foregroundStyle(.secondary)
             } else {
                 comparisonChart

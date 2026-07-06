@@ -48,7 +48,8 @@ struct OnboardingFlow: View {
             Text("Welcome to Sphere")
                 .font(.largeTitle.weight(.bold))
                 .multilineTextAlignment(.center)
-            Text("An AI companion for all 12 spheres of your life — each with its own agent that remembers everything, on your device.")
+            Text("An AI companion for all 12 spheres of your life — each with "
+                + "its own agent that remembers everything, on your device.")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -77,7 +78,8 @@ struct OnboardingFlow: View {
             } header: {
                 Text("About you")
             } footer: {
-                Text("Every agent addresses you by name and weaves these details into its memory.")
+                Text("Every agent addresses you by name and weaves these "
+                    + "details into its memory.")
             }
         }
         .scrollContentBackground(.hidden)
@@ -88,7 +90,8 @@ struct OnboardingFlow: View {
             VStack(alignment: .leading, spacing: 20) {
                 Text("Dietary preferences")
                     .font(.title2.weight(.bold))
-                Text("These shape Health and Travel recommendations. Skip if none apply.")
+                Text("These shape Health and Travel recommendations. Skip if "
+                    + "none apply.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -108,7 +111,8 @@ struct OnboardingFlow: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Choose your spheres")
                     .font(.title2.weight(.bold))
-                Text("Tap to turn any off — you can change this anytime in Settings.")
+                Text("Tap to turn any off — you can change this anytime in "
+                    + "Settings.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 

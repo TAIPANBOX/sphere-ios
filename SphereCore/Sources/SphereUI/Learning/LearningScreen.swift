@@ -20,9 +20,9 @@ public struct LearningScreen: View {
                     EmptyStateCard(
                         emoji: "📚",
                         accent: accent,
-                        title: uiString("Start your Learning sphere"),
-                        message: uiString("Add the book you're reading now, or a skill you're building."),
-                        buttonLabel: uiString("Add your first book")
+                        title: "Start your Learning sphere",
+                        message: "Add the book you're reading now, or a skill you're building.",
+                        buttonLabel: "Add your first book"
                     ) {
                         showingAddBook = true
                     }
@@ -30,10 +30,7 @@ public struct LearningScreen: View {
                 if !store.flashcards.isEmpty {
                     flashcardsCard
                 }
-                bookSection(
-                    "Currently Reading", books: store.reading,
-                    empty: "Nothing in progress — pick one from the queue."
-                )
+                bookSection("Currently Reading", books: store.reading, empty: "Nothing in progress — pick one from the queue.")
                 bookSection("Queue", books: store.queue, empty: "Queue is empty.")
                 if !store.completed.isEmpty {
                     completedSection
@@ -43,11 +40,11 @@ public struct LearningScreen: View {
             }
             .padding()
         }
-        .navigationTitle(Text(ui: "Learning"))
+        .navigationTitle("Learning")
         .toolbar {
             Menu {
-                Button { showingAddBook = true } label: { Text(ui: "Add Book") }
-                Button { showingAddSkill = true } label: { Text(ui: "Add Skill") }
+                Button("Add Book") { showingAddBook = true }
+                Button("Add Skill") { showingAddSkill = true }
             } label: {
                 Image(systemName: "plus")
             }
@@ -76,23 +73,23 @@ public struct LearningScreen: View {
         let due = store.dueFlashcards().count
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Label { Text(ui: "Flashcards") } icon: { Image(systemName: "rectangle.on.rectangle.angled") }
+                Label("Flashcards", systemImage: "rectangle.on.rectangle.angled")
                     .font(.headline)
                     .foregroundStyle(accent)
                 Spacer()
-                Text(ui: "\(store.flashcards.count) cards")
+                Text("\(store.flashcards.count) cards")
                     .font(.caption).foregroundStyle(.secondary)
             }
             if due > 0 {
                 Button {
                     showingReview = true
                 } label: {
-                    Text(ui: "Review \(due) due").frame(maxWidth: .infinity)
+                    Text("Review \(due) due").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(accent)
             } else {
-                Text(ui: "All caught up — nothing due right now.")
+                Text("All caught up — nothing due right now.")
                     .font(.subheadline).foregroundStyle(.secondary)
             }
         }
@@ -103,18 +100,18 @@ public struct LearningScreen: View {
 
     private var moreSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "More").font(.title3.weight(.semibold))
+            Text("More").font(.title3.weight(.semibold))
             VStack(spacing: 0) {
-                MoreLink(uiString("Courses"), systemImage: "graduationcap.fill",
+                MoreLink("Courses", systemImage: "graduationcap.fill",
                          count: store.courses.isEmpty ? nil : store.courses.count) { coursesList }
                 Divider().padding(.leading, 38)
-                MoreLink(uiString("Languages"), systemImage: "character.bubble.fill",
+                MoreLink("Languages", systemImage: "character.bubble.fill",
                          count: store.languages.isEmpty ? nil : store.languages.count) { languagesList }
                 Divider().padding(.leading, 38)
-                MoreLink(uiString("Read / watch later"), systemImage: "bookmark.fill",
+                MoreLink("Read / watch later", systemImage: "bookmark.fill",
                          count: store.pendingQueue.isEmpty ? nil : store.pendingQueue.count) { queueList }
                 Divider().padding(.leading, 38)
-                MoreLink(uiString("Manage flashcards"), systemImage: "rectangle.on.rectangle.angled",
+                MoreLink("Manage flashcards", systemImage: "rectangle.on.rectangle.angled",
                          count: store.flashcards.isEmpty ? nil : store.flashcards.count) { flashcardsList }
             }
             .sphereCard()
@@ -123,9 +120,9 @@ public struct LearningScreen: View {
 
     private var coursesList: some View {
         CRUDListScreen(
-            title: uiString("Courses"),
+            title: "Courses",
             items: store.courses,
-            emptyTitle: uiString("No courses tracked"),
+            emptyTitle: "No courses tracked",
             emptySystemImage: "graduationcap",
             addSheet: { AddCourseSheet { course in Task { try? await store.addCourse(course) } } },
             row: { course in
@@ -148,9 +145,9 @@ public struct LearningScreen: View {
 
     private var languagesList: some View {
         CRUDListScreen(
-            title: uiString("Languages"),
+            title: "Languages",
             items: store.languages,
-            emptyTitle: uiString("No languages tracked"),
+            emptyTitle: "No languages tracked",
             emptySystemImage: "character.bubble",
             addSheet: { AddLanguageSheet { lang in Task { try? await store.addLanguage(lang) } } },
             row: { lang in
@@ -167,9 +164,9 @@ public struct LearningScreen: View {
 
     private var queueList: some View {
         CRUDListScreen(
-            title: uiString("Read / watch later"),
+            title: "Read / watch later",
             items: store.queueItems,
-            emptyTitle: uiString("Queue is empty"),
+            emptyTitle: "Queue is empty",
             emptySystemImage: "bookmark",
             addSheet: { AddQueueItemSheet { item in Task { try? await store.addQueueItem(item) } } },
             row: { item in
@@ -195,9 +192,9 @@ public struct LearningScreen: View {
 
     private var flashcardsList: some View {
         CRUDListScreen(
-            title: uiString("Flashcards"),
+            title: "Flashcards",
             items: store.flashcards,
-            emptyTitle: uiString("No flashcards yet"),
+            emptyTitle: "No flashcards yet",
             emptySystemImage: "rectangle.on.rectangle.angled",
             addSheet: { AddFlashcardSheet { card in Task { try? await store.addFlashcard(card) } } },
             row: { card in
@@ -213,13 +210,11 @@ public struct LearningScreen: View {
 
     // MARK: - Books
 
-    private func bookSection(
-        _ title: LocalizedStringKey, books: [Book], empty: LocalizedStringKey
-    ) -> some View {
+    private func bookSection(_ title: String, books: [Book], empty: String) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: title).font(.title3.weight(.semibold))
+            Text(title).font(.title3.weight(.semibold))
             if books.isEmpty {
-                Text(ui: empty)
+                Text(empty)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -239,7 +234,7 @@ public struct LearningScreen: View {
 
     private var completedSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "Completed").font(.title3.weight(.semibold))
+            Text("Completed").font(.title3.weight(.semibold))
             ForEach(store.completed) { book in
                 HStack {
                     Text(book.emoji)
@@ -256,9 +251,9 @@ public struct LearningScreen: View {
 
     private var skillsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "Skills").font(.title3.weight(.semibold))
+            Text("Skills").font(.title3.weight(.semibold))
             if store.skills.isEmpty {
-                Text(ui: "Track a skill you're learning.")
+                Text("Track a skill you're learning.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -302,16 +297,16 @@ struct BookCard: View {
                 }
                 Spacer()
                 Menu {
-                    Button { onSetPage(book.currentPage + 10) } label: { Text(ui: "+10 pages") }
-                    Button(action: onComplete) { Text(ui: "Mark complete") }
-                    Button(role: .destructive, action: onDelete) { Text(ui: "Delete") }
+                    Button("+10 pages") { onSetPage(book.currentPage + 10) }
+                    Button("Mark complete", action: onComplete)
+                    Button("Delete", role: .destructive, action: onDelete)
                 } label: {
                     Image(systemName: "ellipsis").foregroundStyle(.secondary)
                 }
             }
             if book.totalPages > 0 {
                 ProgressView(value: book.progress).tint(accent)
-                Text(ui: "p. \(book.currentPage) of \(book.totalPages) · \(Int(book.progress * 100))%")
+                Text("p. \(book.currentPage) of \(book.totalPages) · \(Int(book.progress * 100))%")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -363,18 +358,18 @@ struct AddBookSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $title) { Text(ui: "Title") }
-                TextField(text: $author) { Text(ui: "Author") }
-                TextField(text: $totalPagesText) { Text(ui: "Total pages") }
-                Toggle(isOn: $startReading) { Text(ui: "Start reading now") }
+                TextField("Title", text: $title)
+                TextField("Author", text: $author)
+                TextField("Total pages", text: $totalPagesText)
+                Toggle("Start reading now", isOn: $startReading)
             }
-            .navigationTitle(Text(ui: "Add Book"))
+            .navigationTitle("Add Book")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Book(
                             id: Book.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
@@ -383,8 +378,6 @@ struct AddBookSheet: View {
                             status: startReading ? .reading : .wantToRead
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -404,23 +397,21 @@ struct AddSkillSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Skill") }
-                TextField(text: $category) { Text(ui: "Category") }
-                Picker(selection: $status) {
+                TextField("Skill", text: $name)
+                TextField("Category", text: $category)
+                Picker("Status", selection: $status) {
                     ForEach(SkillStatus.allCases, id: \.self) { status in
                         Text(status.label).tag(status)
                     }
-                } label: {
-                    Text(ui: "Status")
                 }
             }
-            .navigationTitle(Text(ui: "Add Skill"))
+            .navigationTitle("Add Skill")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(LearningSkill(
                             id: LearningSkill.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -428,8 +419,6 @@ struct AddSkillSheet: View {
                             status: status
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -475,41 +464,37 @@ struct FlashcardReviewSheet: View {
                         Button {
                             revealed = true
                         } label: {
-                            Text(ui: "Show answer").frame(maxWidth: .infinity)
+                            Text("Show answer").frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(accent)
                     }
                 } else {
                     Spacer()
-                    ContentUnavailableView {
-                        Label { Text(ui: "All caught up") } icon: { Image(systemName: "checkmark.seal.fill") }
-                    } description: {
-                        Text(ui: "No cards due right now — come back later.")
-                    }
+                    ContentUnavailableView(
+                        "All caught up",
+                        systemImage: "checkmark.seal.fill",
+                        description: Text("No cards due right now — come back later.")
+                    )
                     Spacer()
                 }
             }
             .padding()
-            .navigationTitle(Text(ui: "Review"))
+            .navigationTitle("Review")
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button { dismiss() } label: { Text(ui: "Done") }
-                }
+                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
             }
         }
     }
 
-    private func gradeButton(
-        _ title: LocalizedStringKey, _ grade: ReviewGrade, _ tint: Color, _ id: String
-    ) -> some View {
+    private func gradeButton(_ title: String, _ grade: ReviewGrade, _ tint: Color, _ id: String) -> some View {
         Button {
             Task {
                 try? await store.reviewFlashcard(id: id, grade: grade)
                 revealed = false
             }
         } label: {
-            Text(ui: title).frame(maxWidth: .infinity)
+            Text(title).frame(maxWidth: .infinity)
         }
         .buttonStyle(.bordered)
         .tint(tint)
@@ -525,24 +510,20 @@ struct AddCourseSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Course name") }
-                TextField(text: $provider) { Text(ui: "Provider (e.g. Coursera)") }
+                TextField("Course name", text: $name)
+                TextField("Provider (e.g. Coursera)", text: $provider)
             }
-            .navigationTitle(Text(ui: "Add Course"))
+            .navigationTitle("Add Course")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Course(
                             id: Course.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
                             provider: provider.trimmingCharacters(in: .whitespaces)
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -562,28 +543,22 @@ struct AddLanguageSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $name) { Text(ui: "Language") }
-                Picker(selection: $level) {
+                TextField("Language", text: $name)
+                Picker("Level", selection: $level) {
                     ForEach(levels, id: \.self) { Text($0).tag($0) }
-                } label: {
-                    Text(ui: "Level")
                 }
             }
-            .navigationTitle(Text(ui: "Add Language"))
+            .navigationTitle("Add Language")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(LanguageStudy(
                             id: LanguageStudy.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
                             level: level
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -601,22 +576,18 @@ struct AddQueueItemSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $title) { Text(ui: "Title") }
-                Picker(selection: $kind) {
+                TextField("Title", text: $title)
+                Picker("Kind", selection: $kind) {
                     ForEach(QueueKind.allCases, id: \.self) { k in
                         Text("\(k.emoji) \(k.rawValue.capitalized)").tag(k)
                     }
-                } label: {
-                    Text(ui: "Kind")
                 }
             }
-            .navigationTitle(Text(ui: "Add to Queue"))
+            .navigationTitle("Add to Queue")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(LearningQueueItem(
                             id: LearningQueueItem.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
@@ -624,8 +595,6 @@ struct AddQueueItemSheet: View {
                             createdAt: Date()
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -644,17 +613,15 @@ struct AddFlashcardSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $deck) { Text(ui: "Deck") }
-                TextField(text: $front, axis: .vertical) { Text(ui: "Front (question)") }
-                TextField(text: $back, axis: .vertical) { Text(ui: "Back (answer)") }
+                TextField("Deck", text: $deck)
+                TextField("Front (question)", text: $front, axis: .vertical)
+                TextField("Back (answer)", text: $back, axis: .vertical)
             }
-            .navigationTitle(Text(ui: "Add Flashcard"))
+            .navigationTitle("Add Flashcard")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(Flashcard(
                             id: Flashcard.newID(),
                             deck: deck.trimmingCharacters(in: .whitespaces),
@@ -663,8 +630,6 @@ struct AddFlashcardSheet: View {
                             dueDate: Date()
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(front.trimmingCharacters(in: .whitespaces).isEmpty
                         || back.trimmingCharacters(in: .whitespaces).isEmpty)

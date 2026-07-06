@@ -64,11 +64,11 @@ public struct AgentCaptureSheet: View {
                 .sphereAnimation(SphereMotion.gentle, value: revealedSuggestions.count)
             }
             .safeAreaInset(edge: .bottom) { composer }
-            .navigationTitle(Text(ui: "Your agent"))
+            .navigationTitle("Your agent")
             .navigationBarTitleDisplayModeInline()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Done") }
+                    Button("Done") { dismiss() }
                 }
             }
             #if os(iOS)
@@ -88,10 +88,10 @@ public struct AgentCaptureSheet: View {
 
     private var prompt: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label { Text(ui: "Tell me anything") } icon: { Image(systemName: "sparkles") }
+            Label("Tell me anything", systemImage: "sparkles")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(SphereTheme.accent(for: .mindfulness))
-            Text(ui: "Type or dictate a thought, or snap a receipt — I'll sort it into the right spheres.")
+            Text("Type or dictate a thought, or snap a receipt — I'll sort it into the right spheres.")
                 .font(.footnote).foregroundStyle(.secondary)
         }
     }
@@ -122,7 +122,7 @@ public struct AgentCaptureSheet: View {
         HStack(spacing: 8) {
             ProgressView().controlSize(.small)
             Label {
-                Text(ui: "Sorting it into your spheres…").font(.subheadline).foregroundStyle(.secondary)
+                Text("Sorting it into your spheres…").font(.subheadline).foregroundStyle(.secondary)
             } icon: {
                 Image(systemName: "sparkles")
                     .foregroundStyle(SphereTheme.accent(for: .mindfulness))
@@ -133,7 +133,7 @@ public struct AgentCaptureSheet: View {
 
     private var resultsList: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(ui: "Logged").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+            Text("Logged").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             ForEach(Array(revealedResults.enumerated()), id: \.offset) { _, result in
                 Label(result.summary, systemImage: result.isError
                       ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
@@ -150,7 +150,7 @@ public struct AgentCaptureSheet: View {
 
     private var suggestionsList: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(ui: "Continue").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+            Text("Continue").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             ForEach(revealedSuggestions) { suggestion in
                 Button {
                     Task { await run(suggestion) }
@@ -172,12 +172,10 @@ public struct AgentCaptureSheet: View {
 
     private var missHint: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(ui: "I couldn't sort that automatically.")
+            Text("I couldn't sort that automatically.")
                 .font(.subheadline).foregroundStyle(.secondary)
             if !agentAvailable, let onConfigureProvider {
-                Button { dismiss(); onConfigureProvider() } label: {
-                    Text(ui: "Turn on the assistant")
-                }
+                Button("Turn on the assistant") { dismiss(); onConfigureProvider() }
                     .font(.subheadline)
             }
         }
@@ -201,9 +199,7 @@ public struct AgentCaptureSheet: View {
                 }
             }
             #endif
-            TextField(text: $text, axis: .vertical) {
-                Text(ui: "Message your agent")
-            }
+            TextField("Message your agent", text: $text, axis: .vertical)
                 .textFieldStyle(.roundedBorder)
                 .lineLimit(1...4)
             Button { Task { await send() } } label: {

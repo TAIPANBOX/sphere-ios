@@ -20,9 +20,9 @@ public struct CreativityScreen: View {
                     EmptyStateCard(
                         emoji: "🎨",
                         accent: accent,
-                        title: uiString("Start your Creativity sphere"),
-                        message: uiString("Capture the idea you keep meaning to start, or the project you're already circling."),
-                        buttonLabel: uiString("Add your first project")
+                        title: "Start your Creativity sphere",
+                        message: "Capture the idea you keep meaning to start, or the project you're already circling.",
+                        buttonLabel: "Add your first project"
                     ) {
                         showingAddProject = true
                     }
@@ -41,7 +41,7 @@ public struct CreativityScreen: View {
             }
             .padding()
         }
-        .navigationTitle(Text(ui: "Creativity"))
+        .navigationTitle("Creativity")
         .toolbar {
             Button {
                 showingAddProject = true
@@ -69,8 +69,7 @@ public struct CreativityScreen: View {
     private var momentumCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Label { Text(ui: "Momentum") } icon: { Image(systemName: "flame.fill") }
-                    .font(.headline).foregroundStyle(accent)
+                Label("Momentum", systemImage: "flame.fill").font(.headline).foregroundStyle(accent)
                 Spacer()
                 Text("\(store.minutesThisWeek()) min this week")
                     .font(.subheadline.weight(.semibold))
@@ -87,8 +86,7 @@ public struct CreativityScreen: View {
             Button {
                 showingSession = true
             } label: {
-                Label { Text(ui: "Log a work session") } icon: { Image(systemName: "timer") }
-                    .frame(maxWidth: .infinity)
+                Label("Log a work session", systemImage: "timer").frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .tint(accent)
@@ -101,9 +99,9 @@ public struct CreativityScreen: View {
 
     private var moreSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "More").font(.title3.weight(.semibold))
+            Text("More").font(.title3.weight(.semibold))
             VStack(spacing: 0) {
-                MoreLink(uiString("Portfolio"), systemImage: "photo.stack.fill",
+                MoreLink("Portfolio", systemImage: "photo.stack.fill",
                          count: store.portfolio.isEmpty ? nil : store.portfolio.count) { portfolioList }
             }
             .sphereCard()
@@ -112,9 +110,9 @@ public struct CreativityScreen: View {
 
     private var portfolioList: some View {
         CRUDListScreen(
-            title: uiString("Portfolio"),
+            title: "Portfolio",
             items: store.portfolio,
-            emptyTitle: uiString("No finished work yet"),
+            emptyTitle: "No finished work yet",
             emptySystemImage: "photo.stack",
             addSheet: { AddPortfolioSheet { item in Task { try? await store.addPortfolioItem(item) } } },
             row: { item in
@@ -140,9 +138,9 @@ public struct CreativityScreen: View {
 
     private var ideaCaptureCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(ui: "💡 Capture an idea").font(.headline)
+            Text("💡 Capture an idea").font(.headline)
             HStack {
-                TextField(text: $newIdea) { Text(ui: "A melody, a story, a shot…") }
+                TextField("A melody, a story, a shot…", text: $newIdea)
                     .textFieldStyle(.roundedBorder)
                     .onSubmit(captureIdea)
                 Button(action: captureIdea) {
@@ -166,12 +164,12 @@ public struct CreativityScreen: View {
     // MARK: - Projects
 
     private func projectSection(
-        _ title: LocalizedStringKey, projects: [CreativeProject], empty: LocalizedStringKey
+        _ title: String, projects: [CreativeProject], empty: String
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: title).font(.title3.weight(.semibold))
-            if projects.isEmpty {
-                Text(ui: empty)
+            Text(title).font(.title3.weight(.semibold))
+            if projects.isEmpty && !empty.isEmpty {
+                Text(empty)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -191,15 +189,11 @@ public struct CreativityScreen: View {
                         }
                         Spacer()
                         Menu {
-                            Button {
+                            Button("+10% progress") {
                                 Task { try? await store.setProgress(id: project.id, percent: project.progressPercent + 10) }
-                            } label: {
-                                Text(ui: "+10% progress")
                             }
-                            Button(role: .destructive) {
+                            Button("Delete", role: .destructive) {
                                 Task { try? await store.remove(id: project.id) }
-                            } label: {
-                                Text(ui: "Delete")
                             }
                         } label: {
                             Image(systemName: "ellipsis").foregroundStyle(.secondary)
@@ -226,7 +220,7 @@ public struct CreativityScreen: View {
 
     private var completedSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "Completed").font(.title3.weight(.semibold))
+            Text("Completed").font(.title3.weight(.semibold))
             ForEach(store.completed) { project in
                 HStack {
                     Text(project.type.emoji)
@@ -243,9 +237,9 @@ public struct CreativityScreen: View {
 
     private var ideasSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(ui: "Ideas").font(.title3.weight(.semibold))
+            Text("Ideas").font(.title3.weight(.semibold))
             if store.recentIdeas.isEmpty {
-                Text(ui: "Captured ideas will appear here.")
+                Text("Captured ideas will appear here.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -294,22 +288,22 @@ struct AddCreativeProjectSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $title) { Text(ui: "Title") }
-                TextField(text: $details) { Text(ui: "Description (optional)") }
-                Picker(selection: $type) {
+                TextField("Title", text: $title)
+                TextField("Description (optional)", text: $details)
+                Picker("Type", selection: $type) {
                     ForEach(CreativeType.allCases, id: \.self) { type in
                         Text("\(type.emoji) \(type.label)").tag(type)
                     }
-                } label: { Text(ui: "Type") }
-                Toggle(isOn: $isIdea) { Text(ui: "Just an idea for now") }
+                }
+                Toggle("Just an idea for now", isOn: $isIdea)
             }
-            .navigationTitle(Text(ui: "New Project"))
+            .navigationTitle("New Project")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(CreativeProject(
                             id: CreativeProject.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
@@ -319,8 +313,6 @@ struct AddCreativeProjectSheet: View {
                             createdAt: Date()
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -344,30 +336,28 @@ struct CreativeSessionSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
-                Picker(selection: $projectId) {
+                Picker("Project", selection: $projectId) {
                     ForEach(projects) { project in
                         Text("\(project.type.emoji) \(project.title)").tag(project.id)
                     }
-                } label: { Text(ui: "Project") }
+                }
                 .pickerStyle(.menu)
 
                 Text(timeString(elapsed))
                     .font(.system(size: 56, weight: .bold, design: .monospaced))
                     .foregroundStyle(running ? accent : .primary)
 
-                Button {
+                Button(running ? "Finish & log" : "Start") {
                     if running { finish() } else { running = true }
-                } label: {
-                    running ? Text(ui: "Finish & log") : Text(ui: "Start")
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(accent)
                 .disabled(projectId.isEmpty)
             }
             .padding()
-            .navigationTitle(Text(ui: "Work session"))
+            .navigationTitle("Work session")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text(ui: "Cancel") } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
             }
             .onAppear { if projectId.isEmpty { projectId = projects.first?.id ?? "" } }
             .task(id: running) {
@@ -402,19 +392,19 @@ struct AddPortfolioSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField(text: $title) { Text(ui: "Title") }
-                Picker(selection: $type) {
+                TextField("Title", text: $title)
+                Picker("Type", selection: $type) {
                     ForEach(CreativeType.allCases, id: \.self) { t in
                         Text("\(t.emoji) \(t.label)").tag(t)
                     }
-                } label: { Text(ui: "Type") }
-                TextField(text: $url) { Text(ui: "Link (optional)") }
+                }
+                TextField("Link (optional)", text: $url)
             }
-            .navigationTitle(Text(ui: "Add to Portfolio"))
+            .navigationTitle("Add to Portfolio")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text(ui: "Cancel") } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button("Add") {
                         onAdd(PortfolioItem(
                             id: PortfolioItem.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
@@ -423,8 +413,6 @@ struct AddPortfolioSheet: View {
                             date: Date()
                         ))
                         dismiss()
-                    } label: {
-                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }

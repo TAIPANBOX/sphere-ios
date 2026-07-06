@@ -57,14 +57,14 @@ public struct AgentResultSheet: View {
             .navigationBarTitleDisplayModeInline()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Text(ui: "Close") }
+                    Button("Close") { dismiss() }
                 }
                 if agent?.isAvailable() == true && done {
                     ToolbarItem(placement: .primaryAction) {
                         Button { Task { await run() } } label: {
                             Image(systemName: "arrow.clockwise")
                         }
-                        .accessibilityLabel(Text(ui: "Regenerate"))
+                        .accessibilityLabel("Regenerate")
                     }
                 }
             }
@@ -79,7 +79,7 @@ public struct AgentResultSheet: View {
             if text.isEmpty && streaming {
                 ProgressView()
             } else if failed && text.isEmpty {
-                Text(ui: "Couldn't reach the assistant. Check your connection and try again.")
+                Text("Couldn't reach the assistant. Check your connection and try again.")
                     .font(.subheadline).foregroundStyle(.secondary)
             } else {
                 Text(text.isEmpty ? "…" : text)
@@ -93,16 +93,14 @@ public struct AgentResultSheet: View {
 
     private var noBackend: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label { Text(ui: "Assistant is off") } icon: { Image(systemName: "sparkles") }
+            Label("Assistant is off", systemImage: "sparkles")
                 .font(.subheadline.weight(.medium)).foregroundStyle(tint)
-            Text(ui: "Turn on the free on-device assistant or add an API key to use this. Everything else in Sphere keeps working without it.")
+            Text("Turn on the free on-device assistant or add an API key to use this. Everything else in Sphere keeps working without it.")
                 .font(.subheadline).foregroundStyle(.secondary)
             if let onConfigureProvider {
-                Button {
+                Button("Set up the assistant") {
                     dismiss()
                     onConfigureProvider()
-                } label: {
-                    Text(ui: "Set up the assistant")
                 }
                 .buttonStyle(.borderedProminent)
             }
