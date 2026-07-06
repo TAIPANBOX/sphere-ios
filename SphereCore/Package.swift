@@ -6,7 +6,7 @@ let package = Package(
     platforms: [
         .iOS(.v17),
         .macOS(.v14),
-        .watchOS(.v10),
+        .watchOS(.v11),
     ],
     products: [
         .library(name: "SphereCore", targets: ["SphereCore"]),

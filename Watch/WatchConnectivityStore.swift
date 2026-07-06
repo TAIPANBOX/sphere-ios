@@ -30,8 +30,10 @@ final class WatchModel {
     }
 
     /// Sends a quick-log command to the phone (live if reachable, else
-    /// queued for the next wake).
-    func send(_ command: WatchCommand) {
+    /// queued for the next wake). Returns whether it went out live —
+    /// callers use this to show a "will sync later" hint when it didn't.
+    @discardableResult
+    func send(_ command: WatchCommand) -> Bool {
         session.send(command)
     }
 }
@@ -46,14 +48,20 @@ final class WatchSession: NSObject, WCSessionDelegate {
         WCSession.default.activate()
     }
 
-    func send(_ command: WatchCommand) {
-        guard WCSession.isSupported() else { return }
+    /// Sends live via `sendMessage` when the phone is reachable, else queues
+    /// via `transferUserInfo` for delivery on its next wake. Returns whether
+    /// it went out live.
+    @discardableResult
+    func send(_ command: WatchCommand) -> Bool {
+        guard WCSession.isSupported() else { return false }
         let session = WCSession.default
         let payload = command.encode()
         if session.isReachable {
             session.sendMessage(payload, replyHandler: nil)
+            return true
         } else {
             session.transferUserInfo(payload)
+            return false
         }
     }
 

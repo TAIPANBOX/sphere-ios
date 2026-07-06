@@ -1,4 +1,5 @@
 import SwiftUI
+import WatchKit
 import SphereCore
 
 @main
@@ -14,8 +15,92 @@ struct SphereWatchApp: App {
 
 private let accent = Color(red: 10 / 255, green: 132 / 255, blue: 1)
 
+/// Local, optimistic UI state layered on top of the phone-owned snapshot.
+/// None of this is persisted — the snapshot remains the single source of
+/// truth and clears these overlays the moment a fresh one arrives.
+@MainActor
+@Observable
+private final class QuickLogOverlay {
+    /// Added to `snapshot.waterToday` until the next snapshot arrives.
+    var waterDelta = 0
+    /// Mood tapped locally, shown highlighted until the next snapshot arrives.
+    var optimisticMood: Int?
+    /// Meditation logged locally this session (snapshot may lag behind).
+    var optimisticMeditated = false
+    /// "Will sync when your iPhone is nearby." — cleared after a few seconds
+    /// or when a fresh snapshot arrives.
+    var offlineHint = false
+    private var hintTask: Task<Void, Never>?
+
+    func reset() {
+        waterDelta = 0
+        optimisticMood = nil
+        optimisticMeditated = false
+        offlineHint = false
+        hintTask?.cancel()
+    }
+
+    func showOfflineHint() {
+        offlineHint = true
+        hintTask?.cancel()
+        hintTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(4))
+            guard !Task.isCancelled else { return }
+            self?.offlineHint = false
+        }
+    }
+}
+
+/// Local state for the ask-agent flow: pending/waiting/offline messaging
+/// that the snapshot alone can't express (it only knows the last reply).
+@MainActor
+@Observable
+private final class AskAgentState {
+    enum Phase {
+        case idle
+        case thinking
+        case stillWaiting
+        case queuedOffline
+    }
+
+    private(set) var phase: Phase = .idle
+    private var submittedAt: Date?
+    private var waitTask: Task<Void, Never>?
+
+    func submitted(reachable: Bool) {
+        submittedAt = Date()
+        waitTask?.cancel()
+        if !reachable {
+            phase = .queuedOffline
+            return
+        }
+        phase = .thinking
+        waitTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(30))
+            guard !Task.isCancelled else { return }
+            self?.phase = .stillWaiting
+        }
+    }
+
+    /// Called whenever a snapshot arrives; clears pending state once the
+    /// reply is newer than the submission that triggered it.
+    func receivedSnapshot(agentReplyAt: Date?) {
+        guard let submittedAt else { return }
+        if let agentReplyAt, agentReplyAt >= submittedAt {
+            waitTask?.cancel()
+            waitTask = nil
+            self.submittedAt = nil
+            phase = .idle
+            WKInterfaceDevice.current().play(.success)
+        }
+    }
+}
+
 struct WatchRootView: View {
     let model: WatchModel
+    @State private var overlay = QuickLogOverlay()
+    @State private var askState = AskAgentState()
+
     private var snapshot: WidgetSnapshot { model.snapshot }
 
     var body: some View {
@@ -64,8 +149,14 @@ struct WatchRootView: View {
                 }
 
                 askAgent
+
+                staleness
             }
             .padding()
+        }
+        .onChange(of: snapshot) { _, new in
+            overlay.reset()
+            askState.receivedSnapshot(agentReplyAt: new.agentReplyAt)
         }
     }
 
@@ -76,7 +167,7 @@ struct WatchRootView: View {
                 .foregroundStyle(.secondary)
             ForEach(snapshot.shopping) { item in
                 Button {
-                    model.send(.checkShopping(id: item.id))
+                    sendCommand(.checkShopping(id: item.id))
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "circle")
@@ -96,16 +187,41 @@ struct WatchRootView: View {
                 Label("Ask", systemImage: "mic.fill")
             } onSubmit: { text in
                 let query = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !query.isEmpty { model.send(.askAgent(query: query)) }
+                guard !query.isEmpty else { return }
+                let reachable = sendCommand(.askAgent(query: query))
+                askState.submitted(reachable: reachable)
             }
             .font(.caption2)
             .tint(accent)
 
-            if let reply = snapshot.agentReply, !reply.isEmpty {
-                Text(reply)
+            switch askState.phase {
+            case .idle:
+                if let reply = snapshot.agentReply, !reply.isEmpty {
+                    Text(reply)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if let at = snapshot.agentReplyAt {
+                        TimelineView(.periodic(from: at, by: 60)) { context in
+                            Text(RelativeTimeFormat.short(from: at, to: context.date))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            case .thinking:
+                HStack(spacing: 4) {
+                    ProgressView().controlSize(.mini)
+                    Text("Thinking…").font(.caption2).foregroundStyle(.secondary)
+                }
+            case .stillWaiting:
+                Text("Still waiting for your iPhone…")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            case .queuedOffline:
+                Text("Will ask when your iPhone is nearby.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -118,34 +234,102 @@ struct WatchRootView: View {
                 .foregroundStyle(.secondary)
             HStack {
                 Button {
-                    model.send(.logWater)
+                    WKInterfaceDevice.current().play(.click)
+                    overlay.waterDelta += 1
+                    sendCommand(.logWater)
                 } label: {
-                    Label("Water", systemImage: "drop.fill")
+                    Label(waterProgressLabel, systemImage: "drop.fill")
                 }
                 .tint(.blue)
+
                 Button {
-                    model.send(.logMeditation(minutes: 10))
+                    WKInterfaceDevice.current().play(.click)
+                    overlay.optimisticMeditated = true
+                    sendCommand(.logMeditation(minutes: 10))
                 } label: {
-                    Label("10 min", systemImage: "figure.mind.and.body")
+                    Label("10 min", systemImage: meditationDone ? "checkmark.circle.fill" : "figure.mind.and.body")
                 }
-                .tint(accent)
+                .tint(meditationDone ? .green : accent)
             }
             .font(.caption2)
 
             HStack(spacing: 6) {
                 ForEach(1...5, id: \.self) { score in
                     Button("\(moodEmoji(score))") {
-                        model.send(.logMood(score))
+                        WKInterfaceDevice.current().play(.click)
+                        overlay.optimisticMood = score
+                        sendCommand(.logMood(score))
                     }
                     .buttonStyle(.plain)
                     .font(.title3)
+                    .opacity(highlightedMood == score ? 1.0 : 0.4)
+                    .scaleEffect(highlightedMood == score ? 1.15 : 1.0)
+                    .animation(.spring(response: 0.25), value: highlightedMood)
                 }
+            }
+
+            if overlay.offlineHint {
+                Text("Will sync when your iPhone is nearby.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var waterProgressLabel: String {
+        "\(snapshot.waterToday + overlay.waterDelta) / \(snapshot.waterGoal)"
+    }
+
+    private var meditationDone: Bool {
+        snapshot.meditatedToday || overlay.optimisticMeditated
+    }
+
+    private var highlightedMood: Int? {
+        overlay.optimisticMood ?? snapshot.moodToday
+    }
+
+    private var staleness: some View {
+        Group {
+            if Date().timeIntervalSince(snapshot.updatedAt) > 30 * 60 {
+                TimelineView(.everyMinute) { context in
+                    Text("Updated \(RelativeTimeFormat.short(from: snapshot.updatedAt, to: context.date)) ago")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
     private func moodEmoji(_ score: Int) -> String {
         ["😞", "😕", "😐", "🙂", "😄"][score - 1]
+    }
+
+    /// Sends the command and, if it couldn't go out live, shows the shared
+    /// offline hint. Returns whether it went out live.
+    @discardableResult
+    private func sendCommand(_ command: WatchCommand) -> Bool {
+        let reachable = model.send(command)
+        if !reachable {
+            overlay.showOfflineHint()
+        }
+        return reachable
+    }
+}
+
+/// Minimal relative-time formatting shared by the staleness line and the
+/// agent-reply timestamp — avoids pulling in `RelativeDateTimeFormatter`
+/// configuration for a one-line "Xm/Xh ago" label.
+enum RelativeTimeFormat {
+    static func short(from date: Date, to now: Date = Date()) -> String {
+        let seconds = max(0, now.timeIntervalSince(date))
+        if seconds < 60 { return "now" }
+        let minutes = Int(seconds / 60)
+        if minutes < 60 { return "\(minutes)m" }
+        let hours = minutes / 60
+        if hours < 24 { return "\(hours)h" }
+        let days = hours / 24
+        return "\(days)d"
     }
 }
