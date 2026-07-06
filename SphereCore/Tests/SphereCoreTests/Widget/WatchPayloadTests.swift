@@ -40,8 +40,30 @@ struct WatchPayloadTests {
         #expect(decoded.agentReply == "You slept 7.5 hours.")
     }
 
+    @Test func snapshotRoundTripsTodayStateFields() throws {
+        let snapshot = WidgetSnapshot(
+            lifeScore: 65, bestEmoji: "🫀", bestName: "Health",
+            needsFocusEmoji: "💰", needsFocusName: "Finance", topFocus: [],
+            agentReply: "You're at 5 of 8 glasses.",
+            agentReplyAt: Date(timeIntervalSince1970: 100),
+            waterToday: 5,
+            waterGoal: 8,
+            meditatedToday: true,
+            moodToday: 4,
+            updatedAt: Date(timeIntervalSince1970: 101)
+        )
+        let decoded = try #require(WatchPayload.decode(WatchPayload.encode(snapshot)))
+        #expect(decoded == snapshot)
+        #expect(decoded.waterToday == 5)
+        #expect(decoded.waterGoal == 8)
+        #expect(decoded.meditatedToday == true)
+        #expect(decoded.moodToday == 4)
+        #expect(decoded.agentReplyAt == Date(timeIntervalSince1970: 100))
+    }
+
     @Test func decodesLegacySnapshotWithoutNewFields() throws {
-        // A snapshot written by an older build omits shopping / agentReply.
+        // A snapshot written by an older build omits shopping / agentReply /
+        // the today-state fields.
         let legacy = """
         {"lifeScore":50,"bestEmoji":"🫀","bestName":"Health","needsFocusEmoji":"💰",\
         "needsFocusName":"Finance","topFocus":[],"updatedAt":0}
@@ -49,6 +71,28 @@ struct WatchPayloadTests {
         let decoded = try JSONDecoder().decode(WidgetSnapshot.self, from: Data(legacy.utf8))
         #expect(decoded.shopping.isEmpty)
         #expect(decoded.agentReply == nil)
+        #expect(decoded.agentReplyAt == nil)
+        #expect(decoded.waterToday == 0)
+        #expect(decoded.waterGoal == 8)
+        #expect(decoded.meditatedToday == false)
+        #expect(decoded.moodToday == nil)
         #expect(decoded.lifeScore == 50)
+    }
+
+    @Test func decodesPartiallyUpgradedLegacySnapshotWithShoppingButNoTodayState() throws {
+        // A mid-migration build wrote shopping/agentReply but not the newer
+        // today-state fields — every new field must still default cleanly.
+        let legacy = """
+        {"lifeScore":50,"bestEmoji":"🫀","bestName":"Health","needsFocusEmoji":"💰",\
+        "needsFocusName":"Finance","topFocus":[],"shopping":[],\
+        "agentReply":"Hi","updatedAt":0}
+        """
+        let decoded = try JSONDecoder().decode(WidgetSnapshot.self, from: Data(legacy.utf8))
+        #expect(decoded.agentReply == "Hi")
+        #expect(decoded.agentReplyAt == nil)
+        #expect(decoded.waterToday == 0)
+        #expect(decoded.waterGoal == 8)
+        #expect(decoded.meditatedToday == false)
+        #expect(decoded.moodToday == nil)
     }
 }

@@ -35,6 +35,18 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public let shopping: [ShoppingLine]
     /// The agent's answer to the last watch voice query, if any.
     public let agentReply: String?
+    /// When `agentReply` was cached; nil when there is no reply. The watch
+    /// compares this to its query-submission time to know a fresh reply
+    /// landed, and formats it as a relative timestamp under the reply.
+    public let agentReplyAt: Date?
+    /// Glasses of water logged today.
+    public let waterToday: Int
+    /// Daily water goal in glasses.
+    public let waterGoal: Int
+    /// Whether the user has a meditation session logged today.
+    public let meditatedToday: Bool
+    /// Today's mood check-in (1–5), if any.
+    public let moodToday: Int?
     public let updatedAt: Date
 
     public init(
@@ -46,6 +58,11 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         topFocus: [FocusLine],
         shopping: [ShoppingLine] = [],
         agentReply: String? = nil,
+        agentReplyAt: Date? = nil,
+        waterToday: Int = 0,
+        waterGoal: Int = 8,
+        meditatedToday: Bool = false,
+        moodToday: Int? = nil,
         updatedAt: Date
     ) {
         self.lifeScore = lifeScore
@@ -56,11 +73,16 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         self.topFocus = topFocus
         self.shopping = shopping
         self.agentReply = agentReply
+        self.agentReplyAt = agentReplyAt
+        self.waterToday = waterToday
+        self.waterGoal = waterGoal
+        self.meditatedToday = meditatedToday
+        self.moodToday = moodToday
         self.updatedAt = updatedAt
     }
 
-    // Tolerant decoder: snapshots written by older builds lack `shopping` /
-    // `agentReply`, so those default rather than failing the whole decode.
+    // Tolerant decoder: snapshots written by older builds lack newer fields,
+    // so those default rather than failing the whole decode.
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         lifeScore = try c.decode(Int.self, forKey: .lifeScore)
@@ -71,6 +93,11 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         topFocus = try c.decode([FocusLine].self, forKey: .topFocus)
         shopping = try c.decodeIfPresent([ShoppingLine].self, forKey: .shopping) ?? []
         agentReply = try c.decodeIfPresent(String.self, forKey: .agentReply)
+        agentReplyAt = try c.decodeIfPresent(Date.self, forKey: .agentReplyAt)
+        waterToday = try c.decodeIfPresent(Int.self, forKey: .waterToday) ?? 0
+        waterGoal = try c.decodeIfPresent(Int.self, forKey: .waterGoal) ?? 8
+        meditatedToday = try c.decodeIfPresent(Bool.self, forKey: .meditatedToday) ?? false
+        moodToday = try c.decodeIfPresent(Int.self, forKey: .moodToday)
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
     }
 
@@ -85,6 +112,10 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
             FocusLine(emoji: "👟", title: "Reach your step goal"),
             FocusLine(emoji: "🧘", title: "Daily meditation"),
         ],
+        waterToday: 0,
+        waterGoal: 8,
+        meditatedToday: false,
+        moodToday: nil,
         updatedAt: Date(timeIntervalSince1970: 0)
     )
 }

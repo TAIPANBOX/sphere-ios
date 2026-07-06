@@ -387,12 +387,17 @@ final class AppContainer {
         case .askAgent(let query):
             lastAgentReply = (try? await agent.answer(query))
                 ?? "Couldn't reach the assistant."
+            lastAgentReplyAt = Date()
         }
         refreshWidget()
     }
 
     /// Last answer to a watch voice query, surfaced on the next snapshot.
     private var lastAgentReply: String?
+    /// When `lastAgentReply` was cached; nil until the first watch query
+    /// answers. The watch uses this to detect a fresh reply and to render a
+    /// relative "Xm ago" timestamp under it.
+    private var lastAgentReplyAt: Date?
 
     /// Nightly-ish Engram maintenance; call on app background.
     func runMemoryMaintenance() async {
@@ -420,6 +425,11 @@ final class AppContainer {
                 WidgetSnapshot.ShoppingLine(id: $0.id, title: $0.name)
             },
             agentReply: lastAgentReply,
+            agentReplyAt: lastAgentReplyAt,
+            waterToday: health.waterToday,
+            waterGoal: HealthStore.waterGoalGlasses,
+            meditatedToday: mindfulness.hasMeditated(),
+            moodToday: mindfulness.todaysMood(),
             updatedAt: Date()
         )
         store.write(snapshot)
