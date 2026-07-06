@@ -162,4 +162,19 @@ struct OpenAICompatibleEngineTests {
         )
         #expect(custom.model == "google/gemini-2.5-pro")
     }
+
+    @Test func plausibleKeyFormatGate() {
+        let p = LLMProviderID.openrouter
+        // The real shape: sk-or-v1-<64 hex>.
+        #expect(p.isPlausibleKey("sk-or-v1-" + String(repeating: "a1", count: 32)))
+        // Surrounding whitespace from a paste is tolerated.
+        #expect(p.isPlausibleKey("  sk-or-v1-" + String(repeating: "b2", count: 32) + "\n"))
+
+        #expect(!p.isPlausibleKey(""))
+        #expect(!p.isPlausibleKey("12345"))
+        #expect(!p.isPlausibleKey("абракадабра"))
+        #expect(!p.isPlausibleKey("sk-or-v1"))                     // prefix alone, too short
+        #expect(!p.isPlausibleKey("sk-ant-" + String(repeating: "c", count: 40))) // wrong vendor prefix
+        #expect(!p.isPlausibleKey("sk-or-v1-aaaa bbbb cccc dddd")) // inner whitespace
+    }
 }

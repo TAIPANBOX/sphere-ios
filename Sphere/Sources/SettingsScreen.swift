@@ -25,6 +25,12 @@ struct SettingsScreen: View {
         return cloudModelName ?? cloudModel
     }
 
+    /// Live check against the field's current text, so the picker row appears
+    /// the moment a real-looking key is pasted and disappears when it's cleared.
+    private var hasPlausibleOpenRouterKey: Bool {
+        LLMProviderID.openrouter.isPlausibleKey(keys[.openrouter] ?? "")
+    }
+
     var body: some View {
         Form {
             Section {
@@ -64,17 +70,22 @@ struct SettingsScreen: View {
                             .autocorrectionDisabled()
                     }
                 }
-                NavigationLink {
-                    CloudModelsScreen(
-                        catalog: container.cloudModels,
-                        selectedID: { CloudModelPreference.current },
-                        setSelectedID: { CloudModelPreference.current = $0 }
-                    )
-                } label: {
-                    HStack {
-                        Text("Cloud model")
-                        Spacer()
-                        Text(cloudModelLabel).foregroundStyle(.secondary)
+                // The model picker only makes sense with a working key, so it
+                // stays hidden until the entered text at least looks like an
+                // OpenRouter key — random input must not reveal it.
+                if hasPlausibleOpenRouterKey {
+                    NavigationLink {
+                        CloudModelsScreen(
+                            catalog: container.cloudModels,
+                            selectedID: { CloudModelPreference.current },
+                            setSelectedID: { CloudModelPreference.current = $0 }
+                        )
+                    } label: {
+                        HStack {
+                            Text("Cloud model")
+                            Spacer()
+                            Text(cloudModelLabel).foregroundStyle(.secondary)
+                        }
                     }
                 }
             } header: {

@@ -59,6 +59,20 @@ public enum LLMProviderID: String, CaseIterable, Codable, Sendable {
         }
     }
 
+    /// Cheap format check for a pasted key, used to gate key-dependent UI
+    /// (e.g. the cloud-model picker). Not a network validation — just enough
+    /// to reject obvious non-keys. OpenRouter keys look like
+    /// `sk-or-v1-<64 hex>`; we require the stable `sk-or-` prefix, a sane
+    /// length, and the key charset, without pinning the version suffix.
+    public func isPlausibleKey(_ key: String) -> Bool {
+        let trimmed = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        switch self {
+        case .openrouter:
+            guard trimmed.hasPrefix("sk-or-"), trimmed.count >= 24 else { return false }
+            return trimmed.allSatisfy { $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "-" || $0 == "_") }
+        }
+    }
+
     public func makeEngine(
         model: String? = nil,
         transport: any LLMTransport = URLSessionTransport()
