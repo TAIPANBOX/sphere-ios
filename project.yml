@@ -6,11 +6,8 @@ options:
   createIntermediateGroups: true
   developmentLanguage: en
 
-# EN (source) + UK; iOS offers the language once both are declared and the
-# String Catalog ships uk entries.
 knownRegions:
   - en
-  - uk
 
 packages:
   SphereCore:
@@ -47,7 +44,6 @@ targets:
         CFBundleDisplayName: Sphere
         CFBundleLocalizations:
           - en
-          - uk
         UILaunchScreen: {}
         NSLocationWhenInUseUsageDescription: >-
           Sphere uses your location to show local weather on the Home tab.

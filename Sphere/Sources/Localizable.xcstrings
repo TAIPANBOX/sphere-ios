@@ -2,5194 +2,1561 @@
   "sourceLanguage": "en",
   "strings": {
     "%@/mo": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@/міс"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld / %lld glasses": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld / %lld склянок"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld / %lld min · %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld / %lld хв · %@"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld active": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld активних"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld cards": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld карток"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld days": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld днів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld key results": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld ключових результатів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld min": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld хв"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld min this week": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld хв цього тижня"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld of %lld left": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld з %lld лишилось"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld of %lld selected": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Обрано %lld з %lld"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld overdue": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld прострочено"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld to reconnect": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld для звʼязку"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lld-day streak · %lld min total": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Серія %lld дн · усього %lld хв"
-          }
-        }
-      }
+      "localizations": {}
     },
     "%lldd left": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld дн лишилось"
-          }
-        }
-      }
+      "localizations": {}
     },
     "+%lld more": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+%lld ще"
-          }
-        }
-      }
+      "localizations": {}
     },
     "+10 pages": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+10 сторінок"
-          }
-        }
-      }
+      "localizations": {}
     },
     "+10% progress": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+10% прогресу"
-          }
-        }
-      }
+      "localizations": {}
     },
     "10k goal": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ціль 10 тис. кроків"
-          }
-        }
-      }
+      "localizations": {}
     },
     "1:1 notes": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нотатки 1:1"
-          }
-        }
-      }
+      "localizations": {}
     },
     "A boundary, not a target — clarity on what you won't do.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Межа, а не ціль — ясність щодо того, чого не робитимеш."
-          }
-        }
-      }
+      "localizations": {}
     },
     "A melody, a story, a shot…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Мелодія, історія, кадр…"
-          }
-        }
-      }
+      "localizations": {}
     },
     "A quiet day — that's fine too.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Спокійний день — це теж добре."
-          }
-        }
-      }
+      "localizations": {}
     },
     "A quiet week — not much was logged.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Спокійний тиждень — записів небагато."
-          }
-        }
-      }
+      "localizations": {}
     },
     "A shareable recap across every sphere.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Підсумок року по всіх сферах, яким можна поділитися."
-          }
-        }
-      }
+      "localizations": {}
     },
     "A vote for %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Голос за %@"
-          }
-        }
-      }
+      "localizations": {}
     },
     "AI Agents": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI Агенти"
-          }
-        }
-      }
+      "localizations": {}
     },
     "About you": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Про тебе"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Account name": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва рахунку"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Accounts": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Рахунки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Achievement": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Досягнення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Achievements": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Досягнення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Across your life, this week": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "По всіх сферах, цього тижня"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Active": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Активна"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Active Goals": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Активні цілі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Active Projects": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Активні проєкти"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Activity (e.g. a long walk)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Активність (напр. довга прогулянка)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add 1:1 Note": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати нотатку 1:1"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Account": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати рахунок"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Achievement": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати досягнення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Activity": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати активність"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Anti-goal": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати анти-ціль"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Appliance": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати техніку"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Book": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати книгу"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Contact": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати контакт"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Course": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати курс"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Date": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати дату"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Debt": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати борг"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Dream Destination": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати омріяне місце"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Flashcard": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати картку"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Goal": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати ціль"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Habit": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати звичку"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Hobby": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати хобі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Interview": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати співбесіду"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Investment": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати інвестицію"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Item": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати елемент"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Lab Result": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати аналіз"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Language": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати мову"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Medication": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати ліки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Plant": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати рослину"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Project": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати проєкт"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Reading": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати показник"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Salary": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати зарплату"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Skill": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати навичку"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Task": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати задачу"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Template": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати шаблон"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Transaction": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати транзакцію"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Trip": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати поїздку"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add Workout": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати тренування"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add a date": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати дату"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add a hobby to start tracking time for it.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додай хобі, щоб рахувати час на нього."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add birthday": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати дату народження"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add item…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати елемент…"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add photos": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати фото"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add the people you want to stay close to.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додай людей, з якими хочеш бути ближче."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add to Portfolio": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати в портфоліо"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add to Queue": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати в чергу"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Add to Wishlist": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати в список бажань"
-          }
-        }
-      }
+      "localizations": {}
     },
     "All caught up — nothing due right now.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Усе під контролем — зараз нічого немає."
-          }
-        }
-      }
+      "localizations": {}
     },
     "All clear — add a task or tell your agent.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Усе чисто — додай задачу або скажи агенту."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Allergies": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Алергії"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Almost there": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Майже там"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Amount": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сума"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Analyze my patterns": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Проаналізувати патерни"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Anti-Burnout": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Проти вигорання"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Anti-goals": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Анти-цілі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Appearance": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Оформлення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Apple Health": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apple Health"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Appliances": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Техніка"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Ask": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Запитати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Assistant is off": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Асистент вимкнено"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Author": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Автор"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Back": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назад"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Back (answer)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зворот (відповідь)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Balance": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Баланс"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Bedtime": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Час сну"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Before vs during · a pattern, not proof.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "До проти під час · патерн, не доказ."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Birthday": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дата народження"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Blood type": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Група крові"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Body": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тіло"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Brag document": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Документ досягнень"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Brand": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Бренд"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Break it down": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Розклади на кроки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Break this down": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Розкласти на кроки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Breathing Exercise": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дихальна вправа"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Budget": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Бюджет"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Budget (optional)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Бюджет (необовʼязково)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Budgets": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Бюджети"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Building momentum": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Набираємо обертів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Calories": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Калорії"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Cancel": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Скасувати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Captured ideas will appear here.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тут зʼявляться збережені ідеї."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Career": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кар'єра"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Career goals": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Карʼєрні цілі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Category": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Категорія"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Children": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Діти"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Choose your spheres": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Обери свої сфери"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Clear done": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Прибрати виконане"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Close": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Закрити"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Commit to today": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Затвердити на сьогодні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Company": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Компанія"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Completed": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Завершено"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Continue": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Далі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Cooling off · ripens in %lldh": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дозріває · за %lld год"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Cost (optional)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вартість (необовʼязково)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Countries Visited": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відвідані країни"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Country": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Країна"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Course name": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва курсу"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Courses": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Курси"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Creativity": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Творчість"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Currency": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Валюта"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Current value": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поточна вартість"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Cycle": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Цикл"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Dark": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Темна"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Date": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дата"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Dates": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Day %lld": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "День %lld"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Day %lld of %lld": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "День %lld з %lld"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Day %lld of %lld · %lld to go": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "День %lld з %lld · %lld лишилось"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Debts": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Борги"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Deck": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Колода"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Delete": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Видалити"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Deleted": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Видалено"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Departure": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Виліт"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Description (optional)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Опис (необовʼязково)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Destination": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пункт призначення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Dietary preferences": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дієтичні вподобання"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Dietary restrictions": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дієтичні обмеження"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Digital Detox": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Цифровий детокс"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Discipline %lld/100": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дисципліна %lld/100"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Documents": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Документи"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Done": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Готово"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Dosage (e.g. 50 mcg)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дозування (напр. 50 мкг)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Downloadable models": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Моделі для завантаження"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Downloaded model": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Завантажена модель"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Dream Destination": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Омріяне місце"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Dream List": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Список мрій"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Due": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Термін"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Due date": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Термін виконання"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Duration": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тривалість"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Each check-in is a vote for who you're becoming.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кожна відмітка — голос за того, ким ти стаєш."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Easy": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Легко"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Edit": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Редагувати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Email": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Email"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Email (optional)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Email (необов'язково)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Emoji": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Емодзі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Energy today": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Енергія сьогодні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Enjoyment": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Задоволення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Everyone in your contacts is already here, or access was denied.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Усі з контактів уже тут, або доступ відхилено."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Expense": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Витрата"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Experiments": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Експерименти"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Felt": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відчуття"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Finance": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Фінанси"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Finish now": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Завершити зараз"
-          }
-        }
-      }
+      "localizations": {}
     },
     "First name": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ім'я"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Flag emoji": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Емодзі прапора"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Flashcards": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Картки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Flow": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Інтенсивність"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Focus": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Фокус"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Focus session": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сесія фокусу"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Food allergies": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Харчові алергії"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Forgot": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Забув"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Frequency": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Частота"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Front (question)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Лице (питання)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Gaining ground": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Набираємо хід"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Gender": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Стать"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Get": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Завантажити"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Get likely questions": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Отримати ймовірні питання"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Get started": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Розпочати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Getting going": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Розганяємось"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Gift ideas": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ідеї подарунків"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Goal (e.g. Become a staff engineer)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ціль (напр. Стати staff-інженером)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Goal name": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва цілі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Goal title": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва цілі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Goals": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Цілі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Good": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Добре"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Gratitude": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вдячність"
-          }
-        }
-      }
+      "localizations": {}
     },
     "HRV": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "HRV"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Habit (e.g. Read 10 pages)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Звичка (напр. Читати 10 сторінок)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Habits": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Звички"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Has warranty": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Має гарантію"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Health": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Здоров'я"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Health conditions": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Стани здоров'я"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Heart Rate": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пульс"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Height, cm": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зріст, см"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Hobbies": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Хобі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Hobby": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Хобі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Home": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Головна"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Horizon": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Горизонт"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Household Tasks": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Домашні задачі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "How are you today?": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Як ти сьогодні?"
-          }
-        }
-      }
+      "localizations": {}
     },
     "How did today feel? One line is enough.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Яким був сьогодні день? Досить одного рядка."
-          }
-        }
-      }
+      "localizations": {}
     },
     "How does today feel?": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Яким відчувається день?"
-          }
-        }
-      }
+      "localizations": {}
     },
     "How's the trip going?": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Як минає поїздка?"
-          }
-        }
-      }
+      "localizations": {}
     },
     "I am… (e.g. a reader)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Я… (напр. читач)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Ideas": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ідеї"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Identity": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ідентичність"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Impact (optional)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вплив (необовʼязково)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Import": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Імпортувати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Import contacts": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Імпорт контактів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Import from Contacts": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Імпорт з контактів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Income": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дохід"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Insight of the week": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Інсайт тижня"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Interview prep": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Підготовка до співбесіди"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Interviews": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Співбесіди"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Inventory": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Інвентар"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Investments": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Інвестиції"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Item": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Елемент"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Jet-lag plan": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "План проти джетлагу"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Job description": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Опис вакансії"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Journal": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Щоденник"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Just an idea for now": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поки що просто ідея"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Just beginning": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тільки початок"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Keep the work week under 50h": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тримай робочий тиждень менше 50 год"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Kind": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тип"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Lab Results": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Аналізи"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Label (e.g. Anniversary)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Підпис (напр. Річниця)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Language": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Мова"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Languages": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Мови"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Last name": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Прізвище"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Learning": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Навчання"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Lender": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кредитор"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Lent to %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Позичено %@"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Lent to (if anyone)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Позичено (кому, якщо є)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Level": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Рівень"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Life": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Життя"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Life Wheel": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Колесо життя"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Light": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Світла"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Likely questions": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ймовірні питання"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Link (optional)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Посилання (необовʼязково)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Location (e.g. Garage)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Місце (напр. Гараж)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Записати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log Achievement": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Записати досягнення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log Meditation": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Записати медитацію"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log Nap": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Записати дрімоту"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log Period": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Записати місячні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log Session": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Записати сесію"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log Sleep": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Записати сон"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log Weight": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Записати вагу"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log a bit more data and the comparison chart will appear here.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Познач ще трохи даних — і зʼявиться графік порівняння."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log a win worth remembering.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Запиши перемогу, яку варто памʼятати."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log a work session": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Записати робочу сесію"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Log period": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Записати місячні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Map": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Мапа"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Mark complete": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Позначити виконаним"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Mark done": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Позначити готовим"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Meal quality": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Якість харчування"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Measured effect": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Виміряний ефект"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Medications": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ліки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Meditation": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Медитація"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Memories": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Спогади"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Message": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Повідомлення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Message templates": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Шаблони повідомлень"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Meta Agent": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Мета-агент"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Meter reading": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Показник лічильника"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Milestones": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Віхи"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Mindfulness": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Усвідомленість"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Models": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Моделі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Momentum": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Динаміка"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Monthly payment": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Щомісячний платіж"
-          }
-        }
-      }
+      "localizations": {}
     },
     "More": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Більше"
-          }
-        }
-      }
+      "localizations": {}
     },
     "My Hobbies": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Мої хобі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "My Spheres": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Твої сфери"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Name": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Name (e.g. Car loan)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва (напр. Автокредит)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Name (e.g. Washing machine)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва (напр. Пральна машина)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Naps": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дрімоти"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Network": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Контакти"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Anti-goal": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова анти-ціль"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Application": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова заявка"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Contact": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Новий контакт"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Goal": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова ціль"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Habit": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова звичка"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Hobby": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нове хобі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Home Task": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова домашня задача"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Plant": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова рослина"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Project": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Новий проєкт"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Savings Goal": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова ціль заощаджень"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Task": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова задача"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New Trip": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова поїздка"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New contact": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Новий контакт"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New experiment": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Новий експеримент"
-          }
-        }
-      }
+      "localizations": {}
     },
     "New milestone (e.g. Play a full song)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова віха (напр. Зіграти пісню повністю)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Next Trip": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Наступна поїздка"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No active projects.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Немає активних проєктів."
-          }
-        }
-      }
+      "localizations": {}
     },
     "No appliances tracked": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Техніку не відстежуєш"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No applications tracked.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Заявок немає."
-          }
-        }
-      }
+      "localizations": {}
     },
     "No budgets set.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Бюджети не задано."
-          }
-        }
-      }
+      "localizations": {}
     },
     "No cards due right now — come back later.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зараз карток немає — зазирни пізніше."
-          }
-        }
-      }
+      "localizations": {}
     },
     "No career goals": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Немає карʼєрних цілей"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No courses tracked": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Курсів немає"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No debts tracked": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Боргів немає"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No entries": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Немає записів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No entries yet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще немає записів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No finished work yet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще немає завершених робіт"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No flashcards yet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще немає карток"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No investments tracked": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Інвестицій немає"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No lab results": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Немає аналізів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No languages tracked": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Мов немає"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No medications": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Немає ліків"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No naps logged": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дрімот не записано"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No notes yet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще немає нотаток"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No projects": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Немає проєктів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No readings yet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще немає показників"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No skills tracked": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Навичок немає"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No templates": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Немає шаблонів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "No transactions yet — add one or tell your agent.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще немає транзакцій — додай або скажи агенту."
-          }
-        }
-      }
+      "localizations": {}
     },
     "No trips yet — plan one or ask your agent for ideas.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще немає поїздок — заплануй або запитай агента."
-          }
-        }
-      }
+      "localizations": {}
     },
     "No workouts logged": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тренувань не записано"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Not started — one small step is enough": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще не почато — досить одного кроку"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Note": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нотатка"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Note (optional)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нотатка (необовʼязково)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Notes": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нотатки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Nothing added yet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще нічого не додано"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Nothing catalogued": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нічого не каталогізовано"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Nothing new to import": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Немає нічого нового для імпорту"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Nothing on the list": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "У списку порожньо"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Nothing planned yet — dream a little.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще нічого не заплановано — помрій трохи."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Nothing to do around the house 🎉": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вдома нічого робити 🎉"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Noticed across %lld days · a pattern, not proof.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Помічено за %lld днів · патерн, не доказ."
-          }
-        }
-      }
+      "localizations": {}
     },
     "On a roll": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "У потоці"
-          }
-        }
-      }
+      "localizations": {}
     },
     "One thing you're grateful for": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Одне, за що ти вдячний"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Over budget by %lld": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Перевищення бюджету на %lld"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Overall Life Progress": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Загальний прогрес життя"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Packing List": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Список речей"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Past": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Минулі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Paste the posting here": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Встав опис вакансії сюди"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Paused": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "На паузі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "People": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Люди"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Person": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Людина"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Personal": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Особисте"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Photo memories": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Фотоспогади"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Pick a pattern — 4-7-8, box, or coherent": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Обери патерн — 4-7-8, квадрат чи когерентне"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Planned": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Заплановано"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Plant name": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва рослини"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Plants": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Рослини"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Portfolio": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Портфоліо"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Position": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Посада"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Prep me with the assistant": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Підготуй мене з асистентом"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Prep — before you see %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Підготовка — перед зустріччю з %@"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Price": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ціна"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Priority": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пріоритет"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Profile": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Профіль"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Project": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Проєкт"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Project (e.g. Kitchen remodel)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Проєкт (напр. Ремонт кухні)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Project (optional)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Проєкт (необовʼязково)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Provider (e.g. Coursera)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Провайдер (напр. Coursera)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Queue is empty": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Черга порожня"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Quick capture": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Швидкий запис"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Rate how each area of life feels right now, 1 to 10.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Оціни, як зараз відчувається кожна сфера, від 1 до 10."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Reached out": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Звʼязався"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Reached out today": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Звʼязався сьогодні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Read / watch later": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Прочитати / переглянути пізніше"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Ready — buy it or let it go": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Готово — купуй або відпусти"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Recent Sessions": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Останні сесії"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Recovery Score": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Оцінка відновлення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Recovery mode": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Режим відновлення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Recurring": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Повторюване"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Reference range": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Референсний діапазон"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Reflection": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Рефлексія"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Regenerate": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Згенерувати знову"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Relationship": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Стосунок"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Relationships": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Стосунки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Remaining": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Залишилось"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Remind me on": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нагадати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Renovation": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ремонт"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Repeats yearly": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Повторюється щороку"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Rest": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відпочинок"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Restrictions": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Обмеження"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Review": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Огляд"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Review %lld due": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "На повторення: %lld"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Role": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Роль"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Role (e.g. Manager)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Роль (напр. Менеджер)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Run a personal experiment": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Проведи власний експеримент"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Run for": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тривалість"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Running": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Активні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Safe to spend today": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Можна витратити сьогодні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Salary history": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Історія зарплат"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Save": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зберегти"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Savings Goals": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Цілі заощаджень"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Scheduled": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Заплановані"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Search": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пошук"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Search across Sphere": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пошук у Sphere"
-          }
-        }
-      }
+      "localizations": {}
     },
     "See gap": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Побачити розрив"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Set up the assistant": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Налаштувати асистента"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Settings": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Налаштування"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Share your year": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поділитися роком"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Shift bedtime toward the destination in the days before you fly.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зсувай час сну до часового поясу призначення за кілька днів до вильоту."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Shopping List": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Список покупок"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Show answer": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Показати відповідь"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Skill": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Навичка"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Skills": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Навички"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Sleep": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сон"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Sleep Log": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Журнал сну"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Sleep, last 7 days": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сон, останні 7 днів"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Spent": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Витрачено"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Sphere compares your metrics during these %lld days against the %lld days just before.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sphere порівнює твої показники за ці %lld днів із %lld днями до того."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Spheres": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сфери"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Start": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Почати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Start a focus session": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Почати сесію фокусу"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Start date": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дата початку"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Start one": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Почати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Start reading now": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Почати читати зараз"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Start today": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Почни сьогодні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Stats": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Статистика"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Status": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Статус"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Stay with one thing.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Залишайся з однією справою."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Steps": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кроки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Stop early": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зупинити раніше"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Streaks are paused and daily nudges are off. Rest up.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Серії на паузі, щоденні підказки вимкнено. Відпочивайте."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Stress": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Стрес"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Subscriptions": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Підписки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Sunday evening — a good moment to look back.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Недільний вечір — гарний момент озирнутися."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Symptoms": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Симптоми"
-          }
-        }
-      }
+      "localizations": {}
     },
     "System": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Системна"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Talking points (comma-separated)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Теми (через кому)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Target amount": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Цільова сума"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Task": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Задача"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Task title": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва задачі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Tasks": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Задачі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Test name": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва аналізу"
-          }
-        }
-      }
+      "localizations": {}
     },
     "The change": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зміна"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Theme": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тема"
-          }
-        }
-      }
+      "localizations": {}
     },
     "This Week": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Цього тижня"
-          }
-        }
-      }
+      "localizations": {}
     },
     "This month by category": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Цього місяця за категоріями"
-          }
-        }
-      }
+      "localizations": {}
     },
     "This week": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Цього тижня"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Time off this year": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відпустка цьогоріч"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Time to reach out": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Час звʼязатися"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Title": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Today you…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сьогодні ти…"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Today's Focus": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Фокус на сьогодні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Today's affirmation": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Афірмація дня"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Today's intention": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Намір на сьогодні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Today's schedule": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Розклад на сьогодні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Total amount": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Загальна сума"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Total pages": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Усього сторінок"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Track a skill you're learning.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відстежуй навичку, яку опановуєш."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Transactions": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Транзакції"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Travel": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Подорожі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Trips": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поїздки"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Type": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тип"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Undo": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Скасувати"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Unit (e.g. mg/dL)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Одиниця (напр. мг/дл)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Unstoppable": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не спинити"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Use this model": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Використати цю модель"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Utilities": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Комунальні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Utility": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Комуналка"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Value": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Значення"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Visited": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відвідано"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Wake": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Підйом"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Warranties ending soon": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Гарантії, що спливають"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Warranty until": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Гарантія до"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Water": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вода"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Weekend Plans": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Плани на вихідні"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Weekly Steps": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кроки за тиждень"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Weekly review": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тижневий огляд"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Weight": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вага"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Weight, kg": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вага, кг"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Welcome to Sphere": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ласкаво просимо до Sphere"
-          }
-        }
-      }
+      "localizations": {}
     },
     "What changed": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Що змінилося"
-          }
-        }
-      }
+      "localizations": {}
     },
     "What do you want?": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Чого ти хочеш?"
-          }
-        }
-      }
+      "localizations": {}
     },
     "What matters most today?": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Що найважливіше сьогодні?"
-          }
-        }
-      }
+      "localizations": {}
     },
     "What restores me": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Що мене відновлює"
-          }
-        }
-      }
+      "localizations": {}
     },
     "What stood out this week?": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Що запамʼяталося цього тижня?"
-          }
-        }
-      }
+      "localizations": {}
     },
     "What will you say no to?": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Чому скажеш ні?"
-          }
-        }
-      }
+      "localizations": {}
     },
     "What's on your mind?": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Про що думаєш?"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Why (optional)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Чому (необовʼязково)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Why does this matter?": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Чому це важливо?"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Why, or how (optional)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Чому або як (необовʼязково)"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Wishlist": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Список бажань"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Within normal range": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "У межах норми"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Work session": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Робоча сесія"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Workouts": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тренування"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Workouts this week": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тренування цього тижня"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Write down one insight from today.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Запиши один інсайт із сьогодні."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Year in Sphere": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Рік у Sphere"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Yes": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Так"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Your Year in Sphere": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Твій рік у Sphere"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Your daily brief will appear here.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тут зʼявиться ваш денний огляд."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Your note": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ваша нотатка"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Your patterns": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Твої патерни"
-          }
-        }
-      }
+      "localizations": {}
     },
     "Your reason is resurfaced whenever the goal stalls.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Твоя причина зʼявляється щоразу, коли ціль застопорюється."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Your remaining monthly budget, spread over the days left.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Залишок місячного бюджету, розподілений на дні, що лишились."
-          }
-        }
-      }
+      "localizations": {}
     },
     "Your week": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ваш тиждень"
-          }
-        }
-      }
+      "localizations": {}
     },
     "across %lld hobbies": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "по %lld хобі"
-          }
-        }
-      }
+      "localizations": {}
     },
     "bills in %lld d": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "оплата за %lld дн"
-          }
-        }
-      }
+      "localizations": {}
     },
     "e.g. No caffeine after 2pm": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "напр. Без кави після 14:00"
-          }
-        }
-      }
+      "localizations": {}
     },
     "e.g. Senior iOS Engineer": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "напр. Senior iOS Engineer"
-          }
-        }
-      }
+      "localizations": {}
     },
     "flat": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "без змін"
-          }
-        }
-      }
+      "localizations": {}
     },
     "in %lldd": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "за %lld дн"
-          }
-        }
-      }
+      "localizations": {}
     },
     "ref %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "реф %@"
-          }
-        }
-      }
+      "localizations": {}
     },
     "· packed %lld/%lld": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "· зібрано %lld/%lld"
-          }
-        }
-      }
+      "localizations": {}
     },
     "🎂 Upcoming Birthdays": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "🎂 Найближчі дні народження"
-          }
-        }
-      }
+      "localizations": {}
     },
     "💡 Capture an idea": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "💡 Запиши ідею"
-          }
-        }
-      }
+      "localizations": {}
     },
     "💧 %lld thirsty": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "💧 %lld спраглих"
-          }
-        }
-      }
+      "localizations": {}
     },
     "💭 Remember why: %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "💭 Памʼятай навіщо: %@"
-          }
-        }
-      }
+      "localizations": {}
     },
     "💸 %lld/session": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "💸 %lld/сесія"
-          }
-        }
-      }
+      "localizations": {}
     }
   },
   "version": "1.0"

@@ -37,7 +37,7 @@ public struct HomeSphereScreen: View {
             }
             .padding()
         }
-        .navigationTitle("Home")
+        .navigationTitle("Home sphere")
         .toolbar {
             Menu {
                 Button("Add Task") { showingAddTask = true }

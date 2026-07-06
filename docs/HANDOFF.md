@@ -129,16 +129,13 @@ Remaining:
    `UserProfile`/`ProfileStore` in SphereCore (agentContext feeds chat
    sessions via `AppContainer.chatSession`), `OnboardingFlow`,
    `ProfileScreen`, `SettingsScreen` in the app target. Still to do here:
-   ~~theme/currency~~ and ~~app-shell EN/UK localization~~ DONE. The shell
-   String Catalog is `Sphere/Sources/Localizable.xcstrings` (must live inside
-   the target's sources dir or it isn't bundled). project.yml declares
-   knownRegions/CFBundleLocalizations [en, uk]. Computed sphere names render
-   via `LocalizedStringKey(rawValue.capitalized)`. **Remaining i18n: the
-   sphere SCREENS in the SphereUI package** — add a `Localizable.xcstrings`
-   to `SphereCore/Sources/SphereUI/`, set `defaultLocalization: "en"` in
-   Package.swift, and (SPM localizes package `Text` against the package
-   bundle automatically). Big mechanical volume; UK strings are in
-   `sphere/lib/l10n/app_uk.arb`.
+   ~~theme/currency~~ DONE. **i18n: dropped by product decision
+   (2026-07-07)** — the app ships English-only for the English-speaking
+   market; the in-app language switcher, the SphereUI `Localizable.xcstrings`
+   catalog, and the earlier app-shell EN/UK work were all reverted. The
+   uk translation work (app-shell catalog, SphereUI `Text(ui:)`/`uiString`
+   helpers, `app_uk.arb` mapping) still lives in git history if this is
+   revisited later; do not restart it without discussion.
 3. ~~Spheres grid live stats + reorder~~ and ~~home-screen Widget~~ DONE.
    The Widget (`SphereWidgetExtension` in project.yml) reads a
    `WidgetSnapshot` from the App Group (`group.app.sphere.shared`) written

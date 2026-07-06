@@ -17,6 +17,8 @@ before any non-trivial task.
   no per-service OAuth.
 - Engram v2 (on-device reflection via Foundation Models, hybrid BM25+embedding
   recall) is a post-launch phase — do not start it without discussion.
+- **English-only**: product ships English-only (decision 2026-07-07); do not
+  add localization or a language switcher without discussion.
 
 ## Conventions
 

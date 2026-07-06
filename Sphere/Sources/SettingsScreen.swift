@@ -147,19 +147,6 @@ struct SettingsScreen: View {
 
             Section("General") {
                 NavigationLink("My Spheres") { MySpheresScreen(container: container) }
-                Button {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(url)
-                    }
-                } label: {
-                    HStack {
-                        Text("Language").foregroundStyle(.primary)
-                        Spacer()
-                        Image(systemName: "arrow.up.forward.app")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
             }
 
             Section {
