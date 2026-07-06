@@ -70,6 +70,8 @@ public struct CloudModelsScreen: View {
                 }
             }
         }
+        .sphereAnimation(SphereMotion.gentle, value: loading)
+        .sphereAnimation(SphereMotion.gentle, value: filtered.map(\.id))
         .navigationTitle("Cloud model")
         .searchableCompat(text: $query, prompt: "Search models")
         .task {

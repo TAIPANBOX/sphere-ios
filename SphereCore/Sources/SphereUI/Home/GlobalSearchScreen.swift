@@ -50,6 +50,8 @@ public struct GlobalSearchScreen: View {
                 }
             }
         }
+        .sphereAnimation(SphereMotion.gentle, value: groups.map(\.items.count))
+        .sphereAnimation(SphereMotion.gentle, value: memories.count)
         .navigationTitle("Search")
         .searchableCompat(text: $query, prompt: "Search across Sphere")
         .task(id: query) {

@@ -35,6 +35,8 @@ public struct TravelScreen: View {
                 wishlistSection
             }
             .padding()
+            .sphereAnimation(SphereMotion.gentle, value: store.plans.count)
+            .sphereAnimation(SphereMotion.gentle, value: store.wishlist.count)
         }
         .navigationTitle("Travel")
         .toolbar {
@@ -249,6 +251,7 @@ struct TripDetailView: View {
                 }
             }
         }
+        .sphereAnimation(SphereMotion.gentle, value: store.journal(for: planId).count)
         .navigationTitle(plan?.destination ?? "Trip")
         .task {
             try? await store.initPackingAndDocs(planId: planId)

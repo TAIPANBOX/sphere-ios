@@ -32,6 +32,8 @@ public struct HobbiesScreen: View {
                 sessionsSection
             }
             .padding()
+            .sphereAnimation(SphereMotion.gentle, value: store.hobbies.count)
+            .sphereAnimation(SphereMotion.gentle, value: store.sessions.count)
         }
         .navigationTitle("Hobbies")
         .toolbar {

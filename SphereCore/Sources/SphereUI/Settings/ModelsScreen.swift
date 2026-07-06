@@ -18,6 +18,8 @@ public struct ModelsScreen: View {
                 Text("Models run entirely on your device — private and free. They download over Wi-Fi and live in on-device storage.")
             }
         }
+        .sphereAnimation(SphereMotion.gentle, value: manager.activeModelID)
+        .sphereAnimation(SphereMotion.gentle, value: manager.catalog.filter { manager.state(for: $0) == .installed }.count)
         .navigationTitle("Models")
     }
 

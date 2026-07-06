@@ -50,6 +50,7 @@ public struct RelationshipsScreen: View {
                 templatesSection
             }
             .padding()
+            .sphereAnimation(SphereMotion.gentle, value: store.contacts.count)
         }
         .navigationTitle("Relationships")
         .toolbar {

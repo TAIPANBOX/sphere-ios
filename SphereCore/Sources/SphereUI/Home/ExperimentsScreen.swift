@@ -29,6 +29,7 @@ public struct ExperimentsScreen: View {
                             }
                         }
                     }
+                    .sphereAnimation(SphereMotion.gentle, value: store.experiments.count)
                 }
             }
             .navigationTitle("Experiments")
