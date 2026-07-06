@@ -281,6 +281,9 @@ struct WatchRootView: View {
                     Label(waterProgressLabel, systemImage: "drop.fill")
                 }
                 .tint(.blue)
+                // Double Tap (Series 9 / Ultra 2+, watchOS 11) fires the
+                // primary action on the frontmost app — here, log a glass.
+                .handGestureShortcut(.primaryAction)
 
                 Button {
                     WKInterfaceDevice.current().play(.click)
