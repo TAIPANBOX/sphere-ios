@@ -26,7 +26,7 @@ public struct VisitedMapScreen: View {
             }
         }
         .overlay(alignment: .top) { banner }
-        .navigationTitle("Visited")
+        .navigationTitle(Text(ui: "Visited"))
         .navigationBarTitleDisplayModeInline()
         .task { await geocodeAll() }
     }
@@ -34,7 +34,7 @@ public struct VisitedMapScreen: View {
     private var banner: some View {
         HStack(spacing: 8) {
             if geocoding { ProgressView().controlSize(.small) }
-            Text(geocoding
+            Text(ui: geocoding
                  ? "Mapping \(names.count) countries…"
                  : "\(coords.count) of \(names.count) countries mapped")
                 .font(.caption.weight(.medium))

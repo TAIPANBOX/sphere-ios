@@ -20,9 +20,9 @@ public struct HobbiesScreen: View {
                     EmptyStateCard(
                         emoji: "🎸",
                         accent: accent,
-                        title: "Start your Hobbies sphere",
-                        message: "Add something you do for the joy of it, and start making time for it.",
-                        buttonLabel: "Add your first hobby"
+                        title: uiString("Start your Hobbies sphere"),
+                        message: uiString("Add something you do for the joy of it, and start making time for it."),
+                        buttonLabel: uiString("Add your first hobby")
                     ) {
                         showingAddHobby = true
                     }
@@ -33,11 +33,11 @@ public struct HobbiesScreen: View {
             }
             .padding()
         }
-        .navigationTitle("Hobbies")
+        .navigationTitle(Text(ui: "Hobbies"))
         .toolbar {
             Menu {
-                Button("Log Session") { showingLogSession = true }
-                Button("Add Hobby") { showingAddHobby = true }
+                Button { showingLogSession = true } label: { Text(ui: "Log Session") }
+                Button { showingAddHobby = true } label: { Text(ui: "Add Hobby") }
             } label: {
                 Image(systemName: "plus")
             }
@@ -65,7 +65,7 @@ public struct HobbiesScreen: View {
     private var weeklyCard: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("This Week").font(.headline)
+                Text(ui: "This Week").font(.headline)
                 Text("across \(store.hobbies.count) hobbies")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -82,9 +82,9 @@ public struct HobbiesScreen: View {
 
     private var hobbiesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("My Hobbies").font(.title3.weight(.semibold))
+            Text(ui: "My Hobbies").font(.title3.weight(.semibold))
             if store.hobbies.isEmpty {
-                Text("Add a hobby to start tracking time for it.")
+                Text(ui: "Add a hobby to start tracking time for it.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -113,11 +113,15 @@ public struct HobbiesScreen: View {
                         }
                         .buttonStyle(.plain)
                         Menu {
-                            Button(hobby.isActive ? "Pause" : "Resume") {
+                            Button {
                                 Task { try? await store.toggleActive(id: hobby.id) }
+                            } label: {
+                                hobby.isActive ? Text(ui: "Pause") : Text(ui: "Resume")
                             }
-                            Button("Delete", role: .destructive) {
+                            Button(role: .destructive) {
                                 Task { try? await store.removeHobby(id: hobby.id) }
+                            } label: {
+                                Text(ui: "Delete")
                             }
                         } label: {
                             Image(systemName: "ellipsis").foregroundStyle(.secondary)
@@ -149,12 +153,12 @@ public struct HobbiesScreen: View {
 
     private var sessionsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Recent Sessions").font(.title3.weight(.semibold))
+            Text(ui: "Recent Sessions").font(.title3.weight(.semibold))
             ForEach(store.sessions.prefix(10)) { session in
                 HStack(spacing: 12) {
                     Text(store.hobbies.first { $0.id == session.hobbyId }?.emoji ?? "✨")
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(store.hobbies.first { $0.id == session.hobbyId }?.name ?? "Hobby")
+                        Text(store.hobbies.first { $0.id == session.hobbyId }?.name ?? uiString("Hobby"))
                             .font(.body.weight(.medium))
                         if !session.note.isEmpty {
                             Text(session.note).font(.caption).foregroundStyle(.secondary)
@@ -188,8 +192,8 @@ struct AddHobbySheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Hobby", text: $name)
-                TextField("Emoji", text: $emoji)
+                TextField(text: $name) { Text(ui: "Hobby") }
+                TextField(text: $emoji) { Text(ui: "Emoji") }
                 Picker("Frequency", selection: $frequency) {
                     ForEach(HobbyFrequency.allCases, id: \.self) { frequency in
                         Text(frequency.label).tag(frequency)
@@ -197,13 +201,13 @@ struct AddHobbySheet: View {
                 }
                 Stepper("Target: \(target) min/week", value: $target, in: 15...840, step: 15)
             }
-            .navigationTitle("New Hobby")
+            .navigationTitle(Text(ui: "New Hobby"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(Hobby(
                             id: Hobby.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -212,6 +216,8 @@ struct AddHobbySheet: View {
                             targetMinutesPerWeek: target
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -240,7 +246,7 @@ struct LogHobbySessionSheet: View {
                 }
                 Stepper("\(minutes) minutes", value: $minutes, in: 5...720, step: 5)
                 HStack {
-                    Text("Enjoyment")
+                    Text(ui: "Enjoyment")
                     Spacer()
                     ForEach(1...5, id: \.self) { star in
                         Image(systemName: star <= rating ? "star.fill" : "star")
@@ -248,18 +254,18 @@ struct LogHobbySessionSheet: View {
                             .onTapGesture { rating = (rating == star) ? 0 : star }
                     }
                 }
-                TextField("Note (optional)", text: $note)
+                TextField(text: $note) { Text(ui: "Note (optional)") }
             }
-            .navigationTitle("Log Session")
+            .navigationTitle(Text(ui: "Log Session"))
             .onAppear {
                 if hobbyId == nil { hobbyId = hobbies.first?.id }
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button {
                         if let hobbyId {
                             onLog(HobbySession(
                                 id: HobbySession.newID(),
@@ -271,6 +277,8 @@ struct LogHobbySessionSheet: View {
                             ))
                         }
                         dismiss()
+                    } label: {
+                        Text(ui: "Save")
                     }
                     .disabled(hobbyId == nil)
                 }
@@ -288,7 +296,7 @@ struct HobbyDetailSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Stats") {
+                Section {
                     LabeledContent("Total time", value: "\(store.totalMinutes(for: hobby.id)) min")
                     if let cost = store.costPerSession(for: hobby.id) {
                         LabeledContent("Cost per session", value: "\(Int(cost))")
@@ -296,9 +304,11 @@ struct HobbyDetailSheet: View {
                     if let rating = store.averageRating(for: hobby.id) {
                         LabeledContent("Avg enjoyment", value: String(format: "%.1f / 5", rating))
                     }
+                } header: {
+                    Text(ui: "Stats")
                 }
 
-                Section("Milestones") {
+                Section {
                     ForEach(store.milestones(for: hobby.id)) { milestone in
                         Button {
                             Task { try? await store.toggleMilestone(id: milestone.id) }
@@ -315,7 +325,7 @@ struct HobbyDetailSheet: View {
                         .buttonStyle(.plain)
                     }
                     HStack {
-                        TextField("New milestone (e.g. Play a full song)", text: $newMilestone)
+                        TextField(text: $newMilestone) { Text(ui: "New milestone (e.g. Play a full song)") }
                         Button {
                             let title = newMilestone.trimmingCharacters(in: .whitespaces)
                             newMilestone = ""
@@ -329,11 +339,13 @@ struct HobbyDetailSheet: View {
                         }
                         .disabled(newMilestone.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
+                } header: {
+                    Text(ui: "Milestones")
                 }
             }
             .navigationTitle(hobby.name)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button { dismiss() } label: { Text(ui: "Done") } }
             }
         }
     }

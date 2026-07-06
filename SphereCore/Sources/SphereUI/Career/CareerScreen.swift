@@ -29,9 +29,9 @@ public struct CareerScreen: View {
                     EmptyStateCard(
                         emoji: "💼",
                         accent: accent,
-                        title: "Start your Career sphere",
-                        message: "Add a task you're on the hook for, or someone in your network worth staying close to.",
-                        buttonLabel: "Add your first task"
+                        title: uiString("Start your Career sphere"),
+                        message: uiString("Add a task you're on the hook for, or someone in your network worth staying close to."),
+                        buttonLabel: uiString("Add your first task")
                     ) {
                         showingAddTask = true
                     }
@@ -46,13 +46,13 @@ public struct CareerScreen: View {
             }
             .padding()
         }
-        .navigationTitle("Career")
+        .navigationTitle(Text(ui: "Career"))
         .toolbar {
             Menu {
-                Button("Add Task") { showingAddTask = true }
-                Button("Add Interview") { showingAddInterview = true }
-                Button("Add Achievement") { showingAddAchievement = true }
-                Button("Add Contact") { showingAddContact = true }
+                Button { showingAddTask = true } label: { Text(ui: "Add Task") }
+                Button { showingAddInterview = true } label: { Text(ui: "Add Interview") }
+                Button { showingAddAchievement = true } label: { Text(ui: "Add Achievement") }
+                Button { showingAddContact = true } label: { Text(ui: "Add Contact") }
             } label: {
                 Image(systemName: "plus")
             }
@@ -86,24 +86,24 @@ public struct CareerScreen: View {
 
     private var moreSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("More").font(.title3.weight(.semibold))
+            Text(ui: "More").font(.title3.weight(.semibold))
             VStack(spacing: 0) {
-                MoreLink("Skills", systemImage: "star.fill",
+                MoreLink(uiString("Skills"), systemImage: "star.fill",
                          count: store.careerSkills.isEmpty ? nil : store.careerSkills.count) { skillsList }
                 Divider().padding(.leading, 38)
-                MoreLink("Salary history", systemImage: "banknote.fill",
+                MoreLink(uiString("Salary history"), systemImage: "banknote.fill",
                          count: store.salaryHistory.isEmpty ? nil : store.salaryHistory.count) { salaryList }
                 Divider().padding(.leading, 38)
-                MoreLink("Career goals", systemImage: "target",
+                MoreLink(uiString("Career goals"), systemImage: "target",
                          count: store.careerGoals.isEmpty ? nil : store.careerGoals.count) { goalsList }
                 Divider().padding(.leading, 38)
-                MoreLink("1:1 notes", systemImage: "person.2.fill",
+                MoreLink(uiString("1:1 notes"), systemImage: "person.2.fill",
                          count: store.oneOnOnes.isEmpty ? nil : store.oneOnOnes.count) { oneOnOnesList }
                 Divider().padding(.leading, 38)
-                MoreLink("Brag document", systemImage: "doc.text.fill") { bragDocumentView }
+                MoreLink(uiString("Brag document"), systemImage: "doc.text.fill") { bragDocumentView }
                 if agent != nil {
                     Divider().padding(.leading, 38)
-                    MoreLink("Interview prep", systemImage: "person.crop.rectangle.badge.plus") {
+                    MoreLink(uiString("Interview prep"), systemImage: "person.crop.rectangle.badge.plus") {
                         InterviewPrepView(
                             accent: accent, agent: agent,
                             onConfigureProvider: onConfigureProvider
@@ -117,9 +117,9 @@ public struct CareerScreen: View {
 
     private var skillsList: some View {
         CRUDListScreen(
-            title: "Skills",
+            title: uiString("Skills"),
             items: store.careerSkills,
-            emptyTitle: "No skills tracked",
+            emptyTitle: uiString("No skills tracked"),
             emptySystemImage: "star",
             addSheet: { AddCareerSkillSheet { s in Task { try? await store.addSkill(s) } } },
             row: { skill in
@@ -141,9 +141,9 @@ public struct CareerScreen: View {
 
     private var salaryList: some View {
         CRUDListScreen(
-            title: "Salary history",
+            title: uiString("Salary history"),
             items: store.salaryHistory,
-            emptyTitle: "No entries",
+            emptyTitle: uiString("No entries"),
             emptySystemImage: "banknote",
             addSheet: { AddSalarySheet { e in Task { try? await store.addSalary(e) } } },
             row: { entry in
@@ -167,9 +167,9 @@ public struct CareerScreen: View {
 
     private var goalsList: some View {
         CRUDListScreen(
-            title: "Career goals",
+            title: uiString("Career goals"),
             items: store.careerGoals,
-            emptyTitle: "No career goals",
+            emptyTitle: uiString("No career goals"),
             emptySystemImage: "target",
             addSheet: { AddCareerGoalSheet { g in Task { try? await store.addCareerGoal(g) } } },
             row: { goal in
@@ -189,9 +189,9 @@ public struct CareerScreen: View {
 
     private var oneOnOnesList: some View {
         CRUDListScreen(
-            title: "1:1 notes",
+            title: uiString("1:1 notes"),
             items: store.oneOnOnes,
-            emptyTitle: "No notes yet",
+            emptyTitle: uiString("No notes yet"),
             emptySystemImage: "person.2",
             addSheet: { AddOneOnOneSheet { n in Task { try? await store.addOneOnOne(n) } } },
             row: { note in
@@ -202,7 +202,7 @@ public struct CareerScreen: View {
                         Text(note.date, style: .date).font(.caption).foregroundStyle(.secondary)
                     }
                     if !note.talkingPoints.isEmpty {
-                        Text("Next: " + note.talkingPoints.joined(separator: ", "))
+                        Text(ui: "Next: \(note.talkingPoints.joined(separator: ", "))")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -221,7 +221,7 @@ public struct CareerScreen: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
         }
-        .navigationTitle("Brag document")
+        .navigationTitle(Text(ui: "Brag document"))
         .toolbar {
             ShareLink(item: text)
         }
@@ -240,9 +240,9 @@ public struct CareerScreen: View {
         .sphereCard()
     }
 
-    private func statColumn(_ title: String, value: Int, tint: Color) -> some View {
+    private func statColumn(_ title: LocalizedStringKey, value: Int, tint: Color) -> some View {
         VStack(spacing: 4) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(ui: title).font(.caption).foregroundStyle(.secondary)
             Text("\(value)").font(.title3.weight(.bold)).foregroundStyle(tint)
         }
         .frame(maxWidth: .infinity)
@@ -252,9 +252,9 @@ public struct CareerScreen: View {
 
     private var tasksSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Tasks").font(.title3.weight(.semibold))
+            Text(ui: "Tasks").font(.title3.weight(.semibold))
             if store.openTasks.isEmpty {
-                Text("All clear — add a task or tell your agent.")
+                Text(ui: "All clear — add a task or tell your agent.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -276,7 +276,7 @@ public struct CareerScreen: View {
                                 Text("· \(task.project)")
                             }
                             if let dueDate = task.dueDate {
-                                Text("· due \(dueDate, style: .date)")
+                                Text(ui: "· due \(dueDate, style: .date)")
                                     .foregroundStyle(task.isOverdue() ? .red : .secondary)
                             }
                         }
@@ -285,8 +285,10 @@ public struct CareerScreen: View {
                     }
                     Spacer()
                     Menu {
-                        Button("Delete", role: .destructive) {
+                        Button(role: .destructive) {
                             Task { try? await store.remove(id: task.id) }
+                        } label: {
+                            Text(ui: "Delete")
                         }
                     } label: {
                         Image(systemName: "ellipsis").foregroundStyle(.secondary)
@@ -301,9 +303,9 @@ public struct CareerScreen: View {
 
     private var projectsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Active Projects").font(.title3.weight(.semibold))
+            Text(ui: "Active Projects").font(.title3.weight(.semibold))
             if store.activeProjects.isEmpty {
-                Text("No active projects.")
+                Text(ui: "No active projects.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -316,7 +318,7 @@ public struct CareerScreen: View {
                             .font(.body.weight(.medium))
                         Spacer()
                         if let days = project.daysRemaining() {
-                            Text(days >= 0 ? "\(days) d left" : "\(-days) d over")
+                            Text(ui: days >= 0 ? "\(days) d left" : "\(-days) d over")
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(days >= 0 ? Color.secondary : Color.red)
                         }
@@ -339,9 +341,9 @@ public struct CareerScreen: View {
 
     private var interviewsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Interviews").font(.title3.weight(.semibold))
+            Text(ui: "Interviews").font(.title3.weight(.semibold))
             if store.interviews.isEmpty {
-                Text("No applications tracked.")
+                Text(ui: "No applications tracked.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -357,13 +359,17 @@ public struct CareerScreen: View {
                     Spacer()
                     Menu {
                         ForEach(InterviewStatus.allCases, id: \.self) { status in
-                            Button("\(status.emoji) \(status.label)") {
+                            Button {
                                 Task { try? await store.setInterviewStatus(id: interview.id, status: status) }
+                            } label: {
+                                Text("\(status.emoji) \(status.label)")
                             }
                         }
                         Divider()
-                        Button("Delete", role: .destructive) {
+                        Button(role: .destructive) {
                             Task { try? await store.removeInterview(id: interview.id) }
+                        } label: {
+                            Text(ui: "Delete")
                         }
                     } label: {
                         Text(interview.status.label)
@@ -389,9 +395,9 @@ public struct CareerScreen: View {
 
     private var achievementsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Achievements").font(.title3.weight(.semibold))
+            Text(ui: "Achievements").font(.title3.weight(.semibold))
             if store.achievements.isEmpty {
-                Text("Log a win worth remembering.")
+                Text(ui: "Log a win worth remembering.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -416,7 +422,7 @@ public struct CareerScreen: View {
                     Button(role: .destructive) {
                         Task { try? await store.removeAchievement(id: achievement.id) }
                     } label: {
-                        Label("Delete", systemImage: "trash")
+                        Label { Text(ui: "Delete") } icon: { Image(systemName: "trash") }
                     }
                 }
             }
@@ -428,10 +434,10 @@ public struct CareerScreen: View {
     private var networkSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Network").font(.title3.weight(.semibold))
+                Text(ui: "Network").font(.title3.weight(.semibold))
                 Spacer()
                 if !store.staleContacts().isEmpty {
-                    Text("\(store.staleContacts().count) to reconnect")
+                    Text(ui: "\(store.staleContacts().count) to reconnect")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.orange)
                 }
@@ -450,7 +456,7 @@ public struct CareerScreen: View {
                     Button {
                         Task { try? await store.markNetworkContacted(id: contact.id) }
                     } label: {
-                        Text(contact.lastContact == nil ? "Reach out" : "\(contact.daysSinceContact())d")
+                        Text(ui: contact.lastContact == nil ? "Reach out" : "\(contact.daysSinceContact())d")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(stale ? Color.orange : Color.secondary)
                     }
@@ -461,7 +467,7 @@ public struct CareerScreen: View {
                     Button(role: .destructive) {
                         Task { try? await store.removeNetworkContact(id: contact.id) }
                     } label: {
-                        Label("Delete", systemImage: "trash")
+                        Label { Text(ui: "Delete") } icon: { Image(systemName: "trash") }
                     }
                 }
             }
@@ -482,25 +488,27 @@ struct AddCareerTaskSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Task title", text: $title)
-                TextField("Project (optional)", text: $project)
-                Picker("Priority", selection: $priority) {
+                TextField(text: $title) { Text(ui: "Task title") }
+                TextField(text: $project) { Text(ui: "Project (optional)") }
+                Picker(selection: $priority) {
                     ForEach(TaskPriority.allCases, id: \.self) { priority in
                         Text("\(priority.emoji) \(priority.label)").tag(priority)
                     }
+                } label: {
+                    Text(ui: "Priority")
                 }
-                Toggle("Due date", isOn: $hasDueDate)
+                Toggle(isOn: $hasDueDate) { Text(ui: "Due date") }
                 if hasDueDate {
-                    DatePicker("Due", selection: $dueDate, displayedComponents: .date)
+                    DatePicker(selection: $dueDate, displayedComponents: .date) { Text(ui: "Due") }
                 }
             }
-            .navigationTitle("New Task")
+            .navigationTitle(Text(ui: "New Task"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(CareerTask(
                             id: CareerTask.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
@@ -510,6 +518,8 @@ struct AddCareerTaskSheet: View {
                             createdAt: Date()
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -529,17 +539,17 @@ struct AddAchievementSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Achievement", text: $title)
-                TextField("Impact (optional)", text: $impact)
-                DatePicker("Date", selection: $date, displayedComponents: .date)
+                TextField(text: $title) { Text(ui: "Achievement") }
+                TextField(text: $impact) { Text(ui: "Impact (optional)") }
+                DatePicker(selection: $date, displayedComponents: .date) { Text(ui: "Date") }
             }
-            .navigationTitle("Log Achievement")
+            .navigationTitle(Text(ui: "Log Achievement"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(Achievement(
                             id: Achievement.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
@@ -547,6 +557,8 @@ struct AddAchievementSheet: View {
                             impact: impact.trimmingCharacters(in: .whitespaces)
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -567,18 +579,18 @@ struct AddNetworkContactSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name)
-                TextField("Role", text: $role)
-                TextField("Company", text: $company)
-                TextField("Note", text: $note)
+                TextField(text: $name) { Text(ui: "Name") }
+                TextField(text: $role) { Text(ui: "Role") }
+                TextField(text: $company) { Text(ui: "Company") }
+                TextField(text: $note) { Text(ui: "Note") }
             }
-            .navigationTitle("Add Contact")
+            .navigationTitle(Text(ui: "Add Contact"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(NetworkContact(
                             id: NetworkContact.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -587,6 +599,8 @@ struct AddNetworkContactSheet: View {
                             note: note.trimmingCharacters(in: .whitespaces)
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -605,16 +619,16 @@ struct AddInterviewSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Company", text: $company)
-                TextField("Position", text: $position)
+                TextField(text: $company) { Text(ui: "Company") }
+                TextField(text: $position) { Text(ui: "Position") }
             }
-            .navigationTitle("New Application")
+            .navigationTitle(Text(ui: "New Application"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(Interview(
                             id: Interview.newID(),
                             company: company.trimmingCharacters(in: .whitespaces),
@@ -622,6 +636,8 @@ struct AddInterviewSheet: View {
                             appliedDate: Date()
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(company.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -640,15 +656,19 @@ struct AddCareerSkillSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Skill", text: $name)
-                TextField("Category", text: $category)
-                Stepper("Level: \(level)/5", value: $level, in: 1...5)
+                TextField(text: $name) { Text(ui: "Skill") }
+                TextField(text: $category) { Text(ui: "Category") }
+                Stepper(value: $level, in: 1...5) {
+                    Text(ui: "Level: \(level)/5")
+                }
             }
-            .navigationTitle("Add Skill")
+            .navigationTitle(Text(ui: "Add Skill"))
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(CareerSkill(
                             id: CareerSkill.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -657,6 +677,8 @@ struct AddCareerSkillSheet: View {
                             level: level
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -678,16 +700,18 @@ struct AddSalarySheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Amount", text: $amountText)
-                TextField("Role", text: $role)
-                TextField("Company", text: $company)
-                DatePicker("Date", selection: $date, displayedComponents: .date)
+                TextField(text: $amountText) { Text(ui: "Amount") }
+                TextField(text: $role) { Text(ui: "Role") }
+                TextField(text: $company) { Text(ui: "Company") }
+                DatePicker(selection: $date, displayedComponents: .date) { Text(ui: "Date") }
             }
-            .navigationTitle("Add Salary")
+            .navigationTitle(Text(ui: "Add Salary"))
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(SalaryEntry(
                             id: SalaryEntry.newID(),
                             amount: amount ?? 0,
@@ -696,6 +720,8 @@ struct AddSalarySheet: View {
                             date: date
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(amount == nil)
                 }
@@ -713,23 +739,27 @@ struct AddCareerGoalSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Goal (e.g. Become a staff engineer)", text: $title)
+                TextField(text: $title) { Text(ui: "Goal (e.g. Become a staff engineer)") }
                 VStack(alignment: .leading) {
-                    Text("Progress: \(Int(progress))%")
+                    Text(ui: "Progress: \(Int(progress))%")
                     Slider(value: $progress, in: 0...100, step: 5)
                 }
             }
-            .navigationTitle("Add Goal")
+            .navigationTitle(Text(ui: "Add Goal"))
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(CareerGoal(
                             id: CareerGoal.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
                             progressPercent: Int(progress)
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -749,16 +779,21 @@ struct AddOneOnOneSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Person", text: $person)
-                TextField("Role (e.g. Manager)", text: $role)
-                TextField("Notes", text: $notes, axis: .vertical).lineLimit(2...5)
-                TextField("Talking points (comma-separated)", text: $talkingPoints, axis: .vertical)
+                TextField(text: $person) { Text(ui: "Person") }
+                TextField(text: $role) { Text(ui: "Role (e.g. Manager)") }
+                TextField(text: $notes, axis: .vertical) { Text(ui: "Notes") }
+                    .lineLimit(2...5)
+                TextField(text: $talkingPoints, axis: .vertical) {
+                    Text(ui: "Talking points (comma-separated)")
+                }
             }
-            .navigationTitle("Add 1:1 Note")
+            .navigationTitle(Text(ui: "Add 1:1 Note"))
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         let points = talkingPoints
                             .split(separator: ",")
                             .map { $0.trimmingCharacters(in: .whitespaces) }
@@ -772,6 +807,8 @@ struct AddOneOnOneSheet: View {
                             talkingPoints: points
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(person.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -797,28 +834,32 @@ struct InterviewPrepView: View {
 
     var body: some View {
         Form {
-            Section("Role") {
-                TextField("e.g. Senior iOS Engineer", text: $role)
+            Section {
+                TextField(text: $role) { Text(ui: "e.g. Senior iOS Engineer") }
+            } header: {
+                Text(ui: "Role")
             }
-            Section("Job description") {
-                TextField("Paste the posting here", text: $jobDescription, axis: .vertical)
+            Section {
+                TextField(text: $jobDescription, axis: .vertical) { Text(ui: "Paste the posting here") }
                     .lineLimit(4...12)
+            } header: {
+                Text(ui: "Job description")
             }
             Section {
                 Button {
                     showingResult = true
                 } label: {
-                    Label("Get likely questions", systemImage: "sparkles")
+                    Label { Text(ui: "Get likely questions") } icon: { Image(systemName: "sparkles") }
                 }
                 .disabled(!canGenerate)
             } footer: {
-                Text("The assistant drafts questions tailored to this description. Nothing is sent anywhere but your chosen assistant.")
+                Text(ui: "The assistant drafts questions tailored to this description. Nothing is sent anywhere but your chosen assistant.")
             }
         }
-        .navigationTitle("Interview prep")
+        .navigationTitle(Text(ui: "Interview prep"))
         .sheet(isPresented: $showingResult) {
             AgentResultSheet(
-                title: "Likely questions",
+                title: uiString("Likely questions"),
                 subtitle: role.isEmpty ? nil : role,
                 systemImage: "person.crop.rectangle.badge.plus",
                 tint: accent,

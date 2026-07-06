@@ -33,9 +33,9 @@ public struct RelationshipsScreen: View {
                     EmptyStateCard(
                         emoji: "💜",
                         accent: accent,
-                        title: "Start your Relationships sphere",
-                        message: "Add someone you want to stay close to — a friend, family member, or mentor.",
-                        buttonLabel: "Add your first contact"
+                        title: uiString("Start your Relationships sphere"),
+                        message: uiString("Add someone you want to stay close to — a friend, family member, or mentor."),
+                        buttonLabel: uiString("Add your first contact")
                     ) {
                         showingAddContact = true
                     }
@@ -51,13 +51,17 @@ public struct RelationshipsScreen: View {
             }
             .padding()
         }
-        .navigationTitle("Relationships")
+        .navigationTitle(Text(ui: "Relationships"))
         .toolbar {
             if store.hasContactsProvider {
                 Menu {
-                    Button("New contact", systemImage: "plus") { showingAddContact = true }
-                    Button("Import from Contacts", systemImage: "person.crop.circle.badge.plus") {
+                    Button { showingAddContact = true } label: {
+                        Label { Text(ui: "New contact") } icon: { Image(systemName: "plus") }
+                    }
+                    Button {
                         Task { await loadImportCandidates() }
+                    } label: {
+                        Label { Text(ui: "Import from Contacts") } icon: { Image(systemName: "person.crop.circle.badge.plus") }
                     }
                 } label: {
                     if loadingImport {
@@ -106,9 +110,9 @@ public struct RelationshipsScreen: View {
 
     private var templatesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("More").font(.title3.weight(.semibold))
+            Text(ui: "More").font(.title3.weight(.semibold))
             VStack(spacing: 0) {
-                MoreLink("Message templates", systemImage: "text.bubble.fill",
+                MoreLink(uiString("Message templates"), systemImage: "text.bubble.fill",
                          count: store.templates.isEmpty ? nil : store.templates.count) { templatesList }
             }
             .sphereCard()
@@ -117,9 +121,9 @@ public struct RelationshipsScreen: View {
 
     private var templatesList: some View {
         CRUDListScreen(
-            title: "Message templates",
+            title: uiString("Message templates"),
             items: store.effectiveTemplates,
-            emptyTitle: "No templates",
+            emptyTitle: uiString("No templates"),
             emptySystemImage: "text.bubble",
             addSheet: { AddTemplateSheet { t in Task { try? await store.addTemplate(t) } } },
             row: { template in
@@ -137,7 +141,7 @@ public struct RelationshipsScreen: View {
 
     private var birthdaysCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("🎂 Upcoming Birthdays").font(.headline)
+            Text(ui: "🎂 Upcoming Birthdays").font(.headline)
             ForEach(store.upcomingBirthdays()) { contact in
                 HStack {
                     Text(contact.emoji)
@@ -159,7 +163,7 @@ public struct RelationshipsScreen: View {
 
     private var checkinSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Time to reach out").font(.title3.weight(.semibold))
+            Text(ui: "Time to reach out").font(.title3.weight(.semibold))
             ForEach(store.needsCheckin()) { contact in
                 HStack(spacing: 12) {
                     Text(contact.emoji)
@@ -173,8 +177,10 @@ public struct RelationshipsScreen: View {
                         .foregroundStyle(.secondary)
                     }
                     Spacer()
-                    Button("Reached out") {
+                    Button {
                         Task { try? await store.markContacted(id: contact.id) }
+                    } label: {
+                        Text(ui: "Reached out")
                     }
                     .font(.caption.weight(.semibold))
                     .buttonStyle(.bordered)
@@ -189,9 +195,9 @@ public struct RelationshipsScreen: View {
 
     private var contactsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("People").font(.title3.weight(.semibold))
+            Text(ui: "People").font(.title3.weight(.semibold))
             if store.contacts.isEmpty {
-                Text("Add the people you want to stay close to.")
+                Text(ui: "Add the people you want to stay close to.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -221,11 +227,15 @@ public struct RelationshipsScreen: View {
                     }
                     .buttonStyle(.plain)
                     Menu {
-                        Button("Reached out") {
+                        Button {
                             Task { try? await store.markContacted(id: contact.id) }
+                        } label: {
+                            Text(ui: "Reached out")
                         }
-                        Button("Delete", role: .destructive) {
+                        Button(role: .destructive) {
                             Task { try? await store.remove(id: contact.id) }
+                        } label: {
+                            Text(ui: "Delete")
                         }
                     } label: {
                         Image(systemName: "ellipsis").foregroundStyle(.secondary)
@@ -251,26 +261,26 @@ struct AddContactSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name)
+                TextField(text: $name) { Text(ui: "Name") }
                 Picker("Relationship", selection: $type) {
                     ForEach(RelationshipType.allCases, id: \.self) { type in
                         Text("\(type.emoji) \(type.label)").tag(type)
                     }
                 }
-                TextField("Note (optional)", text: $note)
+                TextField(text: $note) { Text(ui: "Note (optional)") }
                 Toggle("Birthday", isOn: $hasBirthday)
                 if hasBirthday {
                     DatePicker("Date", selection: $birthday, displayedComponents: .date)
                 }
                 Stepper("Check in every \(reminderDays) d", value: $reminderDays, in: 7...180, step: 7)
             }
-            .navigationTitle("New Contact")
+            .navigationTitle(Text(ui: "New Contact"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(Contact(
                             id: Contact.newID(),
                             name: name.trimmingCharacters(in: .whitespaces),
@@ -281,6 +291,8 @@ struct AddContactSheet: View {
                             reminderDays: reminderDays
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -312,18 +324,18 @@ struct ContactDetailSheet: View {
                         Button {
                             showingBriefing = true
                         } label: {
-                            Label("Prep me with the assistant", systemImage: "sparkles")
+                            Label { Text(ui: "Prep me with the assistant") } icon: { Image(systemName: "sparkles") }
                         }
                     }
                 } header: {
-                    Label("Prep — before you see \(contact.name)", systemImage: "eyes")
+                    Label { Text(ui: "Prep — before you see \(contact.name)") } icon: { Image(systemName: "eyes") }
                 }
 
                 Section {
                     Button {
                         Task { try? await store.markContacted(id: contact.id) }
                     } label: {
-                        Label("Reached out today", systemImage: "checkmark.circle.fill")
+                        Label { Text(ui: "Reached out today") } icon: { Image(systemName: "checkmark.circle.fill") }
                     }
                 }
 
@@ -337,14 +349,16 @@ struct ContactDetailSheet: View {
                             }
                         }
                     }
-                    Button("Add a date") { showingAddDate = true }
+                    Button { showingAddDate = true } label: { Text(ui: "Add a date") }
                 } header: {
-                    Text("Dates")
+                    Text(ui: "Dates")
                 }
 
                 if !contact.giftIdeas.isEmpty {
-                    Section("Gift ideas") {
+                    Section {
                         ForEach(contact.giftIdeas, id: \.self) { Text($0) }
+                    } header: {
+                        Text(ui: "Gift ideas")
                     }
                 }
 
@@ -360,12 +374,12 @@ struct ContactDetailSheet: View {
                         }
                     }
                 } header: {
-                    Text(copied ? "Copied!" : "Copy a message")
+                    copied ? Text(ui: "Copied!") : Text(ui: "Copy a message")
                 }
             }
             .navigationTitle(contact.name)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button { dismiss() } label: { Text(ui: "Done") } }
             }
             .sheet(isPresented: $showingAddDate) {
                 AddCustomDateSheet(contactId: contact.id) { date in
@@ -374,7 +388,7 @@ struct ContactDetailSheet: View {
             }
             .sheet(isPresented: $showingBriefing) {
                 AgentResultSheet(
-                    title: "Prep for \(contact.name)",
+                    title: uiString("Prep for \(contact.name)"),
                     systemImage: "person.text.rectangle",
                     tint: accent,
                     agent: agent,
@@ -404,15 +418,15 @@ struct AddCustomDateSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Label (e.g. Anniversary)", text: $label)
+                TextField(text: $label) { Text(ui: "Label (e.g. Anniversary)") }
                 DatePicker("Date", selection: $date, displayedComponents: .date)
                 Toggle("Repeats yearly", isOn: $recurs)
             }
-            .navigationTitle("Add Date")
+            .navigationTitle(Text(ui: "Add Date"))
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text(ui: "Cancel") } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(CustomDate(
                             id: CustomDate.newID(),
                             contactId: contactId,
@@ -421,6 +435,8 @@ struct AddCustomDateSheet: View {
                             recursYearly: recurs
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(label.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -438,20 +454,23 @@ struct AddTemplateSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Title", text: $title)
-                TextField("Message", text: $message, axis: .vertical).lineLimit(3...8)
+                TextField(text: $title) { Text(ui: "Title") }
+                TextField(text: $message, axis: .vertical) { Text(ui: "Message") }
+                    .lineLimit(3...8)
             }
-            .navigationTitle("Add Template")
+            .navigationTitle(Text(ui: "Add Template"))
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button { dismiss() } label: { Text(ui: "Cancel") } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button {
                         onAdd(MessageTemplate(
                             id: MessageTemplate.newID(),
                             title: title.trimmingCharacters(in: .whitespaces),
                             body: message.trimmingCharacters(in: .whitespaces)
                         ))
                         dismiss()
+                    } label: {
+                        Text(ui: "Add")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty
                         || message.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -482,8 +501,8 @@ struct ContactPickerSheet: View {
                     VStack(spacing: 10) {
                         Image(systemName: "person.crop.circle.badge.checkmark")
                             .font(.largeTitle).foregroundStyle(.secondary)
-                        Text("Nothing new to import").font(.headline)
-                        Text("Everyone in your contacts is already here, or access was denied.")
+                        Text(ui: "Nothing new to import").font(.headline)
+                        Text(ui: "Everyone in your contacts is already here, or access was denied.")
                             .font(.subheadline).foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
@@ -509,20 +528,22 @@ struct ContactPickerSheet: View {
                                 }
                             }
                         } header: {
-                            Text("\(selected.count) of \(candidates.count) selected")
+                            Text(ui: "\(selected.count) of \(candidates.count) selected")
                         }
                     }
                 }
             }
-            .navigationTitle("Import contacts")
+            .navigationTitle(Text(ui: "Import contacts"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Import \(selected.count)") {
+                    Button {
                         onImport(candidates.filter { selected.contains($0.id) })
                         dismiss()
+                    } label: {
+                        Text(ui: "Import \(selected.count)")
                     }
                     .disabled(selected.isEmpty)
                 }
