@@ -14,6 +14,9 @@ enum Prefs {
     static let activeModel = "pref.activeModel"
     /// Chosen OpenRouter model id (empty/nil = provider default).
     static let cloudModel = "pref.cloudModel"
+    /// Whether the user has been through the Health screen's "Connect Apple
+    /// Health" first-run flow (regardless of what they granted).
+    static let healthConnectCompleted = "pref.healthConnectCompleted"
 }
 
 /// Reads/writes the user's chosen OpenRouter model id (nil = provider default).

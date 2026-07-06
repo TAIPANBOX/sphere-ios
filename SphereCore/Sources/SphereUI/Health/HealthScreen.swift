@@ -22,6 +22,14 @@ public struct HealthScreen: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if store.needsHealthConnect {
+                    ConnectHealthCard(accent: accent) {
+                        _ = await store.requestHealthAccess()
+                        store.markHealthConnectCompleted()
+                        await store.refreshMetrics()
+                    }
+                    .transition(.opacity)
+                }
                 if store.latestWeight == nil && store.workouts.isEmpty {
                     EmptyStateCard(
                         emoji: "🫀",
@@ -44,6 +52,7 @@ public struct HealthScreen: View {
                 moreSection
             }
             .padding()
+            .sphereAnimation(SphereMotion.gentle, value: store.needsHealthConnect)
         }
         .navigationTitle("Health")
         .sheet(isPresented: $showingLogPeriod) {
@@ -484,6 +493,52 @@ public struct HealthScreen: View {
             return "Next period in \(p.daysUntilNextPeriod) day(s) · "
                 + p.nextPeriodStart.formatted(.dateTime.month().day())
         }
+    }
+}
+
+/// First-run coaching card: prompts the user to grant HealthKit access so
+/// metrics stop reading "—". Mirrors `EmptyStateCard`'s look; kept separate
+/// because its action is async and it needs its own disappear animation once
+/// the connect flow completes (rather than opening a sheet).
+struct ConnectHealthCard: View {
+    let accent: Color
+    let onConnect: () async -> Void
+
+    @State private var appeared = false
+    @State private var connecting = false
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("🫀")
+                .font(.system(size: 48))
+            Text("Connect Apple Health")
+                .font(.title3.weight(.semibold))
+                .multilineTextAlignment(.center)
+            Text("Steps, heart rate, sleep and workouts flow in automatically — "
+                + "nothing leaves your device.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            Button {
+                connecting = true
+                Task {
+                    await onConnect()
+                    connecting = false
+                }
+            } label: {
+                Text("Connect")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(accent)
+            .disabled(connecting)
+        }
+        .frame(maxWidth: .infinity)
+        .sphereCard()
+        .opacity(appeared ? 1 : 0)
+        .scaleEffect(appeared ? 1 : 0.96)
+        .sphereAnimation(SphereMotion.gentle, value: appeared)
+        .onAppear { appeared = true }
     }
 }
 
