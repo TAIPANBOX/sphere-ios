@@ -63,6 +63,76 @@ struct NotificationPlanTests {
         #expect(!NotificationCategory.water.defaultOn)
         #expect(NotificationCategory.water.idPrefix == "water_")
     }
+
+    @Test func waterRemindersRepeatDailyAtGivenHours() {
+        let plans = NotificationPlanBuilder.waterReminders(hours: [10, 16, 99])
+        #expect(plans.map(\.id) == ["water_10", "water_16"]) // 99 dropped
+        #expect(plans.allSatisfy { $0.repeats && $0.category == .water })
+        #expect(plans[0].dateComponents.hour == 10)
+    }
+
+    @Test func medicationRemindersMapFrequencyToDoseTimes() {
+        let meds = [
+            Medication(id: "m1", name: "Vitamin D", dosage: "1000 IU", frequency: .once, takenDates: []),
+            Medication(id: "m2", name: "Antibiotic", dosage: "", frequency: .threePerDay, takenDates: []),
+            Medication(id: "m3", name: "  ", dosage: "x", frequency: .twice, takenDates: []), // blank → skipped
+        ]
+        let plans = NotificationPlanBuilder.medicationReminders(meds)
+        #expect(plans.map(\.id) == [
+            "medication_m1_9",
+            "medication_m2_9", "medication_m2_14", "medication_m2_21",
+        ])
+        #expect(plans[0].body.contains("1000 IU"))
+        #expect(plans[1].body == "Time for your dose.") // empty dosage fallback
+    }
+
+    @Test func bedtimeWindsDownBeforeBedtimeWhenEnabled() {
+        var schedule = SleepSchedule(bedtimeHour: 23, bedtimeMinute: 0, remindersEnabled: true)
+        let plan = try! #require(NotificationPlanBuilder.bedtime(schedule, minutesBefore: 30))
+        #expect(plan.id == "bedtime_main")
+        #expect(plan.dateComponents.hour == 22)
+        #expect(plan.dateComponents.minute == 30)
+        #expect(plan.repeats)
+
+        // Wraps past midnight: 00:15 bedtime, 30 min before → 23:45.
+        schedule = SleepSchedule(bedtimeHour: 0, bedtimeMinute: 15, remindersEnabled: true)
+        let wrapped = try! #require(NotificationPlanBuilder.bedtime(schedule, minutesBefore: 30))
+        #expect(wrapped.dateComponents.hour == 23)
+        #expect(wrapped.dateComponents.minute == 45)
+    }
+
+    @Test func bedtimeNilWhenDisabled() {
+        let schedule = SleepSchedule(bedtimeHour: 23, remindersEnabled: false)
+        #expect(NotificationPlanBuilder.bedtime(schedule) == nil)
+    }
+
+    @Test func plantWateringSchedulesNextDueClampedToToday() {
+        let now = date(2026, 7, 4)
+        let plants = [
+            Plant(id: "p1", name: "Fern", lastWatered: nil, intervalDays: 3),               // never → today
+            Plant(id: "p2", name: "Cactus", lastWatered: date(2026, 7, 3), intervalDays: 5), // due 7/8
+            Plant(id: "p3", name: "Ivy", lastWatered: date(2026, 6, 20), intervalDays: 3),   // overdue → today
+        ]
+        let plans = NotificationPlanBuilder.plantWatering(plants, asOf: now)
+        #expect(plans.map(\.id) == ["plant_p1", "plant_p2", "plant_p3"])
+        #expect(plans[0].dateComponents.day == 4)   // never watered → today
+        #expect(plans[1].dateComponents.day == 8)   // 7/3 + 5d
+        #expect(plans[2].dateComponents.day == 4)   // overdue clamped to today
+        #expect(plans.allSatisfy { !$0.repeats && $0.category == .plant })
+    }
+
+    @Test func subscriptionRenewalsLeadTimeAndSkipInactive() {
+        let now = date(2026, 7, 4)
+        let subs = [
+            Subscription(id: "s1", name: "Netflix", amount: 12.99, billingDay: 10),           // bills 7/10 → remind 7/9
+            Subscription(id: "s2", name: "Gym", amount: 30, billingDay: 1, isActive: false),  // inactive → skip
+        ]
+        let plans = NotificationPlanBuilder.subscriptionRenewals(subs, daysBefore: 1, symbol: "£", asOf: now)
+        #expect(plans.map(\.id) == ["subscription_s1"])
+        #expect(plans[0].dateComponents.day == 9)
+        #expect(plans[0].body.contains("£12.99"))
+        #expect(plans[0].body.contains("10th"))
+    }
 }
 
 @Suite("UserProfile tolerant decoding + profile-v2")

@@ -177,19 +177,58 @@ final class AppContainer {
         try? await experiments.load()
         try? await readiness.loadLedger()
         await readiness.recordPrediction()
-        await syncBirthdayReminders()
-        await syncHabitReminders()
+        await syncReminders()
         refreshWidget()
     }
 
-    /// Schedules per-habit weekday reminders (opt-in), reusing the general
-    /// notification engine.
-    func syncHabitReminders() async {
-        let enabled = profile.profile.notificationEnabled(
-            NotificationCategory.habit.rawValue, default: NotificationCategory.habit.defaultOn
-        )
-        let plans = enabled ? NotificationPlanBuilder.habitReminders(goals.habits) : []
-        await NotificationEngine.sync(plans, categories: [.habit])
+    /// Builds every opted-in reminder category from live store data and syncs
+    /// them in one idempotent pass. Managing all categories in a single call
+    /// means a category turned off has its pending notifications cleared too.
+    func syncReminders(asOf now: Date = Date()) async {
+        let p = profile.profile
+        func on(_ category: NotificationCategory) -> Bool {
+            p.notificationEnabled(category.rawValue, default: category.defaultOn)
+        }
+
+        var plans: [NotificationPlan] = []
+        if on(.birthday) {
+            plans += NotificationPlanBuilder.birthdays(relationships.contacts.filter { $0.birthday != nil })
+        }
+        if on(.habit) {
+            plans += NotificationPlanBuilder.habitReminders(goals.habits)
+        }
+        if on(.water) {
+            plans += NotificationPlanBuilder.waterReminders()
+        }
+        if on(.medication) {
+            plans += NotificationPlanBuilder.medicationReminders(health.medications)
+        }
+        if on(.bedtime), let bed = NotificationPlanBuilder.bedtime(rest.schedule) {
+            plans.append(bed)
+        }
+        if on(.plant) {
+            plans += NotificationPlanBuilder.plantWatering(homeSphere.plants, asOf: now)
+        }
+        if on(.subscription) {
+            plans += NotificationPlanBuilder.subscriptionRenewals(
+                finance.subscriptions, symbol: currentCurrency.symbol, asOf: now
+            )
+        }
+        if on(.morningBrief) {
+            plans.append(NotificationPlanBuilder.daily(
+                category: .morningBrief, id: "main",
+                title: "Your morning brief is ready",
+                body: "See what matters across your spheres today.",
+                hour: 8
+            ))
+        }
+
+        await NotificationEngine.sync(plans, categories: Set(NotificationCategory.allCases))
+    }
+
+    private var currentCurrency: Currency {
+        UserDefaults.standard.string(forKey: Prefs.currency)
+            .flatMap(Currency.init(rawValue:)) ?? .deviceDefault
     }
 
     /// Reflects the profile's sick/vacation state into the stores that honor
@@ -216,16 +255,10 @@ final class AppContainer {
         refreshWidget()
     }
 
-    /// Call after contact mutations so reminders track the latest birthdays.
-    func refreshBirthdayReminders() async {
-        await syncBirthdayReminders()
-    }
-
-    private func syncBirthdayReminders() async {
-        let enabled = profile.profile.notificationEnabled(
-            NotificationCategory.birthday.rawValue, default: NotificationCategory.birthday.defaultOn
-        )
-        await BirthdayReminders.sync(contacts: relationships.contacts, enabled: enabled)
+    /// Call after any store mutation (or a settings toggle) so scheduled
+    /// reminders track the latest data.
+    func refreshReminders() async {
+        await syncReminders()
     }
 
     /// One conversation per sphere, kept alive for the app session. Name and

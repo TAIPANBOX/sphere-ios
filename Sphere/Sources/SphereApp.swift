@@ -33,7 +33,7 @@ struct SphereApp: App {
                 container.refreshWidget()
                 Task {
                     await container.runMemoryMaintenance()
-                    await container.syncHabitReminders()
+                    await container.refreshReminders()
                 }
             }
         }

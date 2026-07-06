@@ -64,8 +64,21 @@ struct SettingsScreen: View {
                     + "your devices. Used only when you select a cloud model above.")
             }
 
-            Section("Notifications") {
-                Toggle("Birthday reminders", isOn: notificationBinding(.birthday))
+            Section {
+                Toggle(NotificationCategory.morningBrief.label, isOn: notificationBinding(.morningBrief))
+                Toggle(NotificationCategory.water.label, isOn: notificationBinding(.water))
+                Toggle(NotificationCategory.medication.label, isOn: notificationBinding(.medication))
+                Toggle(NotificationCategory.bedtime.label, isOn: notificationBinding(.bedtime))
+                Toggle(NotificationCategory.plant.label, isOn: notificationBinding(.plant))
+                Toggle(NotificationCategory.subscription.label, isOn: notificationBinding(.subscription))
+                Toggle(NotificationCategory.habit.label, isOn: notificationBinding(.habit))
+                Toggle(NotificationCategory.birthday.label, isOn: notificationBinding(.birthday))
+            } header: {
+                Text("Notifications")
+            } footer: {
+                Text("Reminders are built from your own data and stay on this "
+                    + "device. Bedtime needs a bedtime set in Rest; medication and "
+                    + "plant reminders appear once you add them.")
             }
 
             Section {
@@ -146,7 +159,7 @@ struct SettingsScreen: View {
                     try? await container.profile.update {
                         $0.notificationPrefs[category.rawValue] = enabled
                     }
-                    if category == .birthday { await container.refreshBirthdayReminders() }
+                    await container.refreshReminders()
                 }
             }
         )

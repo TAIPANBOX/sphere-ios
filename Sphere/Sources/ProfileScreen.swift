@@ -263,9 +263,9 @@ struct ProfileScreen: View {
             p.healthConditions = ProfileOptions.conditions.map(\.value).filter(conditions.contains)
         }
         // The user's own birthday isn't a contact reminder, but editing the
-        // profile is a natural place to keep contact reminders fresh too.
+        // profile is a natural place to keep reminders fresh too.
         if container.profile.profile.birthDate != hadBirthday {
-            await container.refreshBirthdayReminders()
+            await container.refreshReminders()
         }
     }
 }

@@ -150,4 +150,124 @@ public enum NotificationPlanBuilder {
             repeats: false
         )
     }
+
+    /// Spaced daily water nudges through the day. Repeating triggers can't see
+    /// runtime intake, so this is a gentle fixed cadence, not goal-aware.
+    public static func waterReminders(hours: [Int] = [10, 13, 16, 19]) -> [NotificationPlan] {
+        hours.filter { (0...23).contains($0) }.map { hour in
+            NotificationPlan(
+                id: NotificationCategory.water.idPrefix + "\(hour)",
+                category: .water,
+                title: "Time for some water 💧",
+                body: "A glass now keeps you on track for the day.",
+                dateComponents: DateComponents(hour: hour, minute: 0),
+                repeats: true
+            )
+        }
+    }
+
+    /// Default dose times per frequency; a daily repeating reminder each.
+    static func doseHours(for frequency: MedFrequency) -> [Int] {
+        switch frequency {
+        case .once: [9]
+        case .twice: [9, 21]
+        case .threePerDay: [9, 14, 21]
+        }
+    }
+
+    /// Daily reminders per medication at its frequency's default dose times.
+    public static func medicationReminders(_ medications: [Medication]) -> [NotificationPlan] {
+        var plans: [NotificationPlan] = []
+        for med in medications where !med.name.trimmingCharacters(in: .whitespaces).isEmpty {
+            for hour in doseHours(for: med.frequency) {
+                plans.append(NotificationPlan(
+                    id: NotificationCategory.medication.idPrefix + "\(med.id)_\(hour)",
+                    category: .medication,
+                    title: "💊 \(med.name)",
+                    body: med.dosage.isEmpty
+                        ? "Time for your dose."
+                        : "Take your \(med.dosage) dose.",
+                    dateComponents: DateComponents(hour: hour, minute: 0),
+                    repeats: true
+                ))
+            }
+        }
+        return plans
+    }
+
+    /// A daily wind-down nudge `minutesBefore` the scheduled bedtime. Returns
+    /// nil unless the user turned bedtime reminders on in Rest.
+    public static func bedtime(_ schedule: SleepSchedule, minutesBefore: Int = 30) -> NotificationPlan? {
+        guard schedule.remindersEnabled else { return nil }
+        let total = schedule.bedtimeHour * 60 + schedule.bedtimeMinute - minutesBefore
+        let normalized = ((total % 1440) + 1440) % 1440
+        return NotificationPlan(
+            id: NotificationCategory.bedtime.idPrefix + "main",
+            category: .bedtime,
+            title: "Wind down for bed 🌙",
+            body: "Lights out around \(schedule.bedtimeLabel) — start easing off screens.",
+            dateComponents: DateComponents(hour: normalized / 60, minute: normalized % 60),
+            repeats: true
+        )
+    }
+
+    /// A one-off reminder on each plant's next watering day (clamped to today
+    /// when overdue). Re-run after watering re-computes the next date.
+    public static func plantWatering(
+        _ plants: [Plant], hour: Int = 9, asOf now: Date = Date()
+    ) -> [NotificationPlan] {
+        let calendar = gregorian
+        return plants.compactMap { plant in
+            let due: Date
+            if let last = plant.lastWatered {
+                due = last.addingTimeInterval(Double(plant.intervalDays) * 86_400)
+            } else {
+                due = now
+            }
+            let clamped = max(calendar.startOfDay(for: due), calendar.startOfDay(for: now))
+            return onDate(
+                category: .plant, id: plant.id,
+                title: "\(plant.emoji) Water \(plant.name)",
+                body: "It's watering day — every \(plant.intervalDays) day\(plant.intervalDays == 1 ? "" : "s").",
+                date: clamped, hour: hour, asOf: now
+            )
+        }
+    }
+
+    /// A one-off reminder `daysBefore` each active subscription's renewal.
+    public static func subscriptionRenewals(
+        _ subscriptions: [Subscription],
+        daysBefore: Int = 1,
+        hour: Int = 9,
+        symbol: String = "",
+        asOf now: Date = Date()
+    ) -> [NotificationPlan] {
+        let calendar = gregorian
+        return subscriptions.compactMap { sub in
+            guard sub.isActive, !sub.name.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+            let lead = max(0, sub.daysUntilBilling(asOf: now) - daysBefore)
+            guard let date = calendar.date(
+                byAdding: .day, value: lead, to: calendar.startOfDay(for: now)
+            ) else { return nil }
+            let amount = sub.amount == sub.amount.rounded()
+                ? String(format: "%.0f", sub.amount)
+                : String(format: "%.2f", sub.amount)
+            return onDate(
+                category: .subscription, id: sub.id,
+                title: "\(sub.emoji) \(sub.name) renews soon",
+                body: "\(symbol)\(amount) bills on the \(sub.billingDay)\(ordinalSuffix(sub.billingDay)).",
+                date: date, hour: hour, asOf: now
+            )
+        }
+    }
+
+    private static func ordinalSuffix(_ day: Int) -> String {
+        switch (day % 100, day % 10) {
+        case (11, _), (12, _), (13, _): "th"
+        case (_, 1): "st"
+        case (_, 2): "nd"
+        case (_, 3): "rd"
+        default: "th"
+        }
+    }
 }

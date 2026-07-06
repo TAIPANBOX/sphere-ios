@@ -14,7 +14,7 @@ updates, **P3** = later / opportunistic.
 
 | # | Item | Why | Pri |
 |---|------|-----|-----|
-| C1 | **Notifications engine** — one opt-in center: water reminders, medication times, bedtime wind-down, plant watering, subscription renewals, morning brief. Flutter had morning brief + water; we only do birthdays. | Retention driver; the data is already in the stores | P1 |
+| C1 | ~~**Notifications engine** — one opt-in center: water reminders, medication times, bedtime wind-down, plant watering, subscription renewals, morning brief.~~ DONE (2026-07-06): pure `NotificationPlanBuilder` builders per category, `AppContainer.syncReminders()` orchestrates every category from live store data in one idempotent sync, Settings exposes a per-category opt-in. Not yet: proactive-nudge notifications (`.nudge` category defined but unscheduled — nudges stay an in-app surface), and wellbeing-pause suppression of non-critical reminders. | Retention driver; the data is already in the stores | P1 |
 | C2 | **Interactive widgets (App Intents, iOS 17)** — log water / mark meditation done directly from the home-screen widget without opening the app | Native killer feature; widget infra already exists | P1 |
 | C3 | **Siri / Shortcuts via App Intents** — "log a glass of water", "log mood 4", "how's my day" | Same intents as C2, one implementation | P1 |
 | C4 | **HealthKit write-back** — workouts, mindful minutes, weight, water written TO HealthKit, not just read | Two-way trust; users expect Apple Health to be source of truth | P1 |
