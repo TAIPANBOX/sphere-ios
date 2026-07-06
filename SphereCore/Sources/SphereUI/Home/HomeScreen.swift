@@ -75,7 +75,7 @@ public struct HomeScreen: View {
             }
             .padding()
         }
-        .navigationTitle("Home")
+        .navigationTitle(Text(ui: "Home"))
         .safeAreaInset(edge: .bottom) { agentBar }
         .toolbar {
             if let search {
@@ -83,7 +83,7 @@ public struct HomeScreen: View {
                     NavigationLink {
                         GlobalSearchScreen(store: search)
                     } label: { Image(systemName: "magnifyingglass") }
-                    .accessibilityLabel("Search")
+                    .accessibilityLabel(Text(ui: "Search"))
                 }
             }
             ToolbarItem(placement: .primaryAction) { moreMenu }
@@ -104,7 +104,7 @@ public struct HomeScreen: View {
         }
         .sheet(isPresented: $showingPatterns) {
             AgentResultSheet(
-                title: "Your patterns", subtitle: "Across your life, this week",
+                title: uiString("Your patterns"), subtitle: uiString("Across your life, this week"),
                 systemImage: "sparkles.rectangle.stack",
                 tint: SphereTheme.accent(for: .mindfulness),
                 agent: agent, task: .analyzePatterns(scope: "my life", facts: patternFacts()),
@@ -129,7 +129,7 @@ public struct HomeScreen: View {
         Button { showingAgent = true } label: {
             HStack(spacing: 10) {
                 Image(systemName: "sparkles").font(.body.weight(.semibold))
-                Text("Tell your agent anything").font(.callout.weight(.medium))
+                Text(ui: "Tell your agent anything").font(.callout.weight(.medium))
                 Spacer()
                 Image(systemName: "mic.fill")
                 Image(systemName: "camera.fill")
@@ -164,20 +164,32 @@ public struct HomeScreen: View {
     private var moreMenu: some View {
         Menu {
             if onQuickCapture != nil {
-                Button("Quick log", systemImage: "bolt") { showingCapture = true }
+                Button { showingCapture = true } label: {
+                    Label { Text(ui: "Quick log") } icon: { Image(systemName: "bolt") }
+                }
             }
             if reviews != nil {
-                Button("Weekly review", systemImage: "calendar.badge.clock") { showingWeeklyReview = true }
-                Button("Life Wheel", systemImage: "chart.pie") { showingLifeWheel = true }
+                Button { showingWeeklyReview = true } label: {
+                    Label { Text(ui: "Weekly review") } icon: { Image(systemName: "calendar.badge.clock") }
+                }
+                Button { showingLifeWheel = true } label: {
+                    Label { Text(ui: "Life Wheel") } icon: { Image(systemName: "chart.pie") }
+                }
             }
             if experiments != nil {
-                Button("Experiments", systemImage: "flask") { showingExperiments = true }
+                Button { showingExperiments = true } label: {
+                    Label { Text(ui: "Experiments") } icon: { Image(systemName: "flask") }
+                }
             }
             if agent != nil {
-                Button("Analyze my patterns", systemImage: "sparkles.rectangle.stack") { showingPatterns = true }
+                Button { showingPatterns = true } label: {
+                    Label { Text(ui: "Analyze my patterns") } icon: { Image(systemName: "sparkles.rectangle.stack") }
+                }
             }
             if ritualPhase != .none {
-                Button("Daily ritual", systemImage: "sun.max") { showingRitual = true }
+                Button { showingRitual = true } label: {
+                    Label { Text(ui: "Daily ritual") } icon: { Image(systemName: "sun.max") }
+                }
             }
         } label: {
             Image(systemName: "ellipsis.circle")
@@ -216,7 +228,7 @@ public struct HomeScreen: View {
                     .foregroundStyle(SphereTheme.accent(for: .health))
                 VStack(alignment: .leading, spacing: 1) {
                     Text(verdict.headline).font(.subheadline.weight(.semibold))
-                    Text("Focus \(verdict.focusWindow) · wind down \(verdict.windDown)")
+                    Text(ui: "Focus \(verdict.focusWindow) · wind down \(verdict.windDown)")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -234,7 +246,7 @@ public struct HomeScreen: View {
 
     private var scheduleCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("Today's schedule", systemImage: "calendar")
+            Label { Text(ui: "Today's schedule") } icon: { Image(systemName: "calendar") }
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(SphereTheme.accent(for: .career))
             ForEach(store.todayEvents.prefix(5)) { event in
@@ -248,7 +260,7 @@ public struct HomeScreen: View {
                 }
             }
             if store.todayEvents.count > 5 {
-                Text("+\(store.todayEvents.count - 5) more")
+                Text(ui: "+\(store.todayEvents.count - 5) more")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -319,11 +331,11 @@ public struct HomeScreen: View {
         .animation(.snappy, value: quickConfirm)
     }
 
-    private func quickChip(_ emoji: String, _ title: String, action: @escaping () -> Void) -> some View {
+    private func quickChip(_ emoji: String, _ title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 5) {
                 Text(emoji)
-                Text(title).font(.subheadline.weight(.medium))
+                Text(ui: title).font(.subheadline.weight(.medium))
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -356,10 +368,10 @@ public struct HomeScreen: View {
             HStack(spacing: 12) {
                 Text(ritualPhase == .evening ? "🌙" : "☀️").font(.title2)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(ritualPhase == .evening ? "Close your day" : "Plan your day")
+                    Text(ui: ritualPhase == .evening ? "Close your day" : "Plan your day")
                         .font(.headline)
                         .foregroundStyle(.primary)
-                    Text(ritualPhase == .evening
+                    Text(ui: ritualPhase == .evening
                         ? "See what you did and reflect — 1 minute."
                         : "Set an intention and pick today's focus — 2 minutes.")
                         .font(.caption)
@@ -418,11 +430,11 @@ public struct HomeScreen: View {
 
     private func insightCard(_ insight: Correlation) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("Insight of the week", systemImage: "lightbulb.fill")
+            Label { Text(ui: "Insight of the week") } icon: { Image(systemName: "lightbulb.fill") }
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(SphereTheme.accent(for: .mindfulness))
             Text(insight.phrase).font(.body)
-            Text("Noticed across \(insight.n) days · a pattern, not proof.")
+            Text(ui: "Noticed across \(insight.n) days · a pattern, not proof.")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -438,7 +450,7 @@ public struct HomeScreen: View {
     private var reviewsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             if isSundayEvening {
-                Text("Sunday evening — a good moment to look back.")
+                Text(ui: "Sunday evening — a good moment to look back.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             HStack(spacing: 10) {
@@ -461,7 +473,7 @@ public struct HomeScreen: View {
             }
             if agent != nil {
                 Button { showingPatterns = true } label: {
-                    Label("Analyze my patterns", systemImage: "sparkles.rectangle.stack")
+                    Label { Text(ui: "Analyze my patterns") } icon: { Image(systemName: "sparkles.rectangle.stack") }
                         .font(.subheadline.weight(.medium))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -486,8 +498,8 @@ public struct HomeScreen: View {
         }
         .sheet(isPresented: $showingPatterns) {
             AgentResultSheet(
-                title: "Your patterns",
-                subtitle: "Across your life, this week",
+                title: uiString("Your patterns"),
+                subtitle: uiString("Across your life, this week"),
                 systemImage: "sparkles.rectangle.stack",
                 tint: SphereTheme.accent(for: .mindfulness),
                 agent: agent,
@@ -522,12 +534,12 @@ public struct HomeScreen: View {
                 }
             }
             HStack(spacing: 8) {
-                verdictChip("bolt.fill", "Focus \(verdict.focusWindow)", color)
-                verdictChip("moon.fill", "Wind down \(verdict.windDown)", color)
+                verdictChip("bolt.fill", uiString("Focus \(verdict.focusWindow)"), color)
+                verdictChip("moon.fill", uiString("Wind down \(verdict.windDown)"), color)
             }
             Divider()
             RatingSelector(
-                title: "How does today feel?",
+                title: uiString("How does today feel?"),
                 systemImage: "figure.mind.and.body",
                 selection: readiness.todayEnergy(),
                 tint: color
@@ -564,7 +576,7 @@ public struct HomeScreen: View {
                     .foregroundStyle(SphereTheme.accent(for: .health))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(experiment.title).font(.subheadline.weight(.semibold))
-                    Text("Day \(experiment.dayNumber()) of \(experiment.durationDays) · \(experiment.daysRemaining()) to go")
+                    Text(ui: "Day \(experiment.dayNumber()) of \(experiment.durationDays) · \(experiment.daysRemaining()) to go")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -578,13 +590,13 @@ public struct HomeScreen: View {
     }
 
     private func reviewButton(
-        title: String, systemImage: String, sphere: SphereType,
+        title: LocalizedStringKey, systemImage: String, sphere: SphereType,
         highlight: Bool, action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
             VStack(spacing: 6) {
                 Image(systemName: systemImage).font(.title3)
-                Text(title).font(.caption.weight(.medium))
+                Text(ui: title).font(.caption.weight(.medium))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
@@ -601,8 +613,8 @@ public struct HomeScreen: View {
         HStack(spacing: 10) {
             Text("🌿").font(.title3)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Recovery mode").font(.subheadline.weight(.semibold))
-                Text("Streaks are paused and daily nudges are off. Rest up.")
+                Text(ui: "Recovery mode").font(.subheadline.weight(.semibold))
+                Text(ui: "Streaks are paused and daily nudges are off. Rest up.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -614,10 +626,10 @@ public struct HomeScreen: View {
 
     private var greeting: String {
         switch Calendar.current.component(.hour, from: Date()) {
-        case 5..<12: "Good morning"
-        case 12..<18: "Good afternoon"
-        case 18..<23: "Good evening"
-        default: "Good night"
+        case 5..<12: uiString("Good morning")
+        case 12..<18: uiString("Good afternoon")
+        case 18..<23: uiString("Good evening")
+        default: uiString("Good night")
         }
     }
 
@@ -626,7 +638,7 @@ public struct HomeScreen: View {
     private var summaryCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Label("Meta Agent", systemImage: "sparkles")
+                Label { Text(ui: "Meta Agent") } icon: { Image(systemName: "sparkles") }
                     .font(.headline)
                     .foregroundStyle(SphereTheme.accent(for: .goals))
                 Spacer()
@@ -636,7 +648,7 @@ public struct HomeScreen: View {
             }
             switch store.briefState {
             case .idle:
-                Text("Your daily brief will appear here.")
+                Text(ui: "Your daily brief will appear here.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             case .streaming, .done:
@@ -669,7 +681,7 @@ public struct HomeScreen: View {
 
     private var focusSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Today's Focus").font(.title3.weight(.semibold))
+            Text(ui: "Today's Focus").font(.title3.weight(.semibold))
             ForEach(store.focusItems) { item in
                 NavigationLink(value: item.sphere) {
                     HStack(spacing: 12) {
@@ -725,7 +737,7 @@ struct LifeScoreBadge: View {
                     .font(.headline.weight(.bold))
             }
             .frame(width: 54, height: 54)
-            Text("Life").font(.caption2).foregroundStyle(.secondary)
+            Text(ui: "Life").font(.caption2).foregroundStyle(.secondary)
         }
     }
 }

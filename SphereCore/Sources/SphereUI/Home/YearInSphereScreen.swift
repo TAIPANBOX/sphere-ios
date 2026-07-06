@@ -25,10 +25,10 @@ public struct YearInSphereScreen: View {
             .tabViewStylePage()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Close") }
                 }
             }
-            .navigationTitle("Year in Sphere")
+            .navigationTitle(Text(ui: "Year in Sphere"))
             .navigationBarTitleDisplayModeInline()
         }
     }
@@ -37,17 +37,17 @@ public struct YearInSphereScreen: View {
         VStack(spacing: 20) {
             Spacer()
             Text("🌐").font(.system(size: 64))
-            Text("That's your \(String(stats.year)).")
+            Text(ui: "That's your \(String(stats.year)).")
                 .font(.title.weight(.bold))
                 .multilineTextAlignment(.center)
-            Text("Every part of your life, in one place — and it's yours to keep.")
+            Text(ui: "Every part of your life, in one place — and it's yours to keep.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             Spacer()
             ShareLink(item: YearInSphere.summaryLine(stats)) {
-                Label("Share your year", systemImage: "square.and.arrow.up")
+                Label { Text(ui: "Share your year") } icon: { Image(systemName: "square.and.arrow.up") }
                     .font(.body.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)

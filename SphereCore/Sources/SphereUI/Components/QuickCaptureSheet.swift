@@ -27,10 +27,9 @@ public struct QuickCaptureSheet: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 10) {
-                    TextField(
-                        "water 2 · mood 4 · spent 4.50 on coffee",
-                        text: $text, axis: .vertical
-                    )
+                    TextField(text: $text, axis: .vertical) {
+                        Text(ui: "water 2 · mood 4 · spent 4.50 on coffee")
+                    }
                     .textFieldStyle(.roundedBorder)
                     .focused($fieldFocused)
                     .onSubmit(submit)
@@ -60,8 +59,7 @@ public struct QuickCaptureSheet: View {
                 }
 
                 if missed {
-                    Text("Didn't catch that. Try wording like \"water 2\", \"mood 4\", "
-                        + "or \"spent 12 on lunch\" — or open a sphere's chat for anything else.")
+                    Text(ui: "Didn't catch that. Try wording like \"water 2\", \"mood 4\", or \"spent 12 on lunch\" — or open a sphere's chat for anything else.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -70,14 +68,14 @@ public struct QuickCaptureSheet: View {
             }
             .padding()
             .sphereHaptic(.success, trigger: successTick)
-            .navigationTitle("Quick capture")
+            .navigationTitle(Text(ui: "Quick capture"))
             .onAppear { fieldFocused = true }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Done") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Log", action: submit)
+                    Button(action: submit) { Text(ui: "Log") }
                         .disabled(text.trimmingCharacters(in: .whitespaces).isEmpty || working)
                 }
             }

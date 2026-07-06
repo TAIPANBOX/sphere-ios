@@ -41,11 +41,15 @@ public struct RitualSheet: View {
             Form {
                 if phase == .evening { eveningContent } else { morningContent }
             }
-            .navigationTitle(phase == .evening ? "Close your day" : "Plan your day")
+            .navigationTitle(Text(ui: phase == .evening ? "Close your day" : "Plan your day"))
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
+                }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(phase == .evening ? "Close the day" : "Start my day", action: finish)
+                    Button(action: finish) {
+                        Text(ui: phase == .evening ? "Close the day" : "Start my day")
+                    }
                 }
             }
         }
@@ -53,13 +57,15 @@ public struct RitualSheet: View {
 
     @ViewBuilder private var morningContent: some View {
         Section {
-            TextField("What matters most today?", text: $intention, axis: .vertical)
+            TextField(text: $intention, axis: .vertical) {
+                Text(ui: "What matters most today?")
+            }
                 .lineLimit(2...4)
         } header: {
-            Text("Today's intention")
+            Text(ui: "Today's intention")
         }
         if !focusItems.isEmpty {
-            Section("Commit to today") {
+            Section {
                 ForEach(focusItems) { item in
                     Button {
                         if selected.contains(item.id) { selected.remove(item.id) }
@@ -75,27 +81,32 @@ public struct RitualSheet: View {
                         }
                     }
                 }
+            } header: {
+                Text(ui: "Commit to today")
             }
         }
     }
 
     @ViewBuilder private var eveningContent: some View {
-        Section("Today you…") {
+        Section {
             if highlights.isEmpty {
-                Text("A quiet day — that's fine too.")
+                Text(ui: "A quiet day — that's fine too.")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(Array(highlights.enumerated()), id: \.offset) { _, line in
                     Text(line)
                 }
             }
+        } header: {
+            Text(ui: "Today you…")
         }
         Section {
-            TextField("How did today feel? One line is enough.",
-                      text: $reflection, axis: .vertical)
+            TextField(text: $reflection, axis: .vertical) {
+                Text(ui: "How did today feel? One line is enough.")
+            }
                 .lineLimit(2...5)
         } header: {
-            Text("Reflection")
+            Text(ui: "Reflection")
         }
     }
 

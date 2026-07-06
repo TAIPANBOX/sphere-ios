@@ -18,28 +18,32 @@ public struct ExperimentsScreen: View {
                 } else {
                     List {
                         if !store.running.isEmpty {
-                            Section("Running") {
+                            Section {
                                 ForEach(store.running) { row($0) }
+                            } header: {
+                                Text(ui: "Running")
                             }
                         }
                         let past = store.experiments.filter { $0.status != .running }
                         if !past.isEmpty {
-                            Section("Past") {
+                            Section {
                                 ForEach(past) { row($0) }
+                            } header: {
+                                Text(ui: "Past")
                             }
                         }
                     }
                 }
             }
-            .navigationTitle("Experiments")
+            .navigationTitle(Text(ui: "Experiments"))
             .navigationBarTitleDisplayModeInline()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Close") }
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button { showingAdd = true } label: { Image(systemName: "plus") }
-                        .accessibilityLabel("New experiment")
+                        .accessibilityLabel(Text(ui: "New experiment"))
                 }
             }
             .sheet(isPresented: $showingAdd) {
@@ -55,12 +59,12 @@ public struct ExperimentsScreen: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(experiment.title).font(.body.weight(.medium))
                 if experiment.status == .running {
-                    Text("Day \(experiment.dayNumber()) of \(experiment.durationDays)")
+                    Text(ui: "Day \(experiment.dayNumber()) of \(experiment.durationDays)")
                         .font(.caption).foregroundStyle(SphereTheme.accent(for: .health))
                 } else if let headline = store.headline(for: experiment) {
                     Text(headline).font(.caption).foregroundStyle(.secondary)
                 } else {
-                    Text(experiment.status == .completed ? "Completed" : "Stopped")
+                    Text(ui: experiment.status == .completed ? "Completed" : "Stopped")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -71,12 +75,12 @@ public struct ExperimentsScreen: View {
         VStack(spacing: 12) {
             Image(systemName: "flask")
                 .font(.system(size: 44)).foregroundStyle(.secondary)
-            Text("Run a personal experiment")
+            Text(ui: "Run a personal experiment")
                 .font(.headline)
-            Text("Change one thing — caffeine, a bedtime, a habit — and Sphere measures the effect on your sleep, mood, spending and more.")
+            Text(ui: "Change one thing — caffeine, a bedtime, a habit — and Sphere measures the effect on your sleep, mood, spending and more.")
                 .font(.subheadline).foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            Button("Start one") { showingAdd = true }
+            Button { showingAdd = true } label: { Text(ui: "Start one") }
                 .buttonStyle(.borderedProminent)
         }
         .padding(32)
@@ -109,7 +113,7 @@ struct ExperimentDetailView: View {
             }
             .padding()
         }
-        .navigationTitle("What changed")
+        .navigationTitle(Text(ui: "What changed"))
         .navigationBarTitleDisplayModeInline()
     }
 
@@ -119,9 +123,13 @@ struct ExperimentDetailView: View {
             if !experiment.note.isEmpty {
                 Text(experiment.note).font(.subheadline).foregroundStyle(.secondary)
             }
-            Text(experiment.status == .running
-                 ? "Day \(experiment.dayNumber()) of \(experiment.durationDays) · \(experiment.daysRemaining()) to go"
-                 : "\(experiment.durationDays)-day experiment")
+            Group {
+                if experiment.status == .running {
+                    Text(ui: "Day \(experiment.dayNumber()) of \(experiment.durationDays) · \(experiment.daysRemaining()) to go")
+                } else {
+                    Text(ui: "\(experiment.durationDays)-day experiment")
+                }
+            }
                 .font(.caption)
                 .foregroundStyle(SphereTheme.accent(for: .health))
         }
@@ -131,17 +139,17 @@ struct ExperimentDetailView: View {
 
     private var resultsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("Measured effect", systemImage: "chart.xyaxis.line")
+            Label { Text(ui: "Measured effect") } icon: { Image(systemName: "chart.xyaxis.line") }
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(SphereTheme.accent(for: .mindfulness))
             if effects.isEmpty {
-                Text("Keep logging — an effect appears once there are at least 3 days of data before and during the change.")
+                Text(ui: "Keep logging — an effect appears once there are at least 3 days of data before and during the change.")
                     .font(.subheadline).foregroundStyle(.secondary)
             } else {
                 ForEach(effects, id: \.metricID) { effect in
                     effectRow(effect)
                 }
-                Text("Before vs during · a pattern, not proof.")
+                Text(ui: "Before vs during · a pattern, not proof.")
                     .font(.caption2).foregroundStyle(.secondary)
             }
         }
@@ -161,7 +169,7 @@ struct ExperimentDetailView: View {
                     .foregroundStyle(pct > 0 ? Color.green : Color.red)
                     .frame(width: 54, alignment: .trailing)
             } else {
-                Text("flat").font(.caption).foregroundStyle(.secondary)
+                Text(ui: "flat").font(.caption).foregroundStyle(.secondary)
                     .frame(width: 54, alignment: .trailing)
             }
         }
@@ -175,7 +183,7 @@ struct ExperimentDetailView: View {
                     dismiss()
                 }
             } label: {
-                Label("Mark done", systemImage: "checkmark.circle")
+                Label { Text(ui: "Mark done") } icon: { Image(systemName: "checkmark.circle") }
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -186,7 +194,8 @@ struct ExperimentDetailView: View {
                     dismiss()
                 }
             } label: {
-                Label("Stop early", systemImage: "stop.circle").frame(maxWidth: .infinity)
+                Label { Text(ui: "Stop early") } icon: { Image(systemName: "stop.circle") }
+                    .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
         }
@@ -208,36 +217,48 @@ struct AddExperimentSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("The change") {
-                    TextField("e.g. No caffeine after 2pm", text: $title, axis: .vertical)
-                        .lineLimit(1...3)
-                    TextField("Why, or how (optional)", text: $note, axis: .vertical)
-                        .lineLimit(1...3)
-                }
-                Section("Run for") {
-                    Picker("Duration", selection: $duration) {
-                        ForEach(durationOptions, id: \.self) { Text("\($0) days").tag($0) }
+                Section {
+                    TextField(text: $title, axis: .vertical) {
+                        Text(ui: "e.g. No caffeine after 2pm")
                     }
-                    .pickerStyle(.segmented)
+                        .lineLimit(1...3)
+                    TextField(text: $note, axis: .vertical) {
+                        Text(ui: "Why, or how (optional)")
+                    }
+                        .lineLimit(1...3)
+                } header: {
+                    Text(ui: "The change")
                 }
                 Section {
-                    Text("Sphere compares your metrics during these \(duration) days against the \(duration) days just before.")
+                    Picker(selection: $duration) {
+                        ForEach(durationOptions, id: \.self) { Text(ui: "\($0) days").tag($0) }
+                    } label: {
+                        Text(ui: "Duration")
+                    }
+                    .pickerStyle(.segmented)
+                } header: {
+                    Text(ui: "Run for")
+                }
+                Section {
+                    Text(ui: "Sphere compares your metrics during these \(duration) days against the \(duration) days just before.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("New experiment")
+            .navigationTitle(Text(ui: "New experiment"))
             .navigationBarTitleDisplayModeInline()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: { Text(ui: "Cancel") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Start") {
+                    Button {
                         let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
                         Task {
                             _ = try? await store.start(title: trimmed, durationDays: duration, note: note)
                             dismiss()
                         }
+                    } label: {
+                        Text(ui: "Start")
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }

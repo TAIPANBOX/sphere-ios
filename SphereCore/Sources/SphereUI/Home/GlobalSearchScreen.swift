@@ -21,37 +21,41 @@ public struct GlobalSearchScreen: View {
                 ContentUnavailableViewCompat(
                     "Search everything",
                     systemImage: "magnifyingglass",
-                    description: "Goals, contacts, books, tasks, subscriptions, journal notes and memories — all in one place."
+                    description: uiString("Goals, contacts, books, tasks, subscriptions, journal notes and memories — all in one place.")
                 )
             } else if groups.isEmpty && memories.isEmpty {
                 ContentUnavailableViewCompat(
                     "No matches",
                     systemImage: "magnifyingglass",
-                    description: "Nothing matches “\(query)” yet."
+                    description: uiString("Nothing matches “\(query)” yet.")
                 )
             } else {
                 ForEach(groups, id: \.sphere) { group in
-                    Section(group.sphere.rawValue.capitalized) {
+                    Section {
                         ForEach(group.items) { item in
                             NavigationLink(value: item.sphere) {
                                 resultRow(item)
                             }
                         }
+                    } header: {
+                        Text(LocalizedStringKey(group.sphere.rawValue.capitalized))
                     }
                 }
                 if !memories.isEmpty {
-                    Section("Memories") {
+                    Section {
                         ForEach(memories, id: \.id) { memory in
                             Label(memory.content, systemImage: "brain")
                                 .font(.subheadline)
                                 .lineLimit(3)
                         }
+                    } header: {
+                        Text(ui: "Memories")
                     }
                 }
             }
         }
-        .navigationTitle("Search")
-        .searchableCompat(text: $query, prompt: "Search across Sphere")
+        .navigationTitle(Text(ui: "Search"))
+        .searchableCompat(text: $query, prompt: Text(ui: "Search across Sphere"))
         .task(id: query) {
             guard query.count >= 2 else { memories = []; return }
             memories = await store.memories(for: query)
@@ -76,11 +80,11 @@ public struct GlobalSearchScreen: View {
 // MARK: - Cross-platform shims (SphereUI compiles on macOS too)
 
 private struct ContentUnavailableViewCompat: View {
-    let title: String
+    let title: LocalizedStringKey
     let systemImage: String
     let description: String
 
-    init(_ title: String, systemImage: String, description: String) {
+    init(_ title: LocalizedStringKey, systemImage: String, description: String) {
         self.title = title
         self.systemImage = systemImage
         self.description = description
@@ -89,7 +93,7 @@ private struct ContentUnavailableViewCompat: View {
     var body: some View {
         VStack(spacing: 10) {
             Image(systemName: systemImage).font(.largeTitle).foregroundStyle(.secondary)
-            Text(title).font(.headline)
+            Text(ui: title).font(.headline)
             Text(description).font(.subheadline).foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
@@ -101,7 +105,7 @@ private struct ContentUnavailableViewCompat: View {
 
 private extension View {
     @ViewBuilder
-    func searchableCompat(text: Binding<String>, prompt: String) -> some View {
+    func searchableCompat(text: Binding<String>, prompt: Text) -> some View {
         #if os(iOS)
         self.searchable(text: text, placement: .navigationBarDrawer(displayMode: .always), prompt: prompt)
         #else
