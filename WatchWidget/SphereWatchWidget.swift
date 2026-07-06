@@ -80,9 +80,48 @@ struct SphereWatchComplication: Widget {
     }
 }
 
+/// Interactive Smart Stack widget: a `Button(intent:)` that logs a glass of
+/// water without opening the app. `Button(intent:)` in an accessory widget is
+/// supported on watchOS 10+; the intent runs in this extension (no WCSession /
+/// DB here), queuing the log for the app to relay and patching the snapshot
+/// for instant feedback (see `LogWaterWatchIntent`). Only `.accessoryRectangular`
+/// has room for a labelled tappable control.
+struct WatchWaterWidgetView: View {
+    let snapshot: WidgetSnapshot
+
+    var body: some View {
+        Button(intent: LogWaterWatchIntent()) {
+            HStack(spacing: 6) {
+                Image(systemName: "drop.fill").foregroundStyle(.blue)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Water").font(.caption2).foregroundStyle(.secondary)
+                    Text("\(snapshot.waterToday) / \(snapshot.waterGoal)")
+                        .font(.headline)
+                }
+                Spacer()
+                Image(systemName: "plus.circle.fill").foregroundStyle(.blue)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct SphereWatchWaterWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "SphereWatchWater", provider: WatchProvider()) { entry in
+            WatchWaterWidgetView(snapshot: entry.snapshot)
+                .containerBackground(.fill.tertiary, for: .widget)
+        }
+        .configurationDisplayName("Log Water")
+        .description("Log a glass of water from your wrist.")
+        .supportedFamilies([.accessoryRectangular])
+    }
+}
+
 @main
 struct SphereWatchWidgetBundle: WidgetBundle {
     var body: some Widget {
         SphereWatchComplication()
+        SphereWatchWaterWidget()
     }
 }

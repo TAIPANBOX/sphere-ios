@@ -137,6 +137,30 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
     }
 
+    /// A copy with `waterToday` bumped by `count` and `updatedAt` refreshed —
+    /// the optimistic patch a watch widget intent applies for instant feedback
+    /// before the real log reaches the phone. Clamped at 0.
+    public func incrementingWater(by count: Int = 1, asOf now: Date = Date()) -> WidgetSnapshot {
+        WidgetSnapshot(
+            lifeScore: lifeScore,
+            bestEmoji: bestEmoji,
+            bestName: bestName,
+            needsFocusEmoji: needsFocusEmoji,
+            needsFocusName: needsFocusName,
+            topFocus: topFocus,
+            shopping: shopping,
+            agentReply: agentReply,
+            agentReplyAt: agentReplyAt,
+            captureResults: captureResults,
+            suggestions: suggestions,
+            waterToday: max(0, waterToday + count),
+            waterGoal: waterGoal,
+            meditatedToday: meditatedToday,
+            moodToday: moodToday,
+            updatedAt: now
+        )
+    }
+
     /// Shown before the app has written a real snapshot.
     public static let placeholder = WidgetSnapshot(
         lifeScore: 72,

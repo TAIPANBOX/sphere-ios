@@ -120,6 +120,10 @@ targets:
     deploymentTarget: "11.0"
     sources:
       - Watch
+      # Shared verbatim with the watch widget extension: the watch app drains
+      # the queued logs this intent writes, and its App Shortcuts / Action
+      # Button entry point (WatchShortcuts) references the intent type.
+      - path: WatchWidget/WatchQuickLogIntent.swift
     dependencies:
       - package: SphereCore
         product: SphereCore
