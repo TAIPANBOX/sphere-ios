@@ -290,9 +290,22 @@ struct WatchRootView: View {
         overlay.optimisticMood ?? snapshot.moodToday
     }
 
+    /// A snapshot this old was never actually synced from the phone — it's
+    /// the built-in placeholder (whose `updatedAt` is the Unix epoch), not a
+    /// real but very stale reading. Anything genuinely stale in practice
+    /// (phone unreachable for days) still deserves this treatment: showing
+    /// a computed "20640d ago" is never more useful than a plain "waiting"
+    /// message.
+    private static let neverSyncedHorizon: TimeInterval = 7 * 24 * 60 * 60
+
     private var staleness: some View {
         Group {
-            if Date().timeIntervalSince(snapshot.updatedAt) > 30 * 60 {
+            let age = Date().timeIntervalSince(snapshot.updatedAt)
+            if age > Self.neverSyncedHorizon {
+                Text("Waiting for your iPhone…")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            } else if age > 30 * 60 {
                 TimelineView(.everyMinute) { context in
                     Text("Updated \(RelativeTimeFormat.short(from: snapshot.updatedAt, to: context.date)) ago")
                         .font(.caption2)
