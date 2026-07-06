@@ -59,7 +59,7 @@ struct LockGate<Content: View>: View {
         defer { authing = false }
 
         let context = LAContext()
-        context.localizedFallbackTitle = "Use passcode"
+        context.localizedFallbackTitle = String(localized: "Use passcode")
         var error: NSError?
         let canBiometrics = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
         let canDeviceAuth = context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
@@ -76,7 +76,7 @@ struct LockGate<Content: View>: View {
             ? .deviceOwnerAuthenticationWithBiometrics
             : .deviceOwnerAuthentication
         do {
-            unlocked = try await context.evaluatePolicy(policy, localizedReason: "Unlock Sphere")
+            unlocked = try await context.evaluatePolicy(policy, localizedReason: String(localized: "Unlock Sphere"))
         } catch {
             unlocked = false
         }
@@ -122,26 +122,19 @@ struct PrivacyScreen: View {
                     .font(.title3.weight(.semibold))
                 privacyPoint(
                     "Local-first",
-                    "Every sphere, journal entry, health log and memory lives in a "
-                        + "database on this device. Sphere has no account and no server "
-                        + "of its own."
+                    "Every sphere, journal entry, health log and memory lives in a database on this device. Sphere has no account and no server of its own."
                 )
                 privacyPoint(
                     "Your AI, your choice",
-                    "The on-device model runs entirely on your phone — nothing leaves "
-                        + "it. If you choose to connect OpenRouter with your own key "
-                        + "instead, only the messages for that chat are sent to that "
-                        + "provider, using your own key."
+                    "The on-device model runs entirely on your phone — nothing leaves it. If you choose to connect OpenRouter with your own key instead, only the messages for that chat are sent to that provider, using your own key."
                 )
                 privacyPoint(
                     "You hold the exit",
-                    "Export all your data to a JSON file at any time from Settings. "
-                        + "Nothing locks you in."
+                    "Export all your data to a JSON file at any time from Settings. Nothing locks you in."
                 )
                 privacyPoint(
                     "Locked if you want",
-                    "Turn on Face ID lock so your life data can't be read from the app "
-                        + "switcher or by anyone who picks up your phone."
+                    "Turn on Face ID lock so your life data can't be read from the app switcher or by anyone who picks up your phone."
                 )
             }
             .padding()
@@ -150,7 +143,7 @@ struct PrivacyScreen: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func privacyPoint(_ title: String, _ body: String) -> some View {
+    private func privacyPoint(_ title: LocalizedStringKey, _ body: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title).font(.headline)
             Text(body).font(.subheadline).foregroundStyle(.secondary)

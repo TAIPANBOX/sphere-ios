@@ -169,10 +169,13 @@ public struct RelationshipsScreen: View {
                     Text(contact.emoji)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(contact.name).font(.body.weight(.medium))
-                        Text(
-                            contact.lastContact.map { "last contact \($0, style: .relative) ago" }
-                                ?? "never contacted"
-                        )
+                        Group {
+                            if let lastContact = contact.lastContact {
+                                Text(ui: "last contact \(lastContact, style: .relative) ago")
+                            } else {
+                                Text(ui: "never contacted")
+                            }
+                        }
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     }
@@ -262,17 +265,17 @@ struct AddContactSheet: View {
         NavigationStack {
             Form {
                 TextField(text: $name) { Text(ui: "Name") }
-                Picker("Relationship", selection: $type) {
+                Picker(selection: $type) {
                     ForEach(RelationshipType.allCases, id: \.self) { type in
                         Text("\(type.emoji) \(type.label)").tag(type)
                     }
-                }
+                } label: { Text(ui: "Relationship") }
                 TextField(text: $note) { Text(ui: "Note (optional)") }
-                Toggle("Birthday", isOn: $hasBirthday)
+                Toggle(isOn: $hasBirthday) { Text(ui: "Birthday") }
                 if hasBirthday {
-                    DatePicker("Date", selection: $birthday, displayedComponents: .date)
+                    DatePicker(selection: $birthday, displayedComponents: .date) { Text(ui: "Date") }
                 }
-                Stepper("Check in every \(reminderDays) d", value: $reminderDays, in: 7...180, step: 7)
+                Stepper(value: $reminderDays, in: 7...180, step: 7) { Text(ui: "Check in every \(reminderDays) d") }
             }
             .navigationTitle(Text(ui: "New Contact"))
             .toolbar {
@@ -419,8 +422,8 @@ struct AddCustomDateSheet: View {
         NavigationStack {
             Form {
                 TextField(text: $label) { Text(ui: "Label (e.g. Anniversary)") }
-                DatePicker("Date", selection: $date, displayedComponents: .date)
-                Toggle("Repeats yearly", isOn: $recurs)
+                DatePicker(selection: $date, displayedComponents: .date) { Text(ui: "Date") }
+                Toggle(isOn: $recurs) { Text(ui: "Repeats yearly") }
             }
             .navigationTitle(Text(ui: "Add Date"))
             .toolbar {

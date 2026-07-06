@@ -378,18 +378,18 @@ struct AddHomeTaskSheet: View {
         NavigationStack {
             Form {
                 TextField(text: $title) { Text(ui: "Task") }
-                Picker("Category", selection: $category) {
+                Picker(selection: $category) {
                     ForEach(HomeCategory.allCases, id: \.self) { category in
                         Text("\(category.emoji) \(category.label)").tag(category)
                     }
-                }
-                Toggle("Due date", isOn: $hasDueDate)
+                } label: { Text(ui: "Category") }
+                Toggle(isOn: $hasDueDate) { Text(ui: "Due date") }
                 if hasDueDate {
-                    DatePicker("Due", selection: $dueDate, displayedComponents: .date)
+                    DatePicker(selection: $dueDate, displayedComponents: .date) { Text(ui: "Due") }
                 }
-                Toggle("Recurring", isOn: $isRecurring)
+                Toggle(isOn: $isRecurring) { Text(ui: "Recurring") }
                 if isRecurring {
-                    Stepper("Every \(recurrenceDays) days", value: $recurrenceDays, in: 1...90)
+                    Stepper(value: $recurrenceDays, in: 1...90) { Text(ui: "Every \(recurrenceDays) days") }
                 }
             }
             .navigationTitle(Text(ui: "New Home Task"))
@@ -432,7 +432,7 @@ struct AddPlantSheet: View {
             Form {
                 TextField(text: $name) { Text(ui: "Plant name") }
                 TextField(text: $emoji) { Text(ui: "Emoji") }
-                Stepper("Water every \(intervalDays) d", value: $intervalDays, in: 1...30)
+                Stepper(value: $intervalDays, in: 1...30) { Text(ui: "Water every \(intervalDays) d") }
             }
             .navigationTitle(Text(ui: "New Plant"))
             .toolbar {
@@ -471,9 +471,9 @@ struct AddApplianceSheet: View {
             Form {
                 TextField(text: $name) { Text(ui: "Name (e.g. Washing machine)") }
                 TextField(text: $brand) { Text(ui: "Brand") }
-                Toggle("Has warranty", isOn: $hasWarranty)
+                Toggle(isOn: $hasWarranty) { Text(ui: "Has warranty") }
                 if hasWarranty {
-                    DatePicker("Warranty until", selection: $warrantyUntil, displayedComponents: .date)
+                    DatePicker(selection: $warrantyUntil, displayedComponents: .date) { Text(ui: "Warranty until") }
                 }
             }
             .navigationTitle(Text(ui: "Add Appliance"))
@@ -510,11 +510,11 @@ struct AddUtilitySheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Picker("Utility", selection: $kind) {
+                Picker(selection: $kind) {
                     ForEach(UtilityKind.allCases, id: \.self) { k in
                         Text("\(k.emoji) \(k.rawValue.capitalized)").tag(k)
                     }
-                }
+                } label: { Text(ui: "Utility") }
                 TextField(text: $valueText) { Text(ui: "Meter reading") }
                 TextField(text: $costText) { Text(ui: "Cost (optional)") }
             }
@@ -552,9 +552,9 @@ struct AddRenovationSheet: View {
         NavigationStack {
             Form {
                 TextField(text: $name) { Text(ui: "Project (e.g. Kitchen remodel)") }
-                Picker("Status", selection: $status) {
+                Picker(selection: $status) {
                     ForEach(RenovationStatus.allCases, id: \.self) { Text($0.label).tag($0) }
-                }
+                } label: { Text(ui: "Status") }
                 TextField(text: $budgetText) { Text(ui: "Budget (optional)") }
             }
             .navigationTitle(Text(ui: "Add Project"))
@@ -591,7 +591,7 @@ struct AddInventorySheet: View {
         NavigationStack {
             Form {
                 TextField(text: $name) { Text(ui: "Item") }
-                Stepper("Quantity: \(quantity)", value: $quantity, in: 1...999)
+                Stepper(value: $quantity, in: 1...999) { Text(ui: "Quantity: \(quantity)") }
                 TextField(text: $location) { Text(ui: "Location (e.g. Garage)") }
                 TextField(text: $lentTo) { Text(ui: "Lent to (if anyone)") }
             }

@@ -337,7 +337,9 @@ struct TripDetailView: View {
 
     private var jetLagSection: some View {
         Section {
-            Stepper("Time difference: \(jetLagHours > 0 ? "+" : "")\(jetLagHours)h", value: $jetLagHours, in: -12...12)
+            Stepper(value: $jetLagHours, in: -12...12) {
+                Text(ui: "Time difference: \(jetLagHours > 0 ? "+" : "")\(jetLagHours)h")
+            }
             ForEach(store.jetLagPlan(hoursDifference: jetLagHours), id: \.daysBefore) { step in
                 Label(step.advice, systemImage: "moon.stars").labelStyle(.titleAndIcon)
             }
@@ -411,19 +413,19 @@ struct AddTripSheet: View {
             Form {
                 TextField(text: $destination) { Text(ui: "Destination") }
                 TextField(text: $country) { Text(ui: "Country") }
-                Picker("Type", selection: $type) {
+                Picker(selection: $type) {
                     ForEach(TravelType.allCases, id: \.self) { type in
                         Text("\(type.emoji) \(type.label)").tag(type)
                     }
-                }
-                Picker("Status", selection: $status) {
+                } label: { Text(ui: "Type") }
+                Picker(selection: $status) {
                     ForEach(TravelStatus.allCases, id: \.self) { status in
-                        Text(status.rawValue.capitalized).tag(status)
+                        Text(LocalizedStringKey(status.rawValue.capitalized)).tag(status)
                     }
-                }
-                Toggle("Start date", isOn: $hasStartDate)
+                } label: { Text(ui: "Status") }
+                Toggle(isOn: $hasStartDate) { Text(ui: "Start date") }
                 if hasStartDate {
-                    DatePicker("Departure", selection: $startDate, displayedComponents: .date)
+                    DatePicker(selection: $startDate, displayedComponents: .date) { Text(ui: "Departure") }
                 }
             }
             .navigationTitle(Text(ui: "New Trip"))

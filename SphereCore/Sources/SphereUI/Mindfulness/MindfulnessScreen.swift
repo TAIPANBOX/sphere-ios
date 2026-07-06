@@ -344,12 +344,12 @@ struct LogMeditationSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Stepper("\(minutes) minutes", value: $minutes, in: 1...240, step: 5)
-                Picker("Type", selection: $type) {
+                Stepper(value: $minutes, in: 1...240, step: 5) { Text(ui: "\(minutes) minutes") }
+                Picker(selection: $type) {
                     ForEach(MeditationType.allCases, id: \.self) { type in
                         Text("\(type.emoji) \(type.label)").tag(type)
                     }
-                }
+                } label: { Text(ui: "Type") }
             }
             .navigationTitle(Text(ui: "Log Meditation"))
             .toolbar {
@@ -488,7 +488,7 @@ struct FocusTimerSheet: View {
                         .buttonStyle(.bordered).tint(accent)
                 } else {
                     Image(systemName: "scope").font(.system(size: 44)).foregroundStyle(accent)
-                    Stepper("Focus for \(totalMinutes) min", value: $totalMinutes, in: 5...120, step: 5)
+                    Stepper(value: $totalMinutes, in: 5...120, step: 5) { Text(ui: "Focus for \(totalMinutes) min") }
                         .padding(.horizontal, 40)
                     Button { start() } label: { Text(ui: "Start") }
                         .buttonStyle(.borderedProminent).tint(accent)

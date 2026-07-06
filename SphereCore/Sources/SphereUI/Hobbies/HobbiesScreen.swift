@@ -194,12 +194,12 @@ struct AddHobbySheet: View {
             Form {
                 TextField(text: $name) { Text(ui: "Hobby") }
                 TextField(text: $emoji) { Text(ui: "Emoji") }
-                Picker("Frequency", selection: $frequency) {
+                Picker(selection: $frequency) {
                     ForEach(HobbyFrequency.allCases, id: \.self) { frequency in
                         Text(frequency.label).tag(frequency)
                     }
-                }
-                Stepper("Target: \(target) min/week", value: $target, in: 15...840, step: 15)
+                } label: { Text(ui: "Frequency") }
+                Stepper(value: $target, in: 15...840, step: 15) { Text(ui: "Target: \(target) min/week") }
             }
             .navigationTitle(Text(ui: "New Hobby"))
             .toolbar {
@@ -239,12 +239,12 @@ struct LogHobbySessionSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Picker("Hobby", selection: $hobbyId) {
+                Picker(selection: $hobbyId) {
                     ForEach(hobbies) { hobby in
                         Text("\(hobby.emoji) \(hobby.name)").tag(Optional(hobby.id))
                     }
-                }
-                Stepper("\(minutes) minutes", value: $minutes, in: 5...720, step: 5)
+                } label: { Text(ui: "Hobby") }
+                Stepper(value: $minutes, in: 5...720, step: 5) { Text(ui: "\(minutes) minutes") }
                 HStack {
                     Text(ui: "Enjoyment")
                     Spacer()

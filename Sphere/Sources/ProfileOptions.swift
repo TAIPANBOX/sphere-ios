@@ -46,7 +46,7 @@ struct ChipGrid: View {
                 Button {
                     if isOn { selected.remove(option.value) } else { selected.insert(option.value) }
                 } label: {
-                    Text("\(option.emoji) \(option.label)")
+                    (Text(option.emoji) + Text(" ") + Text(LocalizedStringKey(option.label)))
                         .font(.subheadline.weight(.medium))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 7)

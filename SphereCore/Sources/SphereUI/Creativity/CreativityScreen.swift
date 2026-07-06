@@ -296,12 +296,12 @@ struct AddCreativeProjectSheet: View {
             Form {
                 TextField(text: $title) { Text(ui: "Title") }
                 TextField(text: $details) { Text(ui: "Description (optional)") }
-                Picker("Type", selection: $type) {
+                Picker(selection: $type) {
                     ForEach(CreativeType.allCases, id: \.self) { type in
                         Text("\(type.emoji) \(type.label)").tag(type)
                     }
-                }
-                Toggle("Just an idea for now", isOn: $isIdea)
+                } label: { Text(ui: "Type") }
+                Toggle(isOn: $isIdea) { Text(ui: "Just an idea for now") }
             }
             .navigationTitle(Text(ui: "New Project"))
             .toolbar {
@@ -344,11 +344,11 @@ struct CreativeSessionSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
-                Picker("Project", selection: $projectId) {
+                Picker(selection: $projectId) {
                     ForEach(projects) { project in
                         Text("\(project.type.emoji) \(project.title)").tag(project.id)
                     }
-                }
+                } label: { Text(ui: "Project") }
                 .pickerStyle(.menu)
 
                 Text(timeString(elapsed))
@@ -403,11 +403,11 @@ struct AddPortfolioSheet: View {
         NavigationStack {
             Form {
                 TextField(text: $title) { Text(ui: "Title") }
-                Picker("Type", selection: $type) {
+                Picker(selection: $type) {
                     ForEach(CreativeType.allCases, id: \.self) { t in
                         Text("\(t.emoji) \(t.label)").tag(t)
                     }
-                }
+                } label: { Text(ui: "Type") }
                 TextField(text: $url) { Text(ui: "Link (optional)") }
             }
             .navigationTitle(Text(ui: "Add to Portfolio"))

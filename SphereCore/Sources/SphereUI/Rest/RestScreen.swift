@@ -426,12 +426,14 @@ struct LogSleepSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Stepper(String(format: "Slept %.1f hours", hours), value: $hours, in: 0...14, step: 0.5)
-                Picker("Felt", selection: $recovery) {
+                Stepper(value: $hours, in: 0...14, step: 0.5) {
+                    Text(ui: "Slept \(hours.formatted(.number.precision(.fractionLength(1)))) hours")
+                }
+                Picker(selection: $recovery) {
                     ForEach(RecoveryLevel.allCases, id: \.self) { level in
                         Text("\(level.emoji) \(level.label)").tag(level)
                     }
-                }
+                } label: { Text(ui: "Felt") }
                 TextField(text: $note) { Text(ui: "Note (optional)") }
             }
             .navigationTitle(Text(ui: "Log Sleep"))
@@ -466,7 +468,7 @@ struct AddNapSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Stepper("Duration: \(minutes) min", value: $minutes, in: 5...180, step: 5)
+                Stepper(value: $minutes, in: 5...180, step: 5) { Text(ui: "Duration: \(minutes) min") }
             }
             .navigationTitle(Text(ui: "Log Nap"))
             .toolbar {
@@ -496,7 +498,7 @@ struct AddRecoveryActivitySheet: View {
             Form {
                 TextField(text: $name) { Text(ui: "Activity (e.g. a long walk)") }
                 TextField(text: $emoji) { Text(ui: "Emoji") }
-                Stepper("How restorative: \(rating)/5", value: $rating, in: 1...5)
+                Stepper(value: $rating, in: 1...5) { Text(ui: "How restorative: \(rating)/5") }
             }
             .navigationTitle(Text(ui: "Add Activity"))
             .toolbar {

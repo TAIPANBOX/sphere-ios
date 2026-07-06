@@ -70,6 +70,29 @@ struct SphereUILocalizationTests {
         }
     }
 
+    /// Guards the localization-completeness sweep (C10): Picker/Toggle/
+    /// DatePicker/Stepper titles that were plain string literals (resolving
+    /// against `Bundle.main`, never this catalog) were rewritten to
+    /// closure-label `Text(ui:)` forms, and the fallback in
+    /// RelationshipsScreen ("never contacted") now routes through the
+    /// catalog too. These keys must exist with real uk translations, or the
+    /// rewrite silently regressed back to unlocalized English.
+    @Test func completenessSweepKeysHaveTranslatedUkrainianEntries() throws {
+        let catalog = try loadCatalog()
+        let cases: [(key: String, expected: String)] = [
+            ("never contacted", "ще не було контакту"),
+            ("Just an idea for now", "Поки що просто ідея"),
+            ("Relationship", "Стосунки"),
+            ("Repeats yearly", "Повторюється щороку"),
+        ]
+        for (key, expected) in cases {
+            let entry = try #require(catalog.strings[key], "missing catalog entry for '\(key)'")
+            let uk = try #require(entry.localizations?.uk, "missing uk localization for '\(key)'")
+            #expect(uk.stringUnit.state == "translated")
+            #expect(uk.stringUnit.value == expected)
+        }
+    }
+
     @Test func moduleBundleIsDeclaredAsAResourceBundle() {
         // Guards the Package.swift wiring: SphereUI must declare
         // `defaultLocalization` and process the catalog as a resource, or

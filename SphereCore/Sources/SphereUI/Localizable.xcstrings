@@ -111,6 +111,16 @@
         }
       }
     },
+    "%lld minutes": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld хвилин"
+          }
+        }
+      }
+    },
     "%lld of %lld left": {
       "localizations": {
         "uk": {
@@ -1131,6 +1141,26 @@
         }
       }
     },
+    "Birthday": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "День народження"
+          }
+        }
+      }
+    },
+    "Booked": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заброньовано"
+          }
+        }
+      }
+    },
     "Brag document": {
       "localizations": {
         "uk": {
@@ -1251,6 +1281,16 @@
         }
       }
     },
+    "Cancelled": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасовано"
+          }
+        }
+      }
+    },
     "Capture the idea you keep meaning to start, or the project you're already circling.": {
       "localizations": {
         "uk": {
@@ -1307,6 +1347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Зміни щось одне — кофеїн, час сну, звичку — і Sphere виміряє вплив на твій сон, настрій, витрати та інше."
+          }
+        }
+      }
+    },
+    "Check in every %lld d": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зв'язуватись кожні %lld дн"
           }
         }
       }
@@ -1661,6 +1711,16 @@
         }
       }
     },
+    "Departure": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відправлення"
+          }
+        }
+      }
+    },
     "Description (optional)": {
       "localizations": {
         "uk": {
@@ -1851,6 +1911,16 @@
         }
       }
     },
+    "Every %lld days": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кожні %lld днів"
+          }
+        }
+      }
+    },
     "Every part of your life, in one place — and it's yours to keep.": {
       "localizations": {
         "uk": {
@@ -1917,6 +1987,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Відчуття проти даних"
+          }
+        }
+      }
+    },
+    "Felt": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Самопочуття"
           }
         }
       }
@@ -2007,6 +2087,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Фокус %@"
+          }
+        }
+      }
+    },
+    "Focus for %lld min": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фокус на %lld хв"
           }
         }
       }
@@ -2231,6 +2321,16 @@
         }
       }
     },
+    "Has warranty": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Є гарантія"
+          }
+        }
+      }
+    },
     "Health": {
       "localizations": {
         "uk": {
@@ -2347,6 +2447,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Яким відчувається день?"
+          }
+        }
+      }
+    },
+    "How restorative: %lld/5": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наскільки відновлює: %lld/5"
           }
         }
       }
@@ -2587,6 +2697,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Щоденник"
+          }
+        }
+      }
+    },
+    "Just an idea for now": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поки що просто ідея"
           }
         }
       }
@@ -4221,6 +4341,16 @@
         }
       }
     },
+    "Project": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проєкт"
+          }
+        }
+      }
+    },
     "Project (e.g. Kitchen remodel)": {
       "localizations": {
         "uk": {
@@ -4257,6 +4387,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Рекомендована провайдером модель"
+          }
+        }
+      }
+    },
+    "Quantity: %lld": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кількість: %lld"
           }
         }
       }
@@ -4401,6 +4541,16 @@
         }
       }
     },
+    "Recurring": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторюється"
+          }
+        }
+      }
+    },
     "Reference range": {
       "localizations": {
         "uk": {
@@ -4427,6 +4577,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Згенерувати знову"
+          }
+        }
+      }
+    },
+    "Relationship": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стосунки"
           }
         }
       }
@@ -4467,6 +4627,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ремонт"
+          }
+        }
+      }
+    },
+    "Repeats yearly": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторюється щороку"
           }
         }
       }
@@ -4777,6 +4947,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сон, останні 7 днів"
+          }
+        }
+      }
+    },
+    "Slept %@ hours": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спав(-ла) %@ год"
           }
         }
       }
@@ -5111,6 +5291,16 @@
         }
       }
     },
+    "Target: %lld min/week": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ціль: %lld хв/тиждень"
+          }
+        }
+      }
+    },
     "Task": {
       "localizations": {
         "uk": {
@@ -5227,6 +5417,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Цього тижня"
+          }
+        }
+      }
+    },
+    "Time difference: %@%lldh": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Різниця в часі: %@%lldг"
           }
         }
       }
@@ -5541,6 +5741,16 @@
         }
       }
     },
+    "Warranty until": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Гарантія до"
+          }
+        }
+      }
+    },
     "Warranty: %lldd left": {
       "localizations": {
         "uk": {
@@ -5557,6 +5767,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вода"
+          }
+        }
+      }
+    },
+    "Water every %lld d": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поливати кожні %lld дн"
           }
         }
       }
@@ -5957,6 +6177,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "у фокусі сьогодні"
+          }
+        }
+      }
+    },
+    "last contact %@ ago": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "останній контакт %@ тому"
+          }
+        }
+      }
+    },
+    "never contacted": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ще не було контакту"
           }
         }
       }
