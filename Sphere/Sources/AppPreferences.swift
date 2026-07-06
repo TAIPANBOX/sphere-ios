@@ -12,6 +12,21 @@ enum Prefs {
     static let aiBackend = "pref.aiBackend"
     /// Active downloaded on-device model id (nil = none selected).
     static let activeModel = "pref.activeModel"
+    /// Chosen OpenRouter model id (empty/nil = provider default).
+    static let cloudModel = "pref.cloudModel"
+}
+
+/// Reads/writes the user's chosen OpenRouter model id (nil = provider default).
+enum CloudModelPreference {
+    static var current: String? {
+        get {
+            let value = UserDefaults.standard.string(forKey: Prefs.cloudModel)
+            return (value?.isEmpty ?? true) ? nil : value
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Prefs.cloudModel)
+        }
+    }
 }
 
 /// Reads the user's explicit AI-backend choice from UserDefaults (nil = auto,

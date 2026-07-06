@@ -38,6 +38,7 @@ final class AppContainer {
     let search: SearchStore
     let models: ModelManager
     let recap: RecapStore
+    let cloudModels: OpenRouterModelCatalog
 
     private var chatSessions: [String: ChatSession] = [:]
 
@@ -59,6 +60,13 @@ final class AppContainer {
             keyStore: keyStore,
             engram: engram,
             cache: cache,
+            engineFactory: { provider in
+                // Nonisolated read: the chosen cloud model id lives in
+                // UserDefaults, so no MainActor state is touched here. Called
+                // on every resolution so a Settings change is picked up
+                // without restarting the app.
+                provider.makeEngine(model: CloudModelPreference.current)
+            },
             onDeviceEngine: { OnDeviceAI.makeEngineIfAvailable() },
             localModelEngine: {
                 // Nonisolated read: the active choice lives in UserDefaults and
@@ -141,6 +149,10 @@ final class AppContainer {
             mindfulness: mindfulness, health: health, learning: learning,
             travel: travel, goals: goals, creativity: creativity, hobbies: hobbies
         )
+        let appSupportDir = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Sphere", isDirectory: true)
+        cloudModels = OpenRouterModelCatalog(cacheDirectory: appSupportDir.appendingPathComponent("cache"))
         search = SearchStore(
             goals: goals, health: health, finance: finance, learning: learning,
             career: career, relationships: relationships, homeSphere: homeSphere,

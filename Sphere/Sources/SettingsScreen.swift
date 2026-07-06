@@ -16,7 +16,14 @@ struct SettingsScreen: View {
     @AppStorage(Prefs.currency) private var currency = Currency.deviceDefault.rawValue
     @AppStorage(Prefs.appLock) private var appLock = false
     @AppStorage(Prefs.aiBackend) private var aiBackend = ""
+    @AppStorage(Prefs.cloudModel) private var cloudModel = ""
+    @State private var cloudModelName: String?
     private let onDeviceAvailable = OnDeviceAI.isAvailable
+
+    private var cloudModelLabel: String {
+        guard !cloudModel.isEmpty else { return "Default" }
+        return cloudModelName ?? cloudModel
+    }
 
     var body: some View {
         Form {
@@ -55,6 +62,19 @@ struct SettingsScreen: View {
                         SecureField("API key", text: keyBinding(for: provider))
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                    }
+                }
+                NavigationLink {
+                    CloudModelsScreen(
+                        catalog: container.cloudModels,
+                        selectedID: { CloudModelPreference.current },
+                        setSelectedID: { CloudModelPreference.current = $0 }
+                    )
+                } label: {
+                    HStack {
+                        Text("Cloud model")
+                        Spacer()
+                        Text(cloudModelLabel).foregroundStyle(.secondary)
                     }
                 }
             } header: {
@@ -140,9 +160,19 @@ struct SettingsScreen: View {
         .onChange(of: appLock) { _, enabled in
             Task { try? await container.profile.update { $0.appLockEnabled = enabled } }
         }
+        .task(id: cloudModel) { await loadCloudModelName() }
         .sheet(item: $exportItem) { item in
             ShareSheet(url: item.url)
         }
+    }
+
+    /// Resolves the friendly name for the selected cloud model id from the
+    /// catalog (cache-first, so this is normally instant); falls back to
+    /// showing the raw id when the catalog hasn't loaded yet.
+    private func loadCloudModelName() async {
+        guard !cloudModel.isEmpty else { cloudModelName = nil; return }
+        let models = await container.cloudModels.load()
+        cloudModelName = models.first { $0.id == cloudModel }?.name
     }
 
     /// Two-way toggle for a per-category notification preference; persists to
