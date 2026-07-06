@@ -449,55 +449,15 @@ non-technical user for an API key).
 
 ---
 
-## 9b. Provider auth: subscription sign-in alongside API keys — DEFERRED (reference only)
+## 9b. Provider auth: subscription sign-in alongside API keys — OBSOLETE
 
-> Per the §9 decision, this is **not** on the build path. Kept for reference
-> if Anthropic/OpenAI open an official third-party subscription program. The
-> shipped cloud tier is plain BYO API key (already implemented). Do not start
-> the OAuth work without a confirmed, ToS-clean partner program.
-
-Goal: connect Anthropic / OpenAI / Gemini via the user's existing chat
-subscription, not only a developer API key. (OpenRouter stays key-based
-by decision.)
-
-### Reality check (2026-07, verify before each release)
-
-- **Anthropic**: Pro/Max OAuth tokens are ToS-restricted to Claude Code /
-  claude.ai. There IS an official third-party surface ("connect app to
-  Claude account", billed to prepaid *extra usage credits* since early
-  2026) — but it requires enrollment in Anthropic's partner program.
-  Action: apply for the program; ship behind a flag.
-- **OpenAI**: ChatGPT sign-in (Codex-style OAuth) officially works only
-  inside Codex tooling; third-party subscription routing is a ToS gray
-  zone. Flag OFF by default until OpenAI opens it.
-- **Gemini**: Google-account OAuth exists via Gemini CLI/Code Assist free
-  tier; equivalent third-party use is likewise not officially sanctioned.
-  Flag.
-- Consequence: architecture ships NOW, flags flip per provider the day a
-  program/policy opens. Never ship a default-on gray-zone auth path —
-  App Store rejection + user account bans are the downside.
-
-### Architecture (provider-agnostic, additive)
-
-- `SphereCore/LLM/Auth/`:
-  - `ProviderCredential` — `.apiKey(String)` | `.oauth(OAuthTokens)`
-    (access, refresh, expiry, scopes), Codable, one Keychain item per
-    provider (extends `KeychainAPIKeyStore` → `CredentialStore`; legacy
-    plain-key items read as `.apiKey` — no migration needed).
-  - `OAuthClient` — PKCE authorize-code flow, pure request builder +
-    token exchange; the browser session enters via a `WebAuthPresenting`
-    protocol (app target implements with `ASWebAuthenticationSession`).
-  - `TokenRefresher` — single-flight refresh on 401/expiry, updates the
-    Keychain, retries the request once.
-- Engines change one seam: instead of a raw key string they take
-  `credential: () async throws -> ProviderCredential` and set
-  `Authorization: Bearer` vs `x-api-key` accordingly. Everything else
-  (SSE, tool loop) untouched.
-- `ProviderAuthCapability` registry: per provider, which methods are
-  available (`.apiKey` always; `.subscription` behind a remote-config-less
-  compile-time flag for now).
-- Settings UI (see §10): per-provider page with a method segment —
-  "Sign in with <Provider>" button (only when capability on) or key field.
+> Per the OpenRouter-only decision (2026-07-06), cloud access goes
+> exclusively through OpenRouter BYO-key — there is no direct vendor API
+> (Anthropic/OpenAI/Gemini) integration left to attach subscription auth to,
+> so this whole line of work is moot. The prior research and architecture
+> sketch for direct-vendor OAuth live in git history (see this file's history
+> before 2026-07-06) if a future pivot back to direct vendor APIs ever
+> revives the question.
 
 ## 10. Shell tabs review — Home, Settings, Profile
 

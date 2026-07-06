@@ -62,9 +62,9 @@ struct PrivacyPolicyScreen: View {
             ("On-device AI",
              "When you use the built-in on-device model, your prompts never leave your phone."),
             ("Cloud AI (optional)",
-             "If you choose to connect a Claude, ChatGPT, or other provider with your own "
-                + "key, only the messages for that conversation are sent to that provider, "
-                + "processed under their privacy policy."),
+             "If you choose to connect OpenRouter with your own key, only the messages "
+                + "for that conversation are sent to that provider, processed under "
+                + "their privacy policy."),
             ("Device permissions",
              "Health, location, photos, microphone, and speech are used only for the "
                 + "features you enable, and the data stays on your device."),

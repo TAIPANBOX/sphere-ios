@@ -129,9 +129,9 @@ struct PrivacyScreen: View {
                 privacyPoint(
                     "Your AI, your choice",
                     "The on-device model runs entirely on your phone — nothing leaves "
-                        + "it. If you choose to connect a Claude or ChatGPT key instead, "
-                        + "only the messages for that chat are sent to that provider, "
-                        + "using your own key."
+                        + "it. If you choose to connect OpenRouter with your own key "
+                        + "instead, only the messages for that chat are sent to that "
+                        + "provider, using your own key."
                 )
                 privacyPoint(
                     "You hold the exit",
