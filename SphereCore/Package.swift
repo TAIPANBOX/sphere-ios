@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "SphereCore",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v17),
         .macOS(.v14),
@@ -24,11 +25,12 @@ let package = Package(
         ),
         .target(
             name: "SphereUI",
-            dependencies: ["SphereCore"]
+            dependencies: ["SphereCore"],
+            resources: [.process("Localizable.xcstrings")]
         ),
         .testTarget(
             name: "SphereCoreTests",
-            dependencies: ["SphereCore"]
+            dependencies: ["SphereCore", "SphereUI"]
         ),
     ]
 )
