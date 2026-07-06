@@ -11,9 +11,16 @@ final class StubEngine: LLMEngine, @unchecked Sendable {
         let maxTokens: Int
     }
 
+    struct CompleteCall {
+        let system: String
+        let prompt: String
+        let maxTokens: Int
+    }
+
     private let lock = NSLock()
     private var scripts: [[LLMEvent]]
     private var _calls: [Call] = []
+    private var _completeCalls: [CompleteCall] = []
 
     var streamError: LLMError?
     var completeResult = ""
@@ -25,6 +32,10 @@ final class StubEngine: LLMEngine, @unchecked Sendable {
 
     var calls: [Call] {
         lock.withLock { _calls }
+    }
+
+    var completeCalls: [CompleteCall] {
+        lock.withLock { _completeCalls }
     }
 
     func stream(
@@ -57,6 +68,9 @@ final class StubEngine: LLMEngine, @unchecked Sendable {
         prompt: String,
         maxTokens: Int
     ) async throws -> String {
+        lock.withLock {
+            _completeCalls.append(CompleteCall(system: system, prompt: prompt, maxTokens: maxTokens))
+        }
         if let completeError { throw completeError }
         return completeResult
     }

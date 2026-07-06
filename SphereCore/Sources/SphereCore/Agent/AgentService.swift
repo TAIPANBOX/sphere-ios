@@ -19,7 +19,11 @@ public enum AgentError: Error, Equatable, Sendable {
 /// agent just answered a question. Never throws to the caller — the watch
 /// always has something to show.
 public enum WristReply: Sendable, Equatable {
-    case captured([CaptureResult])
+    /// Something was logged. `fromAgent` is true when the LLM capture path
+    /// produced these results, false when the free rule parser short-circuited
+    /// — callers use it to decide whether follow-up suggestions are worth an
+    /// extra LLM call (never after a trivial rule-parsed log).
+    case captured([CaptureResult], fromAgent: Bool)
     case answered(String)
 }
 
@@ -301,18 +305,75 @@ public final class AgentService: Sendable {
     public func captureOrAnswer(text: String, tools: SphereToolRegistry) async -> WristReply {
         if QuickCapture.canParse(text) {
             let results = await QuickCapture.run(text, registry: tools)
-            if !results.isEmpty { return .captured(results) }
+            if !results.isEmpty { return .captured(results, fromAgent: false) }
         }
 
         if let results = try? await capture(text: text, tools: tools),
            results.contains(where: { !$0.isError }) {
-            return .captured(results)
+            return .captured(results, fromAgent: true)
         }
 
         if let text = try? await answer(text) {
             return .answered(text)
         }
         return .answered("Couldn't reach the assistant.")
+    }
+
+    // MARK: - Follow-up suggestions
+
+    /// After a capture logged something, proposes up to 3 tappable next steps.
+    /// One non-streaming `complete()` call asking for strict JSON. Parses
+    /// defensively (strips markdown fences, tolerates malformed output) and
+    /// never throws — any failure, or nothing worth suggesting, yields `[]`.
+    public func followUps(for text: String, captured: [CaptureResult]) async -> [AgentSuggestion] {
+        guard let picked = try? resolveBackend() else { return [] }
+        let logged = captured.filter { !$0.isError }.map(\.summary)
+
+        let raw: String
+        do {
+            raw = try await picked.engine.complete(
+                apiKey: picked.apiKey,
+                system: SpherePrompts.followUps(originalText: text, logged: logged),
+                prompt: "Suggest my next steps as strict JSON.",
+                maxTokens: 400
+            )
+        } catch {
+            return []
+        }
+
+        return Self.parseSuggestions(raw)
+    }
+
+    /// Extracts the JSON array of `{title, prompt}` objects from a model reply,
+    /// stripping markdown fences and any surrounding prose. Caps at 3, drops
+    /// entries with an empty title or prompt, and generates index-based ids.
+    static func parseSuggestions(_ raw: String) -> [AgentSuggestion] {
+        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if text.hasPrefix("```") {
+            // Drop the opening fence (```json / ```), keep everything up to the
+            // closing fence.
+            if let firstNewline = text.firstIndex(of: "\n") {
+                text = String(text[text.index(after: firstNewline)...])
+            }
+            if let fenceRange = text.range(of: "```", options: .backwards) {
+                text = String(text[..<fenceRange.lowerBound])
+            }
+        }
+        guard let start = text.firstIndex(of: "["),
+              let end = text.lastIndex(of: "]"),
+              start < end,
+              let json = JSONValue.decoded(from: String(text[start...end])),
+              let items = json.arrayValue
+        else { return [] }
+
+        return items.prefix(3).enumerated().compactMap { index, item in
+            guard let title = item["title"]?.stringValue?
+                    .trimmingCharacters(in: .whitespacesAndNewlines), !title.isEmpty,
+                  let prompt = item["prompt"]?.stringValue?
+                    .trimmingCharacters(in: .whitespacesAndNewlines), !prompt.isEmpty
+            else { return nil }
+            return AgentSuggestion(id: "s\(index)", title: title, prompt: prompt)
+        }
     }
 
     // MARK: - Meta agent

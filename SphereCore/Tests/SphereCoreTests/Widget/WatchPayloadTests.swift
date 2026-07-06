@@ -123,6 +123,36 @@ struct WatchPayloadTests {
         """
         let decoded = try JSONDecoder().decode(WidgetSnapshot.self, from: Data(legacy.utf8))
         #expect(decoded.captureResults.isEmpty)
+        #expect(decoded.suggestions.isEmpty)
         #expect(decoded.agentReply == "Hi")
+    }
+
+    @Test func snapshotRoundTripsSuggestions() throws {
+        let snapshot = WidgetSnapshot(
+            lifeScore: 65, bestEmoji: "🫀", bestName: "Health",
+            needsFocusEmoji: "💰", needsFocusName: "Finance", topFocus: [],
+            captureResults: [.init(summary: "Added trip to Lisbon", isError: false)],
+            suggestions: [
+                .init(id: "s0", title: "Set a lodging reminder", prompt: "Remind me to book lodging for Lisbon."),
+                .init(id: "s1", title: "Draft a packing list", prompt: "Draft a packing list for Lisbon."),
+            ],
+            updatedAt: Date(timeIntervalSince1970: 300)
+        )
+        let decoded = try #require(WatchPayload.decode(WatchPayload.encode(snapshot)))
+        #expect(decoded == snapshot)
+        #expect(decoded.suggestions.map(\.title) == ["Set a lodging reminder", "Draft a packing list"])
+        #expect(decoded.suggestions.first?.prompt == "Remind me to book lodging for Lisbon.")
+    }
+
+    @Test func decodesLegacySnapshotWithoutSuggestions() throws {
+        // A build with captureResults but before suggestions existed.
+        let legacy = """
+        {"lifeScore":50,"bestEmoji":"🫀","bestName":"Health","needsFocusEmoji":"💰",\
+        "needsFocusName":"Finance","topFocus":[],"shopping":[],\
+        "captureResults":[{"summary":"Added trip","isError":false}],"updatedAt":0}
+        """
+        let decoded = try JSONDecoder().decode(WidgetSnapshot.self, from: Data(legacy.utf8))
+        #expect(decoded.suggestions.isEmpty)
+        #expect(decoded.captureResults.map(\.summary) == ["Added trip"])
     }
 }

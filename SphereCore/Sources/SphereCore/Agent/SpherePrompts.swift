@@ -83,6 +83,47 @@ public enum SpherePrompts {
         """
     }
 
+    /// System prompt for continuation suggestions: after the agent logged
+    /// something from a free-form note, propose up to 3 logical next steps the
+    /// user can tap to run as a fresh capture. The model must reply with STRICT
+    /// JSON only.
+    public static func followUps(originalText: String, logged: [String]) -> String {
+        let note = originalText.isEmpty ? "(none)" : originalText
+        let loggedBlock = logged.isEmpty ? "(nothing)" : logged.map { "- \($0)" }.joined(separator: "\n")
+        return """
+        You propose next steps after Sphere, a life intelligence app, logged \
+        something the user captured. Given their original words and what was \
+        actually recorded, suggest up to 3 useful follow-up actions the user \
+        might want next — each one runnable on its own as a new instruction.
+
+        Reply with STRICT JSON only: an array of objects, each \
+        {"title": "...", "prompt": "..."}. No prose, no markdown, no code fences.
+        - "title" is a short button label (≤ 30 characters), e.g. "Draft a packing list".
+        - "prompt" is a complete, self-contained instruction the app can run \
+          later with no memory of this exchange. Restate every specific — \
+          places, dates, names, amounts — so it stands alone.
+        - Quality over quantity. Most simple logs deserve NO suggestions: return \
+          [] for trivial entries (a glass of water, a weight, a single mood). \
+          Only suggest when a genuine, helpful next step exists.
+        - Never invent facts the user did not state.
+
+        Example — original: "planning a trip to Lisbon Sep 12-15", logged: \
+        "Added trip to Lisbon (Sep 12-15)". Good reply:
+        [{"title":"Set a lodging reminder","prompt":"Remind me to book lodging \
+        for my Lisbon trip on Sep 12-15."},{"title":"Draft a packing checklist",\
+        "prompt":"Draft a packing checklist for a 3-day city trip to Lisbon in \
+        September."},{"title":"Suggest neighborhoods","prompt":"Suggest good \
+        neighborhoods to stay in for a short trip to Lisbon."}]
+
+        Example — original: "drank a glass of water", logged: "Logged 1 glass of \
+        water". Good reply: []
+
+        Original note: \(note)
+        Logged:
+        \(loggedBlock)
+        """
+    }
+
     public static func metaAgent(extraContext: String = "") -> String {
         """
         You are the Meta Agent for Sphere — a personal life intelligence system tracking 12 life spheres: Health, Learning, Career, Finance, Relationships, Rest, Hobbies, Travel, Mindfulness, Creativity, Home, and Goals.

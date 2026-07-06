@@ -317,7 +317,7 @@ struct AgentServiceTests {
             text: "drank a glass of water", tools: waterRegistry()
         )
 
-        #expect(reply == .captured([CaptureResult(summary: "Logged 1 glass of water", isError: false)]))
+        #expect(reply == .captured([CaptureResult(summary: "Logged 1 glass of water", isError: false)], fromAgent: false))
         // The rule parser handled it; the LLM was never touched.
         #expect(engine.calls.isEmpty)
     }
@@ -336,7 +336,7 @@ struct AgentServiceTests {
             text: "just finished my morning run, felt great", tools: waterRegistry()
         )
 
-        #expect(reply == .captured([CaptureResult(summary: "Logged 1 glass of water", isError: false)]))
+        #expect(reply == .captured([CaptureResult(summary: "Logged 1 glass of water", isError: false)], fromAgent: true))
     }
 
     @Test func captureOrAnswerFallsBackToAnswerWhenCaptureYieldsNothing() async throws {
@@ -362,6 +362,112 @@ struct AgentServiceTests {
         )
 
         #expect(reply == .answered("Couldn't reach the assistant."))
+    }
+
+    // MARK: - followUps
+
+    private func captured(_ summaries: [String]) -> [CaptureResult] {
+        summaries.map { CaptureResult(summary: $0, isError: false) }
+    }
+
+    @Test func followUpsParsesValidJsonAndCapsAtThree() async throws {
+        let engine = StubEngine()
+        engine.completeResult = """
+        [{"title":"Set a lodging reminder","prompt":"Remind me to book lodging for Lisbon Sep 12-15."},\
+        {"title":"Draft a packing checklist","prompt":"Draft a packing checklist for a 3-day Lisbon trip."},\
+        {"title":"Suggest neighborhoods","prompt":"Suggest neighborhoods to stay in Lisbon."},\
+        {"title":"A fourth","prompt":"Should be dropped."}]
+        """
+        let (service, _, _) = try makeService(engine: engine)
+
+        let suggestions = await service.followUps(
+            for: "planning a trip to Lisbon Sep 12-15",
+            captured: captured(["Added trip to Lisbon (Sep 12-15)"])
+        )
+
+        #expect(suggestions.count == 3)
+        #expect(suggestions.map(\.title) == [
+            "Set a lodging reminder", "Draft a packing checklist", "Suggest neighborhoods",
+        ])
+        #expect(suggestions.first?.prompt == "Remind me to book lodging for Lisbon Sep 12-15.")
+        // Ids are stable and unique.
+        #expect(Set(suggestions.map(\.id)).count == 3)
+        // The prompt carried the original words and the logged chip.
+        #expect(engine.completeCalls.first?.system.contains("Lisbon Sep 12-15") == true)
+        #expect(engine.completeCalls.first?.system.contains("Added trip to Lisbon") == true)
+    }
+
+    @Test func followUpsStripsMarkdownFences() async throws {
+        let engine = StubEngine()
+        engine.completeResult = """
+        ```json
+        [{"title":"Draft a plan","prompt":"Draft a study plan for the exam on May 3."}]
+        ```
+        """
+        let (service, _, _) = try makeService(engine: engine)
+
+        let suggestions = await service.followUps(for: "exam May 3", captured: captured(["Logged exam"]))
+        #expect(suggestions == [
+            AgentSuggestion(id: "s0", title: "Draft a plan", prompt: "Draft a study plan for the exam on May 3."),
+        ])
+    }
+
+    @Test func followUpsReturnsEmptyForEmptyArray() async throws {
+        let engine = StubEngine()
+        engine.completeResult = "[]"
+        let (service, _, _) = try makeService(engine: engine)
+
+        let suggestions = await service.followUps(for: "drank water", captured: captured(["Logged 1 glass of water"]))
+        #expect(suggestions.isEmpty)
+    }
+
+    @Test func followUpsReturnsEmptyForMalformedJson() async throws {
+        let engine = StubEngine()
+        engine.completeResult = "Sure, here are some ideas but not JSON at all."
+        let (service, _, _) = try makeService(engine: engine)
+
+        let suggestions = await service.followUps(for: "trip to Rome", captured: captured(["Added trip"]))
+        #expect(suggestions.isEmpty)
+    }
+
+    @Test func followUpsDropsEntriesWithEmptyFields() async throws {
+        let engine = StubEngine()
+        engine.completeResult = """
+        [{"title":"","prompt":"missing title"},{"title":"Only title","prompt":""},\
+        {"title":"Good one","prompt":"Do the thing for Rome."}]
+        """
+        let (service, _, _) = try makeService(engine: engine)
+
+        let suggestions = await service.followUps(for: "trip to Rome", captured: captured(["Added trip"]))
+        #expect(suggestions.map(\.title) == ["Good one"])
+    }
+
+    @Test func followUpsReturnsEmptyOnEngineFailure() async throws {
+        let engine = StubEngine()
+        engine.completeError = .api("boom")
+        let (service, _, _) = try makeService(engine: engine)
+
+        let suggestions = await service.followUps(for: "trip to Rome", captured: captured(["Added trip"]))
+        #expect(suggestions.isEmpty)
+    }
+
+    @Test func followUpsReturnsEmptyWithoutBackend() async throws {
+        let engine = StubEngine()
+        engine.completeResult = "[{\"title\":\"x\",\"prompt\":\"y\"}]"
+        let (service, _, _) = try makeService(engine: engine, keys: [:])
+
+        let suggestions = await service.followUps(for: "trip to Rome", captured: captured(["Added trip"]))
+        #expect(suggestions.isEmpty)
+    }
+
+    @Test func followUpsWorksWithEmptyCapturedList() async throws {
+        let engine = StubEngine()
+        engine.completeResult = "[{\"title\":\"Plan it\",\"prompt\":\"Plan the trip to Rome.\"}]"
+        let (service, _, _) = try makeService(engine: engine)
+
+        let suggestions = await service.followUps(for: "trip to Rome", captured: [])
+        #expect(suggestions.map(\.title) == ["Plan it"])
+        #expect(engine.completeCalls.first?.system.contains("(nothing)") == true)
     }
 }
 
