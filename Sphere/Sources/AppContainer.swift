@@ -385,8 +385,24 @@ final class AppContainer {
             try? await homeSphere.load()
             try? await homeSphere.toggleShoppingItem(id: id)
         case .askAgent(let query):
+            // Kept for backward compat with an old watch build; new builds
+            // send .capture instead.
             lastAgentReply = (try? await agent.answer(query))
                 ?? "Couldn't reach the assistant."
+            lastCaptureResults = []
+            lastAgentReplyAt = Date()
+        case .capture(let text):
+            switch await agent.captureOrAnswer(text: text, tools: toolRegistry) {
+            case .captured(let results):
+                lastCaptureResults = results
+                lastAgentReply = nil
+            case .answered(let text):
+                lastAgentReply = text
+                lastCaptureResults = []
+            }
+            // Stamped in both branches: the watch's Thinking… state ends as
+            // soon as this is newer than the submission time, regardless of
+            // which branch answered.
             lastAgentReplyAt = Date()
         }
         refreshWidget()
@@ -394,9 +410,12 @@ final class AppContainer {
 
     /// Last answer to a watch voice query, surfaced on the next snapshot.
     private var lastAgentReply: String?
-    /// When `lastAgentReply` was cached; nil until the first watch query
-    /// answers. The watch uses this to detect a fresh reply and to render a
-    /// relative "Xm ago" timestamp under it.
+    /// Confirmation chips from the last wrist capture, surfaced on the next
+    /// snapshot. Mutually exclusive with `lastAgentReply`.
+    private var lastCaptureResults: [CaptureResult] = []
+    /// When `lastAgentReply`/`lastCaptureResults` was last updated; nil until
+    /// the first watch submission resolves. The watch uses this to detect a
+    /// fresh reply and to render a relative "Xm ago" timestamp under it.
     private var lastAgentReplyAt: Date?
 
     /// Nightly-ish Engram maintenance; call on app background.
@@ -426,6 +445,9 @@ final class AppContainer {
             },
             agentReply: lastAgentReply,
             agentReplyAt: lastAgentReplyAt,
+            captureResults: lastCaptureResults.map {
+                WidgetSnapshot.CaptureLine(summary: $0.summary, isError: $0.isError)
+            },
             waterToday: health.waterToday,
             waterGoal: HealthStore.waterGoalGlasses,
             meditatedToday: mindfulness.hasMeditated(),

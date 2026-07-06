@@ -183,12 +183,12 @@ struct WatchRootView: View {
 
     private var askAgent: some View {
         VStack(alignment: .leading, spacing: 6) {
-            TextFieldLink(prompt: Text("Ask your agent")) {
+            TextFieldLink(prompt: Text("Tell or ask your agent")) {
                 Label("Ask", systemImage: "mic.fill")
             } onSubmit: { text in
                 let query = text.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !query.isEmpty else { return }
-                let reachable = sendCommand(.askAgent(query: query))
+                let reachable = sendCommand(.capture(text: query))
                 askState.submitted(reachable: reachable)
             }
             .font(.caption2)
@@ -196,17 +196,20 @@ struct WatchRootView: View {
 
             switch askState.phase {
             case .idle:
-                if let reply = snapshot.agentReply, !reply.isEmpty {
+                if !snapshot.captureResults.isEmpty {
+                    captureChips
+                } else if let reply = snapshot.agentReply, !reply.isEmpty {
                     Text(reply)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    if let at = snapshot.agentReplyAt {
-                        TimelineView(.periodic(from: at, by: 60)) { context in
-                            Text(RelativeTimeFormat.short(from: at, to: context.date))
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
+                }
+                if let at = snapshot.agentReplyAt,
+                   !snapshot.captureResults.isEmpty || !(snapshot.agentReply ?? "").isEmpty {
+                    TimelineView(.periodic(from: at, by: 60)) { context in
+                        Text(RelativeTimeFormat.short(from: at, to: context.date))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                     }
                 }
             case .thinking:
@@ -222,6 +225,21 @@ struct WatchRootView: View {
                 Text("Will ask when your iPhone is nearby.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var captureChips: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(Array(snapshot.captureResults.enumerated()), id: \.offset) { _, line in
+                HStack(alignment: .top, spacing: 4) {
+                    Image(systemName: line.isError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                        .foregroundStyle(line.isError ? Color.orange : Color.green)
+                    Text(line.summary)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
