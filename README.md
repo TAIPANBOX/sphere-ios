@@ -174,6 +174,7 @@ Keychain and is used only when you pick a cloud model.
   <img src="docs/screenshots/capture.png" width="180" alt="Capture sheet">
   <img src="docs/screenshots/health.png" width="180" alt="Health">
   <img src="docs/screenshots/finance.png" width="180" alt="Finance">
+  <img src="docs/screenshots/career.png" width="180" alt="Career sphere">
   <img src="docs/screenshots/mindfulness.png" width="180" alt="Mindfulness, light">
   <img src="docs/screenshots/cloud-models.png" width="180" alt="Cloud model picker">
   <img src="docs/screenshots/import-device.png" width="180" alt="Import from device">
