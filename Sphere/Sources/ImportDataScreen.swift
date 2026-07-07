@@ -2,10 +2,10 @@ import SwiftUI
 import SphereCore
 
 /// Settings → "Import from device": one screen to pull Apple Health,
-/// Contacts, and Calendar data in, replacing the old first-run "Connect
-/// Apple Health" card on the Health screen (which could render invisible —
-/// see docs/BACKLOG.md). Each row's action is idempotent, so re-running an
-/// import never duplicates data.
+/// Contacts, and Calendar & Reminders data in, replacing the old first-run
+/// "Connect Apple Health" card on the Health screen (which could render
+/// invisible — see docs/BACKLOG.md). Each row's action is idempotent, so
+/// re-running an import never duplicates data.
 struct ImportDataScreen: View {
     let container: AppContainer
 
@@ -19,7 +19,8 @@ struct ImportDataScreen: View {
                 ImportRow(
                     icon: "heart.fill", tint: .pink,
                     title: "Apple Health",
-                    caption: "Steps, heart rate, sleep and cycle — nothing leaves your device.",
+                    caption: "Steps, heart rate, sleep, cycle, workouts and weight — "
+                        + "nothing leaves your device.",
                     state: healthState
                 ) {
                     await importHealth()
@@ -34,8 +35,9 @@ struct ImportDataScreen: View {
                 }
                 ImportRow(
                     icon: "calendar", tint: .orange,
-                    title: "Calendar",
-                    caption: "Lets your morning brief see today's events.",
+                    title: "Calendar & Reminders",
+                    caption: "Today's events for your morning brief, plus open "
+                        + "reminders into Career tasks.",
                     state: calendarState
                 ) {
                     await importCalendar()
@@ -54,13 +56,20 @@ struct ImportDataScreen: View {
         healthState = .running
         _ = await container.health.requestHealthAccess()
         await container.health.refreshMetrics()
-        let nights = await container.rest.importSleepFromHealth(days: 30)
+        let nights = await container.rest.importSleepFromHealth(days: 90)
         let cycles = await container.health.importCycleFromHealth()
-        var message = "Connected. Imported \(nights) night\(nights == 1 ? "" : "s") of sleep."
-        if cycles > 0 {
-            message += " \(cycles) cycle\(cycles == 1 ? "" : "s") logged."
-        }
-        healthState = .done(message)
+        let workouts = await container.health.importWorkoutsFromHealth()
+        let weighIns = await container.health.importWeightsFromHealth()
+
+        var parts: [String] = []
+        if workouts > 0 { parts.append("\(workouts) workout\(workouts == 1 ? "" : "s")") }
+        if weighIns > 0 { parts.append("\(weighIns) weigh-in\(weighIns == 1 ? "" : "s")") }
+        if nights > 0 { parts.append("\(nights) night\(nights == 1 ? "" : "s") of sleep") }
+        if cycles > 0 { parts.append("\(cycles) cycle\(cycles == 1 ? "" : "s")") }
+
+        healthState = .done(
+            parts.isEmpty ? "Connected. Nothing new to import." : "Connected. Imported \(parts.joined(separator: ", "))."
+        )
     }
 
     // MARK: - Contacts
@@ -81,15 +90,18 @@ struct ImportDataScreen: View {
         contactsState = .done("Imported \(added) contact\(added == 1 ? "" : "s").")
     }
 
-    // MARK: - Calendar
+    // MARK: - Calendar & Reminders
 
     private func importCalendar() async {
         calendarState = .running
-        let granted = await EventKitService().requestAccess()
-        if granted {
+        let calendarGranted = await container.eventKit.requestAccess()
+        if calendarGranted {
             await container.home.refreshCalendar()
         }
-        calendarState = .done(granted ? "Calendar connected." : "Access declined.")
+        let reminders = await container.career.importRemindersFromDevice()
+
+        let base = calendarGranted ? "Calendar connected" : "Calendar access declined"
+        calendarState = .done("\(base) · \(reminders) reminder\(reminders == 1 ? "" : "s") imported.")
     }
 }
 
