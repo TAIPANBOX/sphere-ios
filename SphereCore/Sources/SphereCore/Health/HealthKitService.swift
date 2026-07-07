@@ -298,17 +298,18 @@ public final class HealthKitService: HealthMetricsProviding, MindfulSessionWriti
     /// Workouts logged in Health over the trailing `days`, excluding samples
     /// this app itself wrote (we already write workouts TO HealthKit via
     /// `writeWorkout`, so re-reading our own samples would duplicate them on
-    /// import). Excluded via a predicate over `HKSource.default()` (this app).
+    /// import). We can't exclude them via a predicate over `HKSource.default()`:
+    /// that call raises an `NSException` unless the HealthKit entitlement is
+    /// properly signed (always true for CODE_SIGNING_ALLOWED=NO simulator
+    /// builds, and possible in other entitlement edge cases), which crashed
+    /// the app on tapping Import. Instead, fetch unfiltered and drop our own
+    /// samples in Swift by comparing `sourceRevision.source.bundleIdentifier`.
     public func recentWorkouts(days: Int) async -> [HealthWorkoutSample] {
         guard HKHealthStore.isHealthDataAvailable(), days > 0 else { return [] }
         let end = Date()
         let start = Calendar.current.startOfDay(for: end).addingTimeInterval(Double(-days) * 86_400)
-        let notOurs = NSCompoundPredicate(notPredicateWithSubpredicate:
-            HKQuery.predicateForObjects(from: HKSource.default())
-        )
-        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-            HKQuery.predicateForSamples(withStart: start, end: end), notOurs,
-        ])
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end)
+        let ownBundleID = Bundle.main.bundleIdentifier
         return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: HKObjectType.workoutType(),
@@ -316,18 +317,20 @@ public final class HealthKitService: HealthMetricsProviding, MindfulSessionWriti
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: nil
             ) { _, samples, _ in
-                let workouts = (samples as? [HKWorkout] ?? []).map { workout -> HealthWorkoutSample in
-                    let energy: Double? = workout
-                        .statistics(for: HKQuantityType(.activeEnergyBurned))?
-                        .sumQuantity()?
-                        .doubleValue(for: .kilocalorie())
-                    return HealthWorkoutSample(
-                        date: workout.startDate,
-                        durationMinutes: Int((workout.duration / 60).rounded()),
-                        type: Self.workoutType(for: workout.workoutActivityType),
-                        calories: energy.map { Int($0.rounded()) }
-                    )
-                }
+                let workouts = (samples as? [HKWorkout] ?? [])
+                    .filter { $0.sourceRevision.source.bundleIdentifier != ownBundleID }
+                    .map { workout -> HealthWorkoutSample in
+                        let energy: Double? = workout
+                            .statistics(for: HKQuantityType(.activeEnergyBurned))?
+                            .sumQuantity()?
+                            .doubleValue(for: .kilocalorie())
+                        return HealthWorkoutSample(
+                            date: workout.startDate,
+                            durationMinutes: Int((workout.duration / 60).rounded()),
+                            type: Self.workoutType(for: workout.workoutActivityType),
+                            calories: energy.map { Int($0.rounded()) }
+                        )
+                    }
                 continuation.resume(returning: workouts)
             }
             store.execute(query)
@@ -335,17 +338,14 @@ public final class HealthKitService: HealthMetricsProviding, MindfulSessionWriti
     }
 
     /// Body-mass entries logged in Health over the trailing `days`, excluding
-    /// samples this app wrote (see `recentWorkouts`).
+    /// samples this app wrote (see `recentWorkouts` for why bundle-id
+    /// filtering is used instead of an `HKSource.default()` predicate).
     public func weightHistory(days: Int) async -> [HealthWeightSample] {
         guard HKHealthStore.isHealthDataAvailable(), days > 0 else { return [] }
         let end = Date()
         let start = Calendar.current.startOfDay(for: end).addingTimeInterval(Double(-days) * 86_400)
-        let notOurs = NSCompoundPredicate(notPredicateWithSubpredicate:
-            HKQuery.predicateForObjects(from: HKSource.default())
-        )
-        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-            HKQuery.predicateForSamples(withStart: start, end: end), notOurs,
-        ])
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end)
+        let ownBundleID = Bundle.main.bundleIdentifier
         return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: HKQuantityType(.bodyMass),
@@ -353,12 +353,14 @@ public final class HealthKitService: HealthMetricsProviding, MindfulSessionWriti
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: nil
             ) { _, samples, _ in
-                let weights = (samples as? [HKQuantitySample] ?? []).map { sample in
-                    HealthWeightSample(
-                        date: sample.startDate,
-                        kg: sample.quantity.doubleValue(for: .gramUnit(with: .kilo))
-                    )
-                }
+                let weights = (samples as? [HKQuantitySample] ?? [])
+                    .filter { $0.sourceRevision.source.bundleIdentifier != ownBundleID }
+                    .map { sample in
+                        HealthWeightSample(
+                            date: sample.startDate,
+                            kg: sample.quantity.doubleValue(for: .gramUnit(with: .kilo))
+                        )
+                    }
                 continuation.resume(returning: weights)
             }
             store.execute(query)
