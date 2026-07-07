@@ -498,13 +498,14 @@ public struct HealthScreen: View {
 
 /// First-run coaching card: prompts the user to grant HealthKit access so
 /// metrics stop reading "—". Mirrors `EmptyStateCard`'s look; kept separate
-/// because its action is async and it needs its own disappear animation once
-/// the connect flow completes (rather than opening a sheet).
+/// because its action is async (rather than opening a sheet). The parent
+/// `HealthScreen` owns show/hide via `store.needsHealthConnect` plus a
+/// `.transition(.opacity)` + `.sphereAnimation`, so this view must always
+/// render fully visible when the parent includes it in the tree.
 struct ConnectHealthCard: View {
     let accent: Color
     let onConnect: () async -> Void
 
-    @State private var appeared = false
     @State private var connecting = false
 
     var body: some View {
@@ -535,10 +536,6 @@ struct ConnectHealthCard: View {
         }
         .frame(maxWidth: .infinity)
         .sphereCard()
-        .opacity(appeared ? 1 : 0)
-        .scaleEffect(appeared ? 1 : 0.96)
-        .sphereAnimation(SphereMotion.gentle, value: appeared)
-        .onAppear { appeared = true }
     }
 }
 

@@ -45,6 +45,12 @@ public final class HealthStore {
     public private(set) var cycleEntries: [CycleEntry] = []
     public private(set) var energyLevels: [String: Int] = [:]
     public private(set) var mealQuality: [String: Int] = [:]
+    /// Stored (not derived) so `needsHealthConnect` is a real @Observable
+    /// property that view bodies can track — reading through to
+    /// `connectPreferences` on every access left nothing for SwiftUI to
+    /// invalidate on, which is why `needsHealthConnect` alone was not a
+    /// reliable diffing signal for the connect card's visibility.
+    public private(set) var healthConnectCompleted: Bool
 
     public nonisolated static let waterGoalGlasses = 8
     public nonisolated static let maxWaterGlasses = 12
@@ -65,6 +71,7 @@ public final class HealthStore {
         self.engram = engram
         self.metricsProvider = metricsProvider
         self.connectPreferences = connectPreferences
+        self.healthConnectCompleted = connectPreferences.hasCompletedHealthConnect()
     }
 
     public func load(today: Date = Date()) async throws {
@@ -113,13 +120,14 @@ public final class HealthStore {
     /// hasn't been through the flow yet. HealthKit hides read-authorization
     /// status, so this is tracked app-side rather than derived from it.
     public var needsHealthConnect: Bool {
-        hasHealthProvider && !connectPreferences.hasCompletedHealthConnect()
+        hasHealthProvider && !healthConnectCompleted
     }
 
     /// Marks the connect flow as done regardless of the outcome — the user
     /// may have denied some data types, but re-showing the card every launch
     /// would be worse than a metric silently reading "—".
     public func markHealthConnectCompleted() {
+        healthConnectCompleted = true
         connectPreferences.setCompletedHealthConnect(true)
     }
 

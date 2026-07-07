@@ -250,6 +250,34 @@ struct HealthStoreTests {
         #expect(!reloaded.needsHealthConnect)
     }
 
+    /// `healthConnectCompleted` is a stored @Observable property seeded from
+    /// prefs at init — this is what makes `needsHealthConnect` trackable by
+    /// SwiftUI view bodies, unlike reading through to prefs on every access.
+    @Test func healthConnectCompletedStoredPropertySeededFromPrefsAtInit() throws {
+        let (freshStore, _) = try makeStore(
+            metrics: FakeMetricsProvider(), connectPreferences: FakeHealthConnectPreferences()
+        )
+        #expect(!freshStore.healthConnectCompleted)
+
+        let (completedStore, _) = try makeStore(
+            metrics: FakeMetricsProvider(),
+            connectPreferences: FakeHealthConnectPreferences(completed: true)
+        )
+        #expect(completedStore.healthConnectCompleted)
+    }
+
+    @Test func markHealthConnectCompletedSetsStoredPropertyAndWritesThroughToPrefs() throws {
+        let prefs = FakeHealthConnectPreferences()
+        let (store, _) = try makeStore(metrics: FakeMetricsProvider(), connectPreferences: prefs)
+        #expect(!store.healthConnectCompleted)
+
+        store.markHealthConnectCompleted()
+
+        #expect(store.healthConnectCompleted)
+        #expect(!store.needsHealthConnect)
+        #expect(prefs.hasCompletedHealthConnect())
+    }
+
     // MARK: - Agent tools
 
     @Test func logWaterToolAddsGlassesAndConfirms() async throws {
