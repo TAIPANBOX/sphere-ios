@@ -39,6 +39,11 @@ updates, **P3** = later / opportunistic.
 
 ## Health
 
+- The Health screen's first-run "Connect Apple Health" card was removed
+  (2026-07-07) — it could render invisible on screen re-entry and the root
+  cause stayed elusive across two fix attempts. Device-data onboarding now
+  lives in Settings → Import from device, one screen for Apple Health,
+  Contacts, and Calendar.
 - Parity: doctors list, menstrual-cycle tracker (female profile), daily stress entry lived here too, conditions list surfaced (profile has it). **P2**
 - New: medication reminders at dose times (uses C1); weight trend chart with goal line; water goal adaptive to weather/workouts; lab-result out-of-range highlighting already done — add history per marker. **P1–P2**
 - New: HealthKit background delivery so steps/sleep update without opening the app. **P2**

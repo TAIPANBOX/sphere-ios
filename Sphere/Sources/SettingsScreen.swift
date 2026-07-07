@@ -124,6 +124,7 @@ struct SettingsScreen: View {
                     }
                 }
                 .disabled(exporting)
+                NavigationLink("Import from device") { ImportDataScreen(container: container) }
                 NavigationLink("Privacy & data") { PrivacyScreen() }
             } header: {
                 Text("Privacy & Data")
