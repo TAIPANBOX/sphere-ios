@@ -9,8 +9,6 @@ public struct RestScreen: View {
     /// Annual paid-time-off allowance from the profile (drives the ledger).
     private let vacationAllowance: Int?
     @State private var showingLogSleep = false
-    @State private var importing = false
-    @State private var importResult: String?
 
     private let accent = SphereTheme.accent(for: .rest)
 
@@ -39,9 +37,6 @@ public struct RestScreen: View {
                     sleepDebtCard
                 }
                 sleepChartCard
-                if store.hasHealthProvider {
-                    healthImportRow
-                }
                 scheduleCard
                 if let allowance = vacationAllowance {
                     vacationCard(allowance: allowance)
@@ -73,41 +68,9 @@ public struct RestScreen: View {
         }
     }
 
-    private var healthImportRow: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "heart.fill").font(.title3).foregroundStyle(.pink)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Apple Health").font(.subheadline.weight(.medium))
-                Text(importResult ?? "Import last nights' sleep automatically.")
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-            Spacer()
-            if importing {
-                ProgressView()
-            } else {
-                Button("Import") {
-                    Task { await runImport() }
-                }
-                .buttonStyle(.bordered)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .sphereCard()
-    }
-
     private func autoImport() async {
         guard store.hasHealthProvider else { return }
-        let added = await store.importSleepFromHealth(days: 30)
-        if added > 0 { importResult = "Added \(added) night\(added == 1 ? "" : "s")." }
-    }
-
-    private func runImport() async {
-        importing = true
-        let added = await store.importSleepFromHealth(days: 30)
-        importResult = added > 0
-            ? "Added \(added) night\(added == 1 ? "" : "s")."
-            : "You're up to date."
-        importing = false
+        _ = await store.importSleepFromHealth(days: 30)
     }
 
     // MARK: - Sleep debt (gem)
