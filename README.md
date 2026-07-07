@@ -51,6 +51,9 @@ no single-sphere app can build:
 - **Cross-sphere correlation engine** — day-keyed metrics across every sphere,
   surfacing honest patterns ("on days your sleep is higher, your mood tends to
   be higher — a pattern, not proof").
+- **[Engram](#engram--memory-that-behaves-like-memory)** — one on-device memory
+  every agent shares, that fades what you stop caring about instead of keeping
+  everything forever.
 - **Weekly narrative review + Life Wheel** — a warm recap and a feeling-vs-data
   gap chart across the twelve spheres.
 - **N-of-1 experiments** — "cut caffeine after 2pm for two weeks," measured
@@ -97,6 +100,80 @@ and budget pace, delivered as a notification before you've opened the app.
 <p align="center">
   <img src="docs/screenshots/home-menu.png" width="260" alt="Home quick actions: Quick log, Weekly review, Life Wheel, Experiments, Analyze my patterns">
 </p>
+
+---
+
+## Engram — memory that behaves like memory
+
+All twelve sphere agents write into one shared episodic memory: log a workout,
+mention a habit, tell an agent something in passing, and it's remembered — by
+every agent, not just the one you told. Left alone, a memory fades. Recall it
+and it strengthens. Fade far enough and it's deleted. Forgetting is not a bug
+here: it keeps recall relevant, keeps the database small, and keeps agents
+from arguing with facts that stopped being true months ago.
+
+### How it works
+
+| Stage | Mechanics |
+|---|---|
+| **Write** | Sphere stores call `engram?.note(agentId:content:tags:salience:)` after a mutation (e.g. `HealthStore.logWeight`, `addWorkout`, `addMedication`). Each memory gets a salience (default 0.7), free-text tags, and its own row in a `memories` table + FTS5 shadow index. |
+| **Recall** | `EngramStore.recall(_:agentId:k:)` sanitizes the query (`sanitizeFtsQuery` keeps only letters/digits, quotes each token, OR-joins them so stray punctuation can't break FTS5 syntax), runs it through `bm25(memories_fts)`, and falls back to the `k` most recent memories for that agent when the query is empty or matches nothing. `crossAgentRecall` runs the same query with no agent filter — this is what powers the Meta Agent's morning brief and full-text search. |
+| **Reinforcement** | Every memory returned by recall — FTS hit or recent-fallback — has `access_count` incremented and `accessed_at` reset to now. A fact you keep asking about keeps resetting its own decay clock; one you never revisit just ages. |
+| **Decay & pruning** | A nightly-ish job recomputes `importance = salience · e^(-λ·days_since_access) + α·ln(1 + access_count) + β·emotional_valence` for every row, then deletes anything under a threshold. |
+
+### Lifecycle
+
+```mermaid
+flowchart LR
+    A[Agent observes\na sphere event] --> B[note / observe\nsalience + tags stored]
+    B --> C{User asks\nsomething later}
+    C --> D[FTS5 MATCH\n+ BM25 ranking]
+    D -->|hit| E[Memory returned\naccess_count++, accessed_at=now]
+    E -->|↺ reinforced| B
+    D -->|no hit| F[recent-k fallback]
+    B -.untouched.-> G[importance decays\nEbbinghaus curve]
+    G --> H{importance < 0.1?}
+    H -->|yes| I[Pruned — row deleted]
+    H -->|no| G
+```
+
+### Retention over time
+
+The defaults (`λ = 0.1`, `α = 0.2`, prune threshold `0.1`, salience `0.7`) give
+roughly a 7-day half-life absent any reinforcement. Computed from the actual
+formula in `DecayConfig.swift`:
+
+```mermaid
+xychart-beta
+    title "Memory strength over 42 days"
+    x-axis "Day" [0, 7, 14, 21, 28, 35, 42]
+    y-axis "Importance" 0 --> 1.1
+    line "recalled weekly (reinforced)" [0.70, 0.84, 0.92, 0.98, 1.02, 1.06, 1.09]
+    line "never recalled (decays)" [0.70, 0.35, 0.17, 0.086, 0.043, 0.021, 0.011]
+    line "prune threshold" [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+```
+
+A memory nobody touches crosses the 0.1 prune threshold around day 20 and is
+deleted on the next maintenance pass. One recalled weekly gains more from
+`α·ln(1 + access_count)` each visit than it loses to decay, so its importance
+climbs instead. Maintenance (`runDecay` then `prune`) runs once per app
+backgrounding, wired in `AppContainer.runMemoryMaintenance()` and triggered
+from `SphereApp` on `scenePhase == .background`.
+
+### Why this is different
+
+Most assistant memory is one of three things: nothing (every chat starts
+blank), everything (context windows and cloud vector stores that never
+forget and never stop growing), or a manual "pin this" button. Engram runs
+actual memory dynamics — decay, reinforcement, pruning — on-device, with no
+embeddings and no cloud round-trip; recall works offline because it's a SQL
+query, not an API call. The whole store is one SQLite file
+(`sphere.engram.db`), separate from the sphere data file, that you can
+inspect, back up, or delete outright. It is not currently part of the JSON
+data export in Settings.
+
+Post-launch, the plan (see `CLAUDE.md`) is Engram v2: on-device reflection
+and hybrid BM25 + embedding recall — a roadmap item, not shipped.
 
 ---
 
@@ -205,8 +282,9 @@ Watch/                 watchOS app + complication + WCSession bridge.
 - **Persistence:** [GRDB](https://github.com/groue/GRDB.swift) with additive
   migrations; one App Group container shared with the widget, App Intents, and
   watch.
-- **Memory:** Engram v1.5 — episodic memory with FTS5/BM25 recall, access
-  reinforcement, and Ebbinghaus decay.
+- **Memory:** [Engram](#engram--memory-that-behaves-like-memory) v1.5 —
+  episodic memory with FTS5/BM25 recall, access reinforcement, and
+  Ebbinghaus decay.
 - **LLM:** one OpenAI-compatible cloud engine (OpenRouter) behind a single
   `LLMEngine` seam, plus Apple Foundation Models and MLX-backed local models.
 - **Sync:** CloudKit; wearables via HealthKit — no per-service OAuth.
