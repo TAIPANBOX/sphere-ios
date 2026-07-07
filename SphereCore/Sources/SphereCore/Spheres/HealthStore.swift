@@ -324,6 +324,75 @@ public final class HealthStore {
         return imported
     }
 
+    // MARK: - Workout & weight history import
+
+    /// Pulls workout history from HealthKit and adds any that aren't already
+    /// logged. A workout is considered a duplicate of an existing one if it
+    /// falls on the same calendar day, has the same type, and its duration is
+    /// within a minute of an existing entry — loose enough to tolerate
+    /// rounding between HealthKit's exact duration and a manually-typed one.
+    /// Own-app-written samples are already excluded at the HealthKit query
+    /// level (`HealthKitService.recentWorkouts`), so this dedup only guards
+    /// against overlap with manually-logged workouts. No Engram note: a bulk
+    /// import of up to a year of workouts would flood memory with entries the
+    /// user didn't actively log just now. Returns how many were imported.
+    @discardableResult
+    public func importWorkoutsFromHealth(days: Int = 365) async -> Int {
+        guard let metricsProvider else { return 0 }
+        _ = await metricsProvider.requestAuthorization()
+        let samples = await metricsProvider.recentWorkouts(days: days)
+        guard !samples.isEmpty else { return 0 }
+
+        var imported = 0
+        for sample in samples {
+            let key = DayKey.make(sample.date)
+            let isDuplicate = workouts.contains { existing in
+                DayKey.make(existing.date) == key
+                    && existing.type == sample.type
+                    && abs(existing.durationMinutes - sample.durationMinutes) < 1
+            }
+            guard !isDuplicate else { continue }
+            let workout = Workout(
+                id: "hkworkout-\(key)-\(sample.type.rawValue)-\(sample.durationMinutes)",
+                type: sample.type,
+                durationMinutes: sample.durationMinutes,
+                caloriesBurned: sample.calories,
+                date: sample.date,
+                note: "From Apple Health"
+            )
+            try? await database.writer.write { db in try workout.save(db) }
+            workouts.append(workout)
+            imported += 1
+        }
+        return imported
+    }
+
+    /// Pulls weight history from HealthKit and fills days that don't already
+    /// have a weigh-in logged (a manual entry for that day is never
+    /// overwritten). No Engram note — see `importWorkoutsFromHealth`. Returns
+    /// how many were imported.
+    @discardableResult
+    public func importWeightsFromHealth(days: Int = 365) async -> Int {
+        guard let metricsProvider else { return 0 }
+        _ = await metricsProvider.requestAuthorization()
+        let samples = await metricsProvider.weightHistory(days: days)
+        guard !samples.isEmpty else { return 0 }
+
+        var seenDayKeys = Set(weights.map(\.dateKey))
+        var imported = 0
+        for sample in samples {
+            let key = DayKey.make(sample.date)
+            guard !seenDayKeys.contains(key) else { continue }
+            let entry = WeightEntry(date: sample.date, kg: sample.kg)
+            try? await database.writer.write { db in try entry.save(db) }
+            weights.append(entry)
+            seenDayKeys.insert(key)
+            imported += 1
+        }
+        if imported > 0 { weights.sort { $0.date < $1.date } }
+        return imported
+    }
+
     // MARK: - Energy & meal (one-tap 1–5 logs)
 
     public func todayEnergy(asOf now: Date = Date()) -> Int? { energyLevels[DayKey.make(now)] }

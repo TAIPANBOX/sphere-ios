@@ -20,8 +20,10 @@ public final class HealthKitService: HealthMetricsProviding, MindfulSessionWriti
             HKQuantityType(.heartRate),
             HKQuantityType(.activeEnergyBurned),
             HKQuantityType(.heartRateVariabilitySDNN),
+            HKQuantityType(.bodyMass),
             HKCategoryType(.sleepAnalysis),
             HKCategoryType(.menstrualFlow),
+            HKObjectType.workoutType(),
         ]
     }
 
@@ -288,6 +290,95 @@ public final class HealthKitService: HealthMetricsProviding, MindfulSessionWriti
                 continuation.resume(returning: seconds / 3_600)
             }
             store.execute(query)
+        }
+    }
+
+    // MARK: - Workout & weight history import
+
+    /// Workouts logged in Health over the trailing `days`, excluding samples
+    /// this app itself wrote (we already write workouts TO HealthKit via
+    /// `writeWorkout`, so re-reading our own samples would duplicate them on
+    /// import). Excluded via a predicate over `HKSource.default()` (this app).
+    public func recentWorkouts(days: Int) async -> [HealthWorkoutSample] {
+        guard HKHealthStore.isHealthDataAvailable(), days > 0 else { return [] }
+        let end = Date()
+        let start = Calendar.current.startOfDay(for: end).addingTimeInterval(Double(-days) * 86_400)
+        let notOurs = NSCompoundPredicate(notPredicateWithSubpredicate:
+            HKQuery.predicateForObjects(from: HKSource.default())
+        )
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            HKQuery.predicateForSamples(withStart: start, end: end), notOurs,
+        ])
+        return await withCheckedContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: HKObjectType.workoutType(),
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: nil
+            ) { _, samples, _ in
+                let workouts = (samples as? [HKWorkout] ?? []).map { workout -> HealthWorkoutSample in
+                    let energy: Double? = workout
+                        .statistics(for: HKQuantityType(.activeEnergyBurned))?
+                        .sumQuantity()?
+                        .doubleValue(for: .kilocalorie())
+                    return HealthWorkoutSample(
+                        date: workout.startDate,
+                        durationMinutes: Int((workout.duration / 60).rounded()),
+                        type: Self.workoutType(for: workout.workoutActivityType),
+                        calories: energy.map { Int($0.rounded()) }
+                    )
+                }
+                continuation.resume(returning: workouts)
+            }
+            store.execute(query)
+        }
+    }
+
+    /// Body-mass entries logged in Health over the trailing `days`, excluding
+    /// samples this app wrote (see `recentWorkouts`).
+    public func weightHistory(days: Int) async -> [HealthWeightSample] {
+        guard HKHealthStore.isHealthDataAvailable(), days > 0 else { return [] }
+        let end = Date()
+        let start = Calendar.current.startOfDay(for: end).addingTimeInterval(Double(-days) * 86_400)
+        let notOurs = NSCompoundPredicate(notPredicateWithSubpredicate:
+            HKQuery.predicateForObjects(from: HKSource.default())
+        )
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            HKQuery.predicateForSamples(withStart: start, end: end), notOurs,
+        ])
+        return await withCheckedContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: HKQuantityType(.bodyMass),
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: nil
+            ) { _, samples, _ in
+                let weights = (samples as? [HKQuantitySample] ?? []).map { sample in
+                    HealthWeightSample(
+                        date: sample.startDate,
+                        kg: sample.quantity.doubleValue(for: .gramUnit(with: .kilo))
+                    )
+                }
+                continuation.resume(returning: weights)
+            }
+            store.execute(query)
+        }
+    }
+
+    /// Maps HealthKit's workout taxonomy onto our smaller `WorkoutType` enum;
+    /// anything not explicitly listed falls back to `.other`.
+    private static func workoutType(for activity: HKWorkoutActivityType) -> WorkoutType {
+        switch activity {
+        case .running: .running
+        case .cycling: .cycling
+        case .swimming: .swimming
+        case .traditionalStrengthTraining, .functionalStrengthTraining, .crossTraining,
+             .coreTraining, .mixedCardio:
+            .gym
+        case .yoga, .pilates, .flexibility, .mindAndBody: .yoga
+        case .walking, .hiking: .walking
+        case .highIntensityIntervalTraining: .hiit
+        default: .other
         }
     }
 }

@@ -41,6 +41,12 @@ public protocol HealthMetricsProviding: Sendable {
     func recentSleepNights(days: Int) async -> [SleepNight]
     /// Per-day menstrual flow for the trailing `days`.
     func recentCycleFlow(days: Int) async -> [CycleFlowDay]
+    /// Workouts logged in Health over the trailing `days` (excludes samples
+    /// this app itself wrote — see `HealthKitService.recentWorkouts`).
+    func recentWorkouts(days: Int) async -> [HealthWorkoutSample]
+    /// Body-mass entries logged in Health over the trailing `days` (excludes
+    /// samples this app itself wrote).
+    func weightHistory(days: Int) async -> [HealthWeightSample]
     /// Write-back: mirror a Sphere log into Apple Health (no-op when unavailable).
     func writeWeight(kg: Double, date: Date) async
     func writeWaterGlass(date: Date) async
@@ -50,9 +56,38 @@ public protocol HealthMetricsProviding: Sendable {
 public extension HealthMetricsProviding {
     func recentSleepNights(days: Int) async -> [SleepNight] { [] }
     func recentCycleFlow(days: Int) async -> [CycleFlowDay] { [] }
+    func recentWorkouts(days: Int) async -> [HealthWorkoutSample] { [] }
+    func weightHistory(days: Int) async -> [HealthWeightSample] { [] }
     func writeWeight(kg: Double, date: Date) async {}
     func writeWaterGlass(date: Date) async {}
     func writeWorkout(type: WorkoutType, minutes: Int, calories: Int?, date: Date) async {}
+}
+
+/// One workout read back from a health source, flattened so the import logic
+/// stays HealthKit-free and testable.
+public struct HealthWorkoutSample: Sendable, Equatable {
+    public let date: Date
+    public let durationMinutes: Int
+    public let type: WorkoutType
+    public let calories: Int?
+
+    public init(date: Date, durationMinutes: Int, type: WorkoutType, calories: Int? = nil) {
+        self.date = date
+        self.durationMinutes = durationMinutes
+        self.type = type
+        self.calories = calories
+    }
+}
+
+/// One body-mass reading read back from a health source.
+public struct HealthWeightSample: Sendable, Equatable {
+    public let date: Date
+    public let kg: Double
+
+    public init(date: Date, kg: Double) {
+        self.date = date
+        self.kg = kg
+    }
 }
 
 /// Write-back seam for the Mindfulness sphere (HealthKit `mindfulSession` on

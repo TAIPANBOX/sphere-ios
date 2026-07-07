@@ -7,9 +7,13 @@ struct FakeMetricsProvider: HealthMetricsProviding {
         steps: 8_450, heartRate: 62, sleepHours: 7.34, calories: 512.6, hrv: 48.2,
         weeklySteps: [4_000, 9_000, 11_000, 7_000, 10_500, 6_000, 8_450]
     )
+    var workouts: [HealthWorkoutSample] = []
+    var weights: [HealthWeightSample] = []
 
     func requestAuthorization() async -> Bool { true }
     func todayMetrics() async -> HealthMetrics { metrics }
+    func recentWorkouts(days: Int) async -> [HealthWorkoutSample] { workouts }
+    func weightHistory(days: Int) async -> [HealthWeightSample] { weights }
 }
 
 @Suite("HealthStore")
@@ -296,6 +300,123 @@ struct HealthStoreTests {
         #expect(store.cycleEntries.count == 1)
         #expect(store.cycleEntries.first?.flow == .heavy)
         #expect(store.cycleEntries.first?.symptoms == [CycleSymptom.cramps.rawValue])
+    }
+
+    // MARK: - Workout history import
+
+    @Test func importWorkoutsAddsNewOnes() async throws {
+        let now = Date()
+        let provider = FakeMetricsProvider(workouts: [
+            HealthWorkoutSample(date: now, durationMinutes: 40, type: .running, calories: 300),
+            HealthWorkoutSample(date: now.addingTimeInterval(-86_400), durationMinutes: 20, type: .yoga),
+        ])
+        let (store, database) = try makeStore(metrics: provider)
+        try await store.load()
+
+        let imported = await store.importWorkoutsFromHealth()
+        #expect(imported == 2)
+        #expect(store.workouts.count == 2)
+
+        let reloaded = HealthStore(database: database)
+        try await reloaded.load()
+        #expect(reloaded.workouts.count == 2)
+    }
+
+    @Test func importWorkoutsSkipsSameDaySameTypeSimilarDuration() async throws {
+        let now = Date()
+        let (store, _) = try makeStore(metrics: FakeMetricsProvider(workouts: [
+            HealthWorkoutSample(date: now, durationMinutes: 40, type: .running),
+        ]))
+        try await store.load()
+        try await store.addWorkout(Workout(id: "manual", type: .running, durationMinutes: 40, date: now))
+
+        let imported = await store.importWorkoutsFromHealth()
+        #expect(imported == 0)
+        #expect(store.workouts.count == 1)
+    }
+
+    @Test func importWorkoutsKeepsDifferentTypeSameDay() async throws {
+        let now = Date()
+        let (store, _) = try makeStore(metrics: FakeMetricsProvider(workouts: [
+            HealthWorkoutSample(date: now, durationMinutes: 40, type: .running),
+        ]))
+        try await store.load()
+        try await store.addWorkout(Workout(id: "manual", type: .yoga, durationMinutes: 40, date: now))
+
+        let imported = await store.importWorkoutsFromHealth()
+        #expect(imported == 1)
+        #expect(store.workouts.count == 2)
+    }
+
+    @Test func importWorkoutsIsIdempotent() async throws {
+        let now = Date()
+        let (store, _) = try makeStore(metrics: FakeMetricsProvider(workouts: [
+            HealthWorkoutSample(date: now, durationMinutes: 40, type: .running),
+        ]))
+        try await store.load()
+
+        #expect(await store.importWorkoutsFromHealth() == 1)
+        #expect(await store.importWorkoutsFromHealth() == 0)
+        #expect(store.workouts.count == 1)
+    }
+
+    @Test func importWorkoutsWithoutProviderReturnsZero() async throws {
+        let (store, _) = try makeStore()
+        try await store.load()
+        #expect(await store.importWorkoutsFromHealth() == 0)
+    }
+
+    // MARK: - Weight history import
+
+    @Test func importWeightsAddsNewDays() async throws {
+        let now = Date()
+        let provider = FakeMetricsProvider(weights: [
+            HealthWeightSample(date: now, kg: 72.4),
+            HealthWeightSample(date: now.addingTimeInterval(-86_400), kg: 72.8),
+        ])
+        let (store, database) = try makeStore(metrics: provider)
+        try await store.load()
+
+        let imported = await store.importWeightsFromHealth()
+        #expect(imported == 2)
+        #expect(store.weights.count == 2)
+
+        let reloaded = HealthStore(database: database)
+        try await reloaded.load()
+        #expect(reloaded.weights.count == 2)
+    }
+
+    @Test func importWeightsSkipsDayAlreadyLogged() async throws {
+        let now = Date()
+        let (store, _) = try makeStore(metrics: FakeMetricsProvider(weights: [
+            HealthWeightSample(date: now, kg: 72.4),
+        ]))
+        try await store.load()
+        try await store.logWeight(kg: 71.0, on: now)
+
+        let imported = await store.importWeightsFromHealth()
+        #expect(imported == 0)
+        #expect(store.weights.count == 1)
+        #expect(store.latestWeight?.kg == 71.0)
+    }
+
+    @Test func importWeightsDedupsWithinSameCall() async throws {
+        let now = Date()
+        let (store, _) = try makeStore(metrics: FakeMetricsProvider(weights: [
+            HealthWeightSample(date: now, kg: 72.4),
+            HealthWeightSample(date: now.addingTimeInterval(3_600), kg: 72.6),
+        ]))
+        try await store.load()
+
+        let imported = await store.importWeightsFromHealth()
+        #expect(imported == 1)
+        #expect(store.weights.count == 1)
+    }
+
+    @Test func importWeightsWithoutProviderReturnsZero() async throws {
+        let (store, _) = try makeStore()
+        try await store.load()
+        #expect(await store.importWeightsFromHealth() == 0)
     }
 
     @Test func logPeriodToolAndSnapshotSurfaceCycle() async throws {
