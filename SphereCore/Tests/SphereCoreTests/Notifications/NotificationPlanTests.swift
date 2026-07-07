@@ -64,6 +64,11 @@ struct NotificationPlanTests {
         #expect(NotificationCategory.water.idPrefix == "water_")
     }
 
+    @Test func onlyMedicationAndBirthdayAreCriticalDuringWellbeingPause() {
+        let critical = NotificationCategory.allCases.filter(\.isCriticalDuringWellbeingPause)
+        #expect(Set(critical) == [.medication, .birthday])
+    }
+
     @Test func waterRemindersRepeatDailyAtGivenHours() {
         let plans = NotificationPlanBuilder.waterReminders(hours: [10, 16, 99])
         #expect(plans.map(\.id) == ["water_10", "water_16"]) // 99 dropped
@@ -173,6 +178,49 @@ struct NotificationPlanTests {
         )
         #expect(plans[0].actionCategoryIdentifier == nil)
         #expect(plans[0].userInfo.isEmpty)
+    }
+
+    // MARK: - Nudge (proactive-nudge notifications)
+
+    @Test func nudgeNilWhenNoActiveNudge() {
+        #expect(NotificationPlanBuilder.nudge(nil) == nil)
+    }
+
+    @Test func nudgeSchedulesTodayWhenHourNotYetPassed() {
+        let now = cal.date(from: DateComponents(year: 2026, month: 7, day: 4, hour: 9, minute: 0))!
+        let nudge = Nudge(id: "sleep_debt", priority: 60, title: "Sleep debt building", body: "…", cooldownDays: 3)
+        let plan = try! #require(NotificationPlanBuilder.nudge(nudge, hour: 11, asOf: now))
+        #expect(plan.id == "nudge_sleep_debt")
+        #expect(plan.category == .nudge)
+        #expect(plan.title == "Sleep debt building")
+        #expect(!plan.repeats)
+        #expect(plan.dateComponents.year == 2026)
+        #expect(plan.dateComponents.month == 7)
+        #expect(plan.dateComponents.day == 4)
+        #expect(plan.dateComponents.hour == 11)
+        #expect(plan.dateComponents.minute == 0)
+    }
+
+    @Test func nudgeSchedulesTomorrowWhenHourAlreadyPassed() {
+        let now = cal.date(from: DateComponents(year: 2026, month: 7, day: 4, hour: 14, minute: 30))!
+        let nudge = Nudge(id: "stale_contact", priority: 50, title: "Reconnect", body: "…", cooldownDays: 5)
+        let plan = try! #require(NotificationPlanBuilder.nudge(nudge, hour: 11, asOf: now))
+        #expect(plan.dateComponents.day == 5)
+        #expect(plan.dateComponents.hour == 11)
+    }
+
+    @Test func nudgeHasNoActionCategoryAndIsIdempotentById() {
+        let now = date(2026, 7, 4)
+        let nudgeA = Nudge(id: "budget_warning", priority: 70, title: "Budget running low", body: "…", cooldownDays: 7)
+        let planA1 = try! #require(NotificationPlanBuilder.nudge(nudgeA, asOf: now))
+        let planA2 = try! #require(NotificationPlanBuilder.nudge(nudgeA, asOf: now))
+        #expect(planA1.id == planA2.id) // same active nudge re-synced → same id
+        #expect(planA1.actionCategoryIdentifier == nil)
+        #expect(planA1.userInfo.isEmpty)
+
+        let nudgeB = Nudge(id: "plant_water", priority: 40, title: "Thirsty plant", body: "…", cooldownDays: 2)
+        let planB = try! #require(NotificationPlanBuilder.nudge(nudgeB, asOf: now))
+        #expect(planB.id != planA1.id) // a different active nudge → different id
     }
 }
 

@@ -209,10 +209,20 @@ final class AppContainer {
     /// Builds every opted-in reminder category from live store data and syncs
     /// them in one idempotent pass. Managing all categories in a single call
     /// means a category turned off has its pending notifications cleared too.
+    ///
+    /// While the user is in sick/vacation mode (wellbeing pause), only
+    /// health-critical (medication) and social (birthday) reminders are
+    /// built — every other category is a "nag" the user should be shielded
+    /// from. Since every category is still passed to `NotificationEngine.sync`
+    /// as managed, the suppressed categories' pending notifications are
+    /// cleared just like a category the user turned off, and get rebuilt
+    /// automatically on the next sync after the pause ends.
     func syncReminders(asOf now: Date = Date()) async {
         let p = profile.profile
+        let paused = p.isWellbeingPaused(asOf: now)
         func on(_ category: NotificationCategory) -> Bool {
-            p.notificationEnabled(category.rawValue, default: category.defaultOn)
+            guard p.notificationEnabled(category.rawValue, default: category.defaultOn) else { return false }
+            return !paused || category.isCriticalDuringWellbeingPause
         }
 
         var plans: [NotificationPlan] = []
@@ -247,6 +257,9 @@ final class AppContainer {
                 hour: 8
             ))
         }
+        if on(.nudge), let nudgePlan = NotificationPlanBuilder.nudge(nudges.activeNudge, asOf: now) {
+            plans.append(nudgePlan)
+        }
 
         await NotificationEngine.sync(plans, categories: Set(NotificationCategory.allCases))
     }
@@ -264,6 +277,8 @@ final class AppContainer {
     }
 
     /// Sets or clears forgiveness (sick/vacation) mode, then re-applies it.
+    /// Re-syncs reminders so entering/leaving the pause immediately clears or
+    /// restores the non-critical ("nag") notification categories.
     func setWellbeing(_ mode: WellbeingMode, until: Date?) async {
         let now = Date()
         try? await profile.update { profile in
@@ -277,6 +292,7 @@ final class AppContainer {
             }
         }
         applyWellbeing(asOf: now)
+        await syncReminders()
         refreshWidget()
     }
 

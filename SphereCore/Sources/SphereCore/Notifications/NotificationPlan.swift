@@ -24,6 +24,20 @@ public enum NotificationCategory: String, CaseIterable, Sendable {
 
     /// Identifier namespace so a sync of one category never disturbs another.
     public var idPrefix: String { "\(rawValue)_" }
+
+    /// True for categories that must keep firing while the user is in
+    /// sick/vacation mode (`UserProfile.isWellbeingPaused`). Medication is
+    /// health-critical — skipping a dose reminder because the user is sick is
+    /// exactly backwards. Birthdays are social acknowledgment, not a nag, and
+    /// firing once a year is not something wellbeing pause should suppress.
+    /// Everything else (water, bedtime, plant, subscription, morning brief,
+    /// habit, nudge) is a "nag" a paused user should be shielded from.
+    public var isCriticalDuringWellbeingPause: Bool {
+        switch self {
+        case .medication, .birthday: true
+        case .water, .bedtime, .plant, .subscription, .morningBrief, .nudge, .habit: false
+        }
+    }
 }
 
 /// A platform-agnostic description of one scheduled local notification. The
@@ -311,6 +325,38 @@ public enum NotificationPlanBuilder {
                 date: date, hour: hour, asOf: now
             )
         }
+    }
+
+    /// One unobtrusive reminder for the current active nudge (if any), fixed
+    /// at `hour:00` — deliberately away from the 8:00 morning-brief slot.
+    /// Non-repeating: nudges are one-off, computed fresh at each sync from
+    /// `NudgeStore.activeNudge`, which already applies cooldown/dedup, so this
+    /// builder just mirrors whatever it says right now. Scheduled for today
+    /// if `hour` hasn't passed yet, otherwise tomorrow. The nudge's own id is
+    /// folded into the plan id so re-syncing the same active nudge produces
+    /// the same identifier (idempotent) while a new nudge gets a fresh one.
+    public static func nudge(
+        _ nudge: Nudge?, hour: Int = 11, asOf now: Date = Date()
+    ) -> NotificationPlan? {
+        guard let nudge else { return nil }
+        let calendar = gregorian
+        let todayAtHour = calendar.date(
+            bySettingHour: hour, minute: 0, second: 0, of: now
+        ) ?? now
+        let target = todayAtHour > now
+            ? todayAtHour
+            : calendar.date(byAdding: .day, value: 1, to: todayAtHour) ?? todayAtHour
+        var parts = calendar.dateComponents([.year, .month, .day], from: target)
+        parts.hour = hour
+        parts.minute = 0
+        return NotificationPlan(
+            id: NotificationCategory.nudge.idPrefix + nudge.id,
+            category: .nudge,
+            title: nudge.title,
+            body: nudge.body,
+            dateComponents: parts,
+            repeats: false
+        )
     }
 
     private static func ordinalSuffix(_ day: Int) -> String {
