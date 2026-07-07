@@ -279,6 +279,26 @@ public final class EngramStore: Sendable {
         }
     }
 
+    /// Fetches every memory across every agent, in deterministic order
+    /// (`created_at` ascending, then `id`, so a tie is still stable). Used by
+    /// ``DataExporter`` so the JSON export includes Engram alongside the
+    /// sphere database — no memory is left out of the local-first export.
+    /// Does not touch access stats (this is a dump, not a recall).
+    public func dumpAll() async throws -> [EngramMemory] {
+        try await dbWriter.read { db in
+            let rows = try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT id, agent_id, content, tags, salience, emotional_valence,
+                           importance, access_count, created_at, 0.0 AS score
+                    FROM memories
+                    ORDER BY created_at ASC, id ASC
+                    """
+            )
+            return rows.map(Self.memory(from:))
+        }
+    }
+
     /// Fetches a single memory by id (nil when absent). Does not touch access stats.
     public func memory(id: String) async throws -> EngramMemory? {
         try await dbWriter.read { db in

@@ -34,4 +34,48 @@ struct DataExporterTests {
         let goalRows = try #require(tables["goals"] as? [[String: Any]])
         #expect(goalRows.isEmpty)
     }
+
+    @Test func exportWithoutEngramOmitsEngramSection() async throws {
+        let database = try AppDatabase.inMemory()
+        let data = try await DataExporter.exportJSON(from: database)
+        let root = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        #expect(root["engram"] == nil)
+    }
+
+    @Test func exportIncludesEngramMemories() async throws {
+        let database = try AppDatabase.inMemory()
+        let engram = try EngramStore.inMemory()
+        try await engram.observe(
+            agentId: "health", content: "Ran 5km this morning",
+            tags: ["exercise", "cardio"], salience: 0.8, emotionalValence: 0.3
+        )
+        try await engram.observe(agentId: "finance", content: "Paid rent", salience: 0.6)
+
+        let data = try await DataExporter.exportJSON(from: database, engram: engram)
+        let root = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let memories = try #require(root["engram"] as? [[String: Any]])
+        #expect(memories.count == 2)
+
+        let first = try #require(memories.first)
+        #expect(first["agentId"] as? String == "health")
+        #expect(first["content"] as? String == "Ran 5km this morning")
+        #expect(first["tags"] as? [String] == ["exercise", "cardio"])
+        #expect(first["salience"] as? Double == 0.8)
+        #expect(first["emotionalValence"] as? Double == 0.3)
+        #expect(first["accessCount"] as? Int == 0)
+        #expect(first["id"] != nil)
+        #expect(first["createdAt"] != nil)
+        #expect(first["importance"] != nil)
+
+        #expect(memories.last?["content"] as? String == "Paid rent")
+    }
+
+    @Test func exportWithEmptyEngramStoreHasEmptyEngramSection() async throws {
+        let database = try AppDatabase.inMemory()
+        let engram = try EngramStore.inMemory()
+        let data = try await DataExporter.exportJSON(from: database, engram: engram)
+        let root = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let memories = try #require(root["engram"] as? [[String: Any]])
+        #expect(memories.isEmpty)
+    }
 }

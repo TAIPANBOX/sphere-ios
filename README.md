@@ -169,8 +169,8 @@ actual memory dynamics — decay, reinforcement, pruning — on-device, with no
 embeddings and no cloud round-trip; recall works offline because it's a SQL
 query, not an API call. The whole store is one SQLite file
 (`sphere.engram.db`), separate from the sphere data file, that you can
-inspect, back up, or delete outright. It is not currently part of the JSON
-data export in Settings.
+inspect, back up, or delete outright. It's included in the JSON data export
+in Settings, alongside the sphere data.
 
 Post-launch, the plan (see `CLAUDE.md`) is Engram v2: on-device reflection
 and hybrid BM25 + embedding recall — a roadmap item, not shipped.

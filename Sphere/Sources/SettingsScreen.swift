@@ -197,7 +197,9 @@ struct SettingsScreen: View {
     private func runExport() async {
         exporting = true
         defer { exporting = false }
-        guard let data = try? await DataExporter.exportJSON(from: container.database) else { return }
+        guard let data = try? await DataExporter.exportJSON(
+            from: container.database, engram: container.engram
+        ) else { return }
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("sphere-export.json")
         guard (try? data.write(to: url, options: .atomic)) != nil else { return }

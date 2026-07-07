@@ -128,6 +128,22 @@ struct EngramStoreTests {
         #expect(memory.accessCount == 3)
     }
 
+    @Test func dumpAllReturnsEveryMemoryInCreationOrder() async throws {
+        let store = try EngramStore.inMemory()
+        try await store.observe(agentId: "health", content: "First observation", tags: ["a"])
+        try await store.observe(agentId: "finance", content: "Second observation", tags: ["b"])
+
+        let dump = try await store.dumpAll()
+        #expect(dump.count == 2)
+        #expect(dump.map(\.content) == ["First observation", "Second observation"])
+        #expect(Set(dump.map(\.agentId)) == ["health", "finance"])
+    }
+
+    @Test func dumpAllEmptyStoreReturnsEmpty() async throws {
+        let store = try EngramStore.inMemory()
+        #expect(try await store.dumpAll().isEmpty)
+    }
+
     @Test func noteIsFireAndForget() async throws {
         let store = try EngramStore.inMemory()
         store.note(agentId: "goals", content: "Started a new habit")
