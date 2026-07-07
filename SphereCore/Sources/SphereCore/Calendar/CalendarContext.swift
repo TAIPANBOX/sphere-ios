@@ -30,6 +30,34 @@ public protocol CalendarProviding: Sendable {
     func events(from start: Date, to end: Date) async -> [CalendarEvent]
 }
 
+/// One incomplete reminder pulled from the device Reminders app, flattened so
+/// SphereCore stays free of EventKit and the mapping is testable.
+public struct ImportedReminder: Sendable, Equatable, Identifiable {
+    public let id: String
+    public let title: String
+    public let dueDate: Date?
+    public let notes: String?
+
+    public init(id: String, title: String, dueDate: Date? = nil, notes: String? = nil) {
+        self.id = id
+        self.title = title
+        self.dueDate = dueDate
+        self.notes = notes
+    }
+}
+
+/// Reads the device Reminders app. Separate from `CalendarProviding` because
+/// iOS 17+ gates reminders behind their own permission
+/// (`requestFullAccessToReminders`), distinct from calendar access. The method
+/// is named distinctly from `CalendarProviding.requestAccess()` so a single
+/// conforming type (`EventKitService`) can request each permission
+/// independently instead of one implementation satisfying both protocols.
+public protocol RemindersProviding: Sendable {
+    func requestRemindersAccess() async -> Bool
+    /// Incomplete reminders only — done items aren't actionable as tasks.
+    func fetchIncompleteReminders() async -> [ImportedReminder]
+}
+
 /// Pure filtering and formatting of calendar events for Home's agenda card and
 /// the morning brief.
 public enum CalendarContext {

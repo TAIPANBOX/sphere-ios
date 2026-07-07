@@ -3,12 +3,14 @@ import EventKit
 import Foundation
 import SphereCore
 
-/// Live calendar reader backing Home's agenda card and the morning brief.
-/// Read-only; requests full access (iOS 17+).
+/// Live calendar and reminders reader backing Home's agenda card, the
+/// morning brief, and the Career reminders import. Read-only; requests full
+/// access separately for each (iOS 17+ gates calendar and reminders behind
+/// distinct permissions).
 ///
 /// `@unchecked Sendable`: `EKEventStore` is thread-safe and the class holds no
 /// other mutable state.
-final class EventKitService: CalendarProviding, @unchecked Sendable {
+final class EventKitService: CalendarProviding, RemindersProviding, @unchecked Sendable {
     private let store = EKEventStore()
 
     func requestAccess() async -> Bool {
@@ -31,6 +33,38 @@ final class EventKitService: CalendarProviding, @unchecked Sendable {
                 isAllDay: event.isAllDay,
                 location: event.location
             )
+        }
+    }
+
+    // MARK: - Reminders (RemindersProviding)
+
+    func requestRemindersAccess() async -> Bool {
+        do {
+            return try await store.requestFullAccessToReminders()
+        } catch {
+            return false
+        }
+    }
+
+    func fetchIncompleteReminders() async -> [ImportedReminder] {
+        let predicate = store.predicateForIncompleteReminders(
+            withDueDateStarting: nil, ending: nil, calendars: nil
+        )
+        // Map to the Sendable `ImportedReminder` inside the completion handler
+        // itself — `EKReminder` is not Sendable, so it must not cross the
+        // continuation boundary.
+        return await withCheckedContinuation { (continuation: CheckedContinuation<[ImportedReminder], Never>) in
+            store.fetchReminders(matching: predicate) { fetched in
+                let imported = (fetched ?? []).map { reminder in
+                    ImportedReminder(
+                        id: reminder.calendarItemIdentifier,
+                        title: reminder.title ?? "(No title)",
+                        dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
+                        notes: reminder.notes
+                    )
+                }
+                continuation.resume(returning: imported)
+            }
         }
     }
 }

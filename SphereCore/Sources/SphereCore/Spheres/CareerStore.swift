@@ -22,10 +22,15 @@ public final class CareerStore {
 
     private let database: AppDatabase
     private let engram: EngramStore?
+    private let remindersProvider: (any RemindersProviding)?
 
-    public init(database: AppDatabase, engram: EngramStore? = nil) {
+    public init(
+        database: AppDatabase, engram: EngramStore? = nil,
+        remindersProvider: (any RemindersProviding)? = nil
+    ) {
         self.database = database
         self.engram = engram
+        self.remindersProvider = remindersProvider
     }
 
     public func load() async throws {
@@ -102,6 +107,31 @@ public final class CareerStore {
             guard let dueDate = task.dueDate else { return true }
             return Calendar.current.isDate(dueDate, inSameDayAs: now)
         }
+    }
+
+    // MARK: - Reminders import
+
+    public var hasRemindersProvider: Bool { remindersProvider != nil }
+
+    /// Requests Reminders access, pulls incomplete reminders, and adds any
+    /// whose title doesn't already match an open task as a new Career task.
+    /// Returns how many were imported.
+    @discardableResult
+    public func importRemindersFromDevice(now: Date = Date()) async -> Int {
+        guard let remindersProvider else { return 0 }
+        guard await remindersProvider.requestRemindersAccess() else { return 0 }
+        let reminders = await remindersProvider.fetchIncompleteReminders()
+        guard !reminders.isEmpty else { return 0 }
+
+        let openTitles = openTasks.map(\.title)
+        let fresh = ReminderImport.newTasks(from: reminders, existingTitles: openTitles)
+        var imported = 0
+        for reminder in fresh {
+            let task = ReminderImport.makeTask(from: reminder, now: now)
+            try? await add(task)
+            imported += 1
+        }
+        return imported
     }
 
     // MARK: - Projects

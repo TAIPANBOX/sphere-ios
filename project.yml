@@ -48,8 +48,9 @@ targets:
         NSLocationWhenInUseUsageDescription: >-
           Sphere uses your location to show local weather on the Home tab.
         NSHealthShareUsageDescription: >-
-          Sphere reads your steps, heart rate, sleep, energy, HRV, and cycle from
-          Apple Health so your Health agent can work with real data.
+          Sphere reads your steps, heart rate, sleep, energy, HRV, cycle,
+          workouts, and weight from Apple Health so your Health agent can work
+          with real data.
         NSHealthUpdateUsageDescription: >-
           Sphere can save the weight, water, workouts, and mindful minutes you
           log back to Apple Health, so your data stays in one place.
@@ -59,6 +60,9 @@ targets:
         NSCalendarsFullAccessUsageDescription: >-
           Sphere reads today's events to show your agenda and give your morning
           brief context. Nothing is shared or uploaded.
+        NSRemindersFullAccessUsageDescription: >-
+          Sphere reads your open reminders to bring them into your Career
+          tasks. Nothing is shared or uploaded.
         NSPhotoLibraryUsageDescription: >-
           Attach photos to your agent conversations.
         NSMicrophoneUsageDescription: >-

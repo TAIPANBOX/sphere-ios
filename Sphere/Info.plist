@@ -31,7 +31,7 @@
 	<key>NSFaceIDUsageDescription</key>
 	<string>Unlock Sphere with Face ID so your health, finance, and journal data stays private.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Sphere reads your steps, heart rate, sleep, energy, HRV, and cycle from Apple Health so your Health agent can work with real data.</string>
+	<string>Sphere reads your steps, heart rate, sleep, energy, HRV, cycle, workouts, and weight from Apple Health so your Health agent can work with real data.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Sphere can save the weight, water, workouts, and mindful minutes you log back to Apple Health, so your data stays in one place.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -40,6 +40,8 @@
 	<string>Dictate messages to your agents by voice.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Attach photos to your agent conversations.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Sphere reads your open reminders to bring them into your Career tasks. Nothing is shared or uploaded.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Transcribe your voice into chat messages, on-device where possible.</string>
 	<key>UILaunchScreen</key>

@@ -40,6 +40,10 @@ final class AppContainer {
     let models: ModelManager
     let recap: RecapStore
     let cloudModels: OpenRouterModelCatalog
+    /// Shared calendar + reminders service: also injected into `home`
+    /// (calendar) and `career` (reminders); the "Import from device" screen
+    /// uses it directly to request calendar access.
+    let eventKit: EventKitService
 
     private var chatSessions: [String: ChatSession] = [:]
 
@@ -89,7 +93,8 @@ final class AppContainer {
         health = HealthStore(database: database, engram: engram, metricsProvider: healthKit)
         finance = FinanceStore(database: database, engram: engram)
         learning = LearningStore(database: database, engram: engram)
-        career = CareerStore(database: database, engram: engram)
+        eventKit = EventKitService()
+        career = CareerStore(database: database, engram: engram, remindersProvider: eventKit)
         rest = RestStore(database: database, engram: engram, metricsProvider: healthKit)
         travel = TravelStore(database: database, engram: engram, photoStore: TripPhotoStorage())
         mindfulness = MindfulnessStore(database: database, engram: engram, mindfulWriter: healthKit)
@@ -131,7 +136,7 @@ final class AppContainer {
             agent: agent,
             weatherService: WeatherService(),
             location: CoreLocationProvider(),
-            calendarProvider: EventKitService()
+            calendarProvider: eventKit
         )
         reviews = ReviewStore(
             database: database, home: home, mindfulness: mindfulness,
