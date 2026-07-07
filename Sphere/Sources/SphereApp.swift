@@ -4,10 +4,22 @@ import SphereUI
 
 @main
 struct SphereApp: App {
-    @State private var container = AppContainer()
+    @State private var container: AppContainer
     @State private var loaded = false
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage(Prefs.theme) private var theme = ThemePreference.system.rawValue
+
+    init() {
+        #if DEBUG
+        // Must run before AppContainer() opens any database: -WipeAllData is
+        // the one-shot "delete everything" path, so the app then boots fresh
+        // into onboarding.
+        if ProcessInfo.processInfo.arguments.contains("-WipeAllData") {
+            DemoSeed.wipeAllData()
+        }
+        #endif
+        _container = State(initialValue: AppContainer())
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -25,6 +37,11 @@ struct SphereApp: App {
             .preferredColorScheme(ThemePreference(rawValue: theme)?.colorScheme)
             .task {
                 await container.loadAll()
+                #if DEBUG
+                if ProcessInfo.processInfo.arguments.contains("-DemoSeed") {
+                    await DemoSeed.runIfNeeded(container: container)
+                }
+                #endif
                 loaded = true
             }
         }

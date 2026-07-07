@@ -14,6 +14,9 @@ enum Prefs {
     static let activeModel = "pref.activeModel"
     /// Chosen OpenRouter model id (empty/nil = provider default).
     static let cloudModel = "pref.cloudModel"
+    /// DEBUG-only: set once `DemoSeed` has populated the databases, so
+    /// `-DemoSeed` is idempotent across relaunches.
+    static let demoSeeded = "pref.demoSeeded"
 }
 
 /// Reads/writes the user's chosen OpenRouter model id (nil = provider default).
