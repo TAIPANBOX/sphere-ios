@@ -12,30 +12,15 @@ struct FakeMetricsProvider: HealthMetricsProviding {
     func todayMetrics() async -> HealthMetrics { metrics }
 }
 
-private final class FakeHealthConnectPreferences: HealthConnectPreferences, @unchecked Sendable {
-    var completed: Bool
-    init(completed: Bool = false) { self.completed = completed }
-    func hasCompletedHealthConnect() -> Bool { completed }
-    func setCompletedHealthConnect(_ completed: Bool) { self.completed = completed }
-}
-
 @Suite("HealthStore")
 @MainActor
 struct HealthStoreTests {
     private func makeStore(
         engram: EngramStore? = nil,
-        metrics: (any HealthMetricsProviding)? = nil,
-        connectPreferences: (any HealthConnectPreferences)? = nil
+        metrics: (any HealthMetricsProviding)? = nil
     ) throws -> (HealthStore, AppDatabase) {
         let database = try AppDatabase.inMemory()
-        let store = if let connectPreferences {
-            HealthStore(
-                database: database, engram: engram, metricsProvider: metrics,
-                connectPreferences: connectPreferences
-            )
-        } else {
-            HealthStore(database: database, engram: engram, metricsProvider: metrics)
-        }
+        let store = HealthStore(database: database, engram: engram, metricsProvider: metrics)
         return (store, database)
     }
 
@@ -203,79 +188,6 @@ struct HealthStoreTests {
         #expect(store.metrics == .empty)
         #expect(!store.metricsAvailable)
         #expect(!(await store.requestHealthAccess()))
-    }
-
-    // MARK: - Health connect card
-
-    @Test func needsHealthConnectWhenProviderPresentAndFlagUnset() throws {
-        let (store, _) = try makeStore(
-            metrics: FakeMetricsProvider(), connectPreferences: FakeHealthConnectPreferences()
-        )
-        #expect(store.needsHealthConnect)
-    }
-
-    @Test func markHealthConnectCompletedHidesCard() throws {
-        let (store, _) = try makeStore(
-            metrics: FakeMetricsProvider(), connectPreferences: FakeHealthConnectPreferences()
-        )
-        #expect(store.needsHealthConnect)
-        store.markHealthConnectCompleted()
-        #expect(!store.needsHealthConnect)
-    }
-
-    @Test func needsHealthConnectFalseWithoutProviderEvenIfFlagUnset() throws {
-        let (store, _) = try makeStore(connectPreferences: FakeHealthConnectPreferences())
-        #expect(!store.needsHealthConnect)
-    }
-
-    @Test func needsHealthConnectFalseWhenAlreadyCompleted() throws {
-        let (store, _) = try makeStore(
-            metrics: FakeMetricsProvider(),
-            connectPreferences: FakeHealthConnectPreferences(completed: true)
-        )
-        #expect(!store.needsHealthConnect)
-    }
-
-    @Test func connectPreferencePersistsThroughInjectedSeam() throws {
-        let prefs = FakeHealthConnectPreferences()
-        let (store, _) = try makeStore(metrics: FakeMetricsProvider(), connectPreferences: prefs)
-        store.markHealthConnectCompleted()
-        #expect(prefs.hasCompletedHealthConnect())
-
-        // A second store reading the same preferences object sees it too.
-        let database = try AppDatabase.inMemory()
-        let reloaded = HealthStore(
-            database: database, metricsProvider: FakeMetricsProvider(), connectPreferences: prefs
-        )
-        #expect(!reloaded.needsHealthConnect)
-    }
-
-    /// `healthConnectCompleted` is a stored @Observable property seeded from
-    /// prefs at init — this is what makes `needsHealthConnect` trackable by
-    /// SwiftUI view bodies, unlike reading through to prefs on every access.
-    @Test func healthConnectCompletedStoredPropertySeededFromPrefsAtInit() throws {
-        let (freshStore, _) = try makeStore(
-            metrics: FakeMetricsProvider(), connectPreferences: FakeHealthConnectPreferences()
-        )
-        #expect(!freshStore.healthConnectCompleted)
-
-        let (completedStore, _) = try makeStore(
-            metrics: FakeMetricsProvider(),
-            connectPreferences: FakeHealthConnectPreferences(completed: true)
-        )
-        #expect(completedStore.healthConnectCompleted)
-    }
-
-    @Test func markHealthConnectCompletedSetsStoredPropertyAndWritesThroughToPrefs() throws {
-        let prefs = FakeHealthConnectPreferences()
-        let (store, _) = try makeStore(metrics: FakeMetricsProvider(), connectPreferences: prefs)
-        #expect(!store.healthConnectCompleted)
-
-        store.markHealthConnectCompleted()
-
-        #expect(store.healthConnectCompleted)
-        #expect(!store.needsHealthConnect)
-        #expect(prefs.hasCompletedHealthConnect())
     }
 
     // MARK: - Agent tools

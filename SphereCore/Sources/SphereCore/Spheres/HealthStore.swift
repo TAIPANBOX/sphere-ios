@@ -2,33 +2,6 @@ import Foundation
 import GRDB
 import Observation
 
-/// Persists whether the user has been through the "Connect Apple Health"
-/// first-run flow. HealthKit deliberately hides read-authorization status, so
-/// this app-side flag is the only way to know whether to prompt again. The
-/// app wires a UserDefaults-backed implementation; tests and previews use
-/// ``InMemoryHealthConnectPreferences``.
-public protocol HealthConnectPreferences: Sendable {
-    func hasCompletedHealthConnect() -> Bool
-    func setCompletedHealthConnect(_ completed: Bool)
-}
-
-public final class InMemoryHealthConnectPreferences: HealthConnectPreferences, @unchecked Sendable {
-    private let lock = NSLock()
-    private var completed: Bool
-
-    public init(completed: Bool = false) {
-        self.completed = completed
-    }
-
-    public func hasCompletedHealthConnect() -> Bool {
-        lock.withLock { completed }
-    }
-
-    public func setCompletedHealthConnect(_ completed: Bool) {
-        lock.withLock { self.completed = completed }
-    }
-}
-
 /// Health sphere store: live HealthKit metrics (via an injected provider),
 /// day-keyed water intake, weight log with BMI, and workouts.
 /// Follows the golden-template shape — see docs/HANDOFF.md.
@@ -45,12 +18,6 @@ public final class HealthStore {
     public private(set) var cycleEntries: [CycleEntry] = []
     public private(set) var energyLevels: [String: Int] = [:]
     public private(set) var mealQuality: [String: Int] = [:]
-    /// Stored (not derived) so `needsHealthConnect` is a real @Observable
-    /// property that view bodies can track — reading through to
-    /// `connectPreferences` on every access left nothing for SwiftUI to
-    /// invalidate on, which is why `needsHealthConnect` alone was not a
-    /// reliable diffing signal for the connect card's visibility.
-    public private(set) var healthConnectCompleted: Bool
 
     public nonisolated static let waterGoalGlasses = 8
     public nonisolated static let maxWaterGlasses = 12
@@ -59,19 +26,15 @@ public final class HealthStore {
     private let database: AppDatabase
     private let engram: EngramStore?
     private let metricsProvider: (any HealthMetricsProviding)?
-    private let connectPreferences: any HealthConnectPreferences
 
     public init(
         database: AppDatabase,
         engram: EngramStore? = nil,
-        metricsProvider: (any HealthMetricsProviding)? = nil,
-        connectPreferences: any HealthConnectPreferences = InMemoryHealthConnectPreferences()
+        metricsProvider: (any HealthMetricsProviding)? = nil
     ) {
         self.database = database
         self.engram = engram
         self.metricsProvider = metricsProvider
-        self.connectPreferences = connectPreferences
-        self.healthConnectCompleted = connectPreferences.hasCompletedHealthConnect()
     }
 
     public func load(today: Date = Date()) async throws {
@@ -113,22 +76,6 @@ public final class HealthStore {
     public func requestHealthAccess() async -> Bool {
         guard let metricsProvider else { return false }
         return await metricsProvider.requestAuthorization()
-    }
-
-    /// Whether the first-run "Connect Apple Health" card should show: a
-    /// provider is wired (so there's something to connect to) and the user
-    /// hasn't been through the flow yet. HealthKit hides read-authorization
-    /// status, so this is tracked app-side rather than derived from it.
-    public var needsHealthConnect: Bool {
-        hasHealthProvider && !healthConnectCompleted
-    }
-
-    /// Marks the connect flow as done regardless of the outcome — the user
-    /// may have denied some data types, but re-showing the card every launch
-    /// would be worse than a metric silently reading "—".
-    public func markHealthConnectCompleted() {
-        healthConnectCompleted = true
-        connectPreferences.setCompletedHealthConnect(true)
     }
 
     // MARK: - Water

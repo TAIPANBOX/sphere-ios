@@ -86,10 +86,7 @@ final class AppContainer {
 
         goals = GoalsStore(database: database, engram: engram)
         let healthKit = HealthKitService()
-        health = HealthStore(
-            database: database, engram: engram, metricsProvider: healthKit,
-            connectPreferences: HealthConnectDefaults()
-        )
+        health = HealthStore(database: database, engram: engram, metricsProvider: healthKit)
         finance = FinanceStore(database: database, engram: engram)
         learning = LearningStore(database: database, engram: engram)
         career = CareerStore(database: database, engram: engram)

@@ -88,14 +88,3 @@ struct ModelPreferences: ModelPreferenceStoring {
         UserDefaults.standard.set(id, forKey: Prefs.activeModel)
     }
 }
-
-/// Persists whether the user has completed the Health screen's "Connect
-/// Apple Health" first-run flow.
-struct HealthConnectDefaults: HealthConnectPreferences {
-    func hasCompletedHealthConnect() -> Bool {
-        UserDefaults.standard.bool(forKey: Prefs.healthConnectCompleted)
-    }
-    func setCompletedHealthConnect(_ completed: Bool) {
-        UserDefaults.standard.set(completed, forKey: Prefs.healthConnectCompleted)
-    }
-}
