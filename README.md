@@ -14,9 +14,9 @@ Native SwiftUI rewrite of [Sphere](https://github.com/TAIPANBOX/sphere) — a
 Personal Life Intelligence System.
 
 <p align="center">
+  <img src="docs/screenshots/home-dark.png" width="260" alt="Home dashboard, dark theme">
   <img src="docs/screenshots/home-light.png" width="260" alt="Home dashboard, light theme">
   <img src="docs/screenshots/capture.png" width="260" alt="Tell your agent anything capture sheet">
-  <img src="docs/screenshots/home-dark.png" width="260" alt="Home dashboard, dark theme">
 </p>
 
 ---
@@ -66,12 +66,12 @@ Everything works with **zero setup and no account**. Rule-based quick capture
 no model at all.
 
 <p align="center">
+  <img src="docs/screenshots/travel.png" width="220" alt="Travel sphere">
+  <img src="docs/screenshots/goals.png" width="220" alt="Goals sphere, dark">
+  <img src="docs/screenshots/mindfulness-dark.png" width="220" alt="Mindfulness sphere, dark">
+  <img src="docs/screenshots/mindfulness.png" width="220" alt="Mindfulness sphere, light">
   <img src="docs/screenshots/health.png" width="220" alt="Health sphere">
   <img src="docs/screenshots/finance.png" width="220" alt="Finance sphere">
-  <img src="docs/screenshots/mindfulness.png" width="220" alt="Mindfulness sphere, light">
-  <img src="docs/screenshots/mindfulness-dark.png" width="220" alt="Mindfulness sphere, dark">
-  <img src="docs/screenshots/travel.png" width="220" alt="Travel sphere">
-  <img src="docs/screenshots/goals.png" width="220" alt="Goals sphere">
 </p>
 
 ---
@@ -114,7 +114,7 @@ and context length shown per model — and switch back to on-device whenever you
 want.
 
 <p align="center">
-  <img src="docs/screenshots/settings-ai.png" width="240" alt="Settings AI section">
+  <img src="docs/screenshots/settings-ai.png" width="240" alt="Settings AI section, dark">
   <img src="docs/screenshots/cloud-models.png" width="240" alt="Cloud model picker with live pricing">
 </p>
 
@@ -137,6 +137,7 @@ Keychain and is used only when you pick a cloud model.
 <p align="center">
   <img src="docs/screenshots/watch-home.png" width="200" alt="Watch: Life ring and Today's Focus">
   <img src="docs/screenshots/watch-quicklog.png" width="200" alt="Watch: Quick Log">
+  <img src="docs/screenshots/watch-shopping.png" width="200" alt="Watch: Shopping list">
 </p>
 
 ---
@@ -163,21 +164,22 @@ Keychain and is used only when you pick a cloud model.
 ## Gallery
 
 <p align="center">
-  <img src="docs/screenshots/home-light.png" width="180" alt="Home, light">
   <img src="docs/screenshots/home-dark.png" width="180" alt="Home, dark">
+  <img src="docs/screenshots/home-light.png" width="180" alt="Home, light">
+  <img src="docs/screenshots/travel.png" width="180" alt="Travel">
+  <img src="docs/screenshots/goals.png" width="180" alt="Goals, dark">
+  <img src="docs/screenshots/mindfulness-dark.png" width="180" alt="Mindfulness, dark">
+  <img src="docs/screenshots/settings-ai.png" width="180" alt="Settings AI, dark">
   <img src="docs/screenshots/home-menu.png" width="180" alt="Home quick actions">
   <img src="docs/screenshots/capture.png" width="180" alt="Capture sheet">
   <img src="docs/screenshots/health.png" width="180" alt="Health">
   <img src="docs/screenshots/finance.png" width="180" alt="Finance">
   <img src="docs/screenshots/mindfulness.png" width="180" alt="Mindfulness, light">
-  <img src="docs/screenshots/mindfulness-dark.png" width="180" alt="Mindfulness, dark">
-  <img src="docs/screenshots/travel.png" width="180" alt="Travel">
-  <img src="docs/screenshots/goals.png" width="180" alt="Goals">
-  <img src="docs/screenshots/settings-ai.png" width="180" alt="Settings AI">
   <img src="docs/screenshots/cloud-models.png" width="180" alt="Cloud model picker">
   <img src="docs/screenshots/import-device.png" width="180" alt="Import from device">
   <img src="docs/screenshots/watch-home.png" width="140" alt="Watch home">
   <img src="docs/screenshots/watch-quicklog.png" width="140" alt="Watch quick log">
+  <img src="docs/screenshots/watch-shopping.png" width="140" alt="Watch shopping list">
 </p>
 
 ---
