@@ -258,6 +258,17 @@ Keychain and is used only when you pick a cloud model.
   <img src="docs/screenshots/watch-home.png" width="140" alt="Watch home">
   <img src="docs/screenshots/watch-quicklog.png" width="140" alt="Watch quick log">
   <img src="docs/screenshots/watch-shopping.png" width="140" alt="Watch shopping list">
+  <img src="docs/screenshots/rest.png" width="180" alt="Rest sphere: bedtime, wake time, digital detox streak">
+  <img src="docs/screenshots/profile.png" width="180" alt="Profile: dietary restrictions, allergies, health conditions">
+  <img src="docs/screenshots/onboarding-welcome.png" width="180" alt="Onboarding: welcome to Sphere">
+  <img src="docs/screenshots/onboarding-about-you.png" width="180" alt="Onboarding: about you, name and birthday">
+  <img src="docs/screenshots/onboarding-dietary.png" width="180" alt="Onboarding: dietary preferences and allergies">
+  <img src="docs/screenshots/onboarding-spheres.png" width="180" alt="Onboarding: choose your twelve spheres">
+  <img src="docs/screenshots/settings-ai-light.png" width="180" alt="Settings AI, light">
+  <img src="docs/screenshots/settings-models.png" width="180" alt="Settings: downloadable on-device models">
+  <img src="docs/screenshots/settings-privacy-appearance.png" width="180" alt="Settings: privacy, data export, appearance">
+  <img src="docs/screenshots/settings-my-spheres.png" width="180" alt="Settings: My Spheres toggles">
+  <img src="docs/screenshots/profile-personal.png" width="180" alt="Profile: personal details">
 </p>
 
 ---
