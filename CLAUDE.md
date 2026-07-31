@@ -1,7 +1,7 @@
-# Sphere iOS — CLAUDE.md
+# Sphere iOS: CLAUDE.md
 
 Native SwiftUI rewrite of the Flutter app in `../sphere` (frozen, reference
-only). Full phased plan: `../sphere/planning/IOS_REWRITE_PLAN.md` — read it
+only). Full phased plan: `../sphere/planning/IOS_REWRITE_PLAN.md`, read it
 before any non-trivial task.
 
 ## Fixed decisions
@@ -16,7 +16,7 @@ before any non-trivial task.
 - **Sync**: CloudKit (CKSyncEngine), no custom server. Wearables via HealthKit,
   no per-service OAuth.
 - Engram v2 (on-device reflection via Foundation Models, hybrid BM25+embedding
-  recall) is a post-launch phase — do not start it without discussion.
+  recall) is a post-launch phase, do not start it without discussion.
 - **English-only**: product ships English-only (decision 2026-07-07); do not
   add localization or a language switcher without discussion.
 
@@ -26,11 +26,11 @@ before any non-trivial task.
 - Comments only where the code cannot express a constraint; no narration.
 - Every public API in SphereCore gets tests (swift-testing, `@Test`).
 - Run `swift test` in `SphereCore/` after every change to the package.
-- No singletons in SphereCore — inject stores/services explicitly.
+- No singletons in SphereCore, inject stores/services explicitly.
 - No network calls in Engram write paths.
 
 ## Layout
 
-- `SphereCore/` — SPM package (models, Engram, LLM, services). Testable on
+- `SphereCore/`, SPM package (models, Engram, LLM, services). Testable on
   macOS via `swift test`; no UIKit/SwiftUI imports allowed inside.
 - App / Widget / Watch Xcode targets: to be added (plan Phase 2+).
