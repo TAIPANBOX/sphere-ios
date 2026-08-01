@@ -10,7 +10,7 @@ jobs:
     name: swift test (SphereCore)
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Select Xcode
         # Newest installed Xcode: the codebase uses current-SDK APIs and the
         # app job already builds with the runner default. (The old 16.2 pin
@@ -27,7 +27,7 @@ jobs:
     name: xcodebuild (Sphere app, iOS Simulator)
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # No xcode-select here: the runner's default Xcode ships with a
       # matching iOS Simulator runtime; hand-picked versions may not.
       - name: Install XcodeGen
