@@ -1,17 +1,17 @@
 # Sphere (iOS)
 
 > **Your whole life, understood by agents that remember.** Twelve life-sphere
-> AI agents, cross-sphere intelligence, and on-device memory — private by
+> AI agents, cross-sphere intelligence, and on-device memory, private by
 > default, free without a key.
 
 ![CI](https://github.com/TAIPANBOX/sphere-ios/actions/workflows/ci.yml/badge.svg)
 ![Swift 6](https://img.shields.io/badge/swift-6-F05138.svg?logo=swift)
 ![Platform](https://img.shields.io/badge/platform-iOS%2017%20·%20watchOS%2011-1a1a1a?logo=apple)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Tests](https://img.shields.io/badge/tests-583%20passed-green)
+![Tests](https://img.shields.io/badge/tests-588-green)
 
-Native SwiftUI rewrite of [Sphere](https://github.com/TAIPANBOX/sphere) — a
-Personal Life Intelligence System.
+The native SwiftUI Sphere: a Personal Life Intelligence System. It replaces an
+earlier build that is not public, so there is nothing to link to there.
 
 <p align="center">
   <img src="docs/screenshots/home-dark.png" width="260" alt="Home dashboard, dark theme">
@@ -33,35 +33,35 @@ And most of them punish you. Miss a day and the streak resets to zero. Open the
 app and a cold **"38% complete"** stares back. That's why the average tracker is
 abandoned inside two weeks.
 
-**Sphere is one place that sees the whole picture — and is kind about it.**
+**Sphere is one place that sees the whole picture, and is kind about it.**
 
 ---
 
 ## What Sphere does
 
-Twelve life spheres — Health, Finance, Career, Learning, Relationships, Rest,
-Hobbies, Travel, Mindfulness, Creativity, Home, Goals — each with its own
+Twelve life spheres: Health, Finance, Career, Learning, Relationships, Rest,
+Hobbies, Travel, Mindfulness, Creativity, Home, Goals, each with its own
 `@Observable` store, agent tools, and screen. On top of them sits a layer that
 no single-sphere app can build:
 
-- **Life Score** — one number that rolls up all twelve spheres, with which
+- **Life Score**, one number that rolls up all twelve spheres, with which
   ones are pulling it up or down today.
-- **Today's Focus** — the handful of things that actually need your attention,
+- **Today's Focus**, the handful of things that actually need your attention,
   pulled from every sphere into one list.
-- **Cross-sphere correlation engine** — day-keyed metrics across every sphere,
+- **Cross-sphere correlation engine**, day-keyed metrics across every sphere,
   surfacing honest patterns ("on days your sleep is higher, your mood tends to
-  be higher — a pattern, not proof").
-- **[Engram](#engram--memory-that-behaves-like-memory)** — one on-device memory
+  be higher, a pattern, not proof").
+- **[Engram](#engram--memory-that-behaves-like-memory)**, one on-device memory
   every agent shares, that fades what you stop caring about instead of keeping
   everything forever.
-- **Weekly narrative review + Life Wheel** — a warm recap and a feeling-vs-data
+- **Weekly narrative review + Life Wheel**, a warm recap and a feeling-vs-data
   gap chart across the twelve spheres.
-- **N-of-1 experiments** — "cut caffeine after 2pm for two weeks," measured
+- **N-of-1 experiments**, "cut caffeine after 2pm for two weeks," measured
   against the baseline across sleep, mood, and spend. Passive logging becomes
   personal science.
-- **Year in Sphere** — a free, shareable recap of your year across every
+- **Year in Sphere**, a free, shareable recap of your year across every
   sphere.
-- **Forgiveness + momentum** — excused days bridge streaks; warm "building
+- **Forgiveness + momentum**, excused days bridge streaks; warm "building
   momentum" framing replaces the cold percentage.
 
 Everything works with **zero setup and no account**. Rule-based quick capture
@@ -86,12 +86,12 @@ photo of a receipt. Sphere reads it, sorts it into the right sphere, and asks
 only when it has to.
 
 **Continuation suggestions.** After you log something, Sphere offers the next
-sensible step instead of waiting for you to remember it — log the workout,
+sensible step instead of waiting for you to remember it, log the workout,
 then it offers to log the protein shake.
 
 **Per-sphere agents with memory.** Each sphere has its own agent and its own
 tools (`log_water`, `add_expense`, `log_mood`, …). Engram, the on-device memory
-layer, gives every agent episodic recall — it remembers what you told it last
+layer, gives every agent episodic recall, it remembers what you told it last
 month, not just this session.
 
 **Morning brief.** A short, factual rundown assembled from calendar, sleep,
@@ -103,10 +103,10 @@ and budget pace, delivered as a notification before you've opened the app.
 
 ---
 
-## Engram — memory that behaves like memory
+## Engram, memory that behaves like memory
 
 All twelve sphere agents write into one shared episodic memory: log a workout,
-mention a habit, tell an agent something in passing, and it's remembered — by
+mention a habit, tell an agent something in passing, and it's remembered, by
 every agent, not just the one you told. Left alone, a memory fades. Recall it
 and it strengthens. Fade far enough and it's deleted. Forgetting is not a bug
 here: it keeps recall relevant, keeps the database small, and keeps agents
@@ -117,8 +117,8 @@ from arguing with facts that stopped being true months ago.
 | Stage | Mechanics |
 |---|---|
 | **Write** | Sphere stores call `engram?.note(agentId:content:tags:salience:)` after a mutation (e.g. `HealthStore.logWeight`, `addWorkout`, `addMedication`). Each memory gets a salience (default 0.7), free-text tags, and its own row in a `memories` table + FTS5 shadow index. |
-| **Recall** | `EngramStore.recall(_:agentId:k:)` sanitizes the query (`sanitizeFtsQuery` keeps only letters/digits, quotes each token, OR-joins them so stray punctuation can't break FTS5 syntax), runs it through `bm25(memories_fts)`, and falls back to the `k` most recent memories for that agent when the query is empty or matches nothing. `crossAgentRecall` runs the same query with no agent filter — this is what powers the Meta Agent's morning brief and full-text search. |
-| **Reinforcement** | Every memory returned by recall — FTS hit or recent-fallback — has `access_count` incremented and `accessed_at` reset to now. A fact you keep asking about keeps resetting its own decay clock; one you never revisit just ages. |
+| **Recall** | `EngramStore.recall(_:agentId:k:)` sanitizes the query (`sanitizeFtsQuery` keeps only letters/digits, quotes each token, OR-joins them so stray punctuation can't break FTS5 syntax), runs it through `bm25(memories_fts)`, and falls back to the `k` most recent memories for that agent when the query is empty or matches nothing. `crossAgentRecall` runs the same query with no agent filter, this is what powers the Meta Agent's morning brief and full-text search. |
+| **Reinforcement** | Every memory returned by recall (FTS hit or recent-fallback) has `access_count` incremented and `accessed_at` reset to now. A fact you keep asking about keeps resetting its own decay clock; one you never revisit just ages. |
 | **Decay & pruning** | A nightly-ish job recomputes `importance = salience · e^(-λ·days_since_access) + α·ln(1 + access_count) + β·emotional_valence` for every row, then deletes anything under a threshold. |
 
 ### Lifecycle
@@ -133,7 +133,7 @@ flowchart LR
     D -->|no hit| F[recent-k fallback]
     B -.untouched.-> G[importance decays\nEbbinghaus curve]
     G --> H{importance < 0.1?}
-    H -->|yes| I[Pruned — row deleted]
+    H -->|yes| I[Pruned, row deleted]
     H -->|no| G
 ```
 
@@ -165,7 +165,7 @@ from `SphereApp` on `scenePhase == .background`.
 Most assistant memory is one of three things: nothing (every chat starts
 blank), everything (context windows and cloud vector stores that never
 forget and never stop growing), or a manual "pin this" button. Engram runs
-actual memory dynamics — decay, reinforcement, pruning — on-device, with no
+actual memory dynamics (decay, reinforcement, pruning) on-device, with no
 embeddings and no cloud round-trip; recall works offline because it's a SQL
 query, not an API call. The whole store is one SQLite file
 (`sphere.engram.db`), separate from the sphere data file, that you can
@@ -173,11 +173,11 @@ inspect, back up, or delete outright. It's included in the JSON data export
 in Settings, alongside the sphere data.
 
 Post-launch, the plan (see `CLAUDE.md`) is Engram v2: on-device reflection
-and hybrid BM25 + embedding recall — a roadmap item, not shipped.
+and hybrid BM25 + embedding recall, a roadmap item, not shipped.
 
 ---
 
-## AI, three ways — free first
+## AI, three ways, free first
 
 | Tier | Backend | Cost | Needs |
 |------|---------|------|-------|
@@ -186,8 +186,8 @@ and hybrid BM25 + embedding recall — a roadmap item, not shipped.
 | Power | OpenRouter (Claude · GPT · Gemini · …) | Your key | One OpenRouter key (optional) |
 
 Nothing ever *requires* a key. The on-device paths keep your data on your
-phone. Pick a hosted model any time from a live, searchable picker — pricing
-and context length shown per model — and switch back to on-device whenever you
+phone. Pick a hosted model any time from a live, searchable picker, pricing
+and context length shown per model, and switch back to on-device whenever you
 want.
 
 <p align="center">
@@ -203,13 +203,13 @@ Keychain and is used only when you pick a cloud model.
 
 ## Apple Watch
 
-- **Quick logs with live state** — water, mood, and today's focus items, right
+- **Quick logs with live state**, water, mood, and today's focus items, right
   on the wrist, reflecting what's already logged on the phone.
-- **Voice capture** — dictate a thought or a shopping item without unlocking
+- **Voice capture**, dictate a thought or a shopping item without unlocking
   your phone.
 - **Interactive Smart Stack widget** and complication showing the Life Score.
 - **Action Button** wired to quick capture.
-- **Actionable notifications** — respond to a nudge without opening the app.
+- **Actionable notifications**, respond to a nudge without opening the app.
 
 <p align="center">
   <img src="docs/screenshots/watch-home.png" width="200" alt="Watch: Life ring and Today's Focus">
@@ -221,11 +221,11 @@ Keychain and is used only when you pick a cloud model.
 
 ## Native integrations
 
-- **HealthKit, two-way** — steps, heart rate, sleep, cycle, workouts, and
+- **HealthKit, two-way**, steps, heart rate, sleep, cycle, workouts, and
   weight flow in; Sphere writes back what you log.
-- **Import from device** — Contacts and birthdays into Relationships,
+- **Import from device**, Contacts and birthdays into Relationships,
   Calendar events into your morning brief, Reminders into Career tasks. Runs
-  on-device, idempotent — run it again any time, nothing duplicates.
+  on-device, idempotent, run it again any time, nothing duplicates.
 - **Interactive iOS widgets** and a Smart Stack widget on watchOS.
 - **Siri shortcuts** for quick capture and sphere summaries.
 - **Face ID lock** and full JSON data export in Settings.
@@ -276,41 +276,40 @@ Keychain and is used only when you pick a cloud model.
 ## Architecture
 
 ```
-SphereCore/            SPM package — pure Swift, no UIKit. `swift test`-able,
+SphereCore/            SPM package, pure Swift, no UIKit. `swift test`-able,
                        shared by every target.
 ├── Sources/SphereCore Models, 12 sphere stores (GRDB), Engram memory, LLM
 │                      engines, agent service, insight/nudge/review/experiment
 │                      engines, search, on-device model manager.
 └── Sources/SphereUI   All SwiftUI screens (compiles on macOS too, for previews).
 
-Sphere/                iOS app target (XcodeGen — project.yml).
+Sphere/                iOS app target (XcodeGen, project.yml).
 SphereWidget/          Home-screen + Smart Stack widget.
 Watch/                 watchOS app + complication + WCSession bridge.
 ```
 
-- **Language:** Swift 6, strict concurrency, `@Observable` stores — one per
+- **Language:** Swift 6, strict concurrency, `@Observable` stores, one per
   sphere, no architecture frameworks.
 - **Persistence:** [GRDB](https://github.com/groue/GRDB.swift) with additive
   migrations; one App Group container shared with the widget, App Intents, and
   watch.
-- **Memory:** [Engram](#engram--memory-that-behaves-like-memory) v1.5 —
-  episodic memory with FTS5/BM25 recall, access reinforcement, and
+- **Memory:** [Engram](#engram--memory-that-behaves-like-memory) v1.5, episodic memory with FTS5/BM25 recall, access reinforcement, and
   Ebbinghaus decay.
 - **LLM:** one OpenAI-compatible cloud engine (OpenRouter) behind a single
   `LLMEngine` seam, plus Apple Foundation Models and MLX-backed local models.
-- **Sync:** CloudKit; wearables via HealthKit — no per-service OAuth.
-- **Tests:** 583 tests (swift-testing), CI-gated, no singletons in
-  `SphereCore` — everything is injected.
+- **Sync:** CloudKit; wearables via HealthKit, no per-service OAuth.
+- **Tests:** 588 tests (swift-testing), CI-gated, no singletons in
+  `SphereCore`, everything is injected.
 
 ## Build
 
 ```bash
-# Core package — pure Swift, runs anywhere Swift does
+# Core package, pure Swift, runs anywhere Swift does
 cd SphereCore
 swift build
-swift test          # 583 tests
+swift test          # 588 tests
 
-# App — generate the Xcode project, then build for a simulator
+# App, generate the Xcode project, then build for a simulator
 brew install xcodegen
 xcodegen generate
 xcodebuild -project Sphere.xcodeproj -scheme Sphere \
@@ -330,7 +329,7 @@ ship in Settings.
 ## Status
 
 All twelve spheres plus the intelligence, platform-integration, and polish
-stages are built — see [docs/ROADMAP.md](docs/ROADMAP.md) for the full,
+stages are built, see [docs/ROADMAP.md](docs/ROADMAP.md) for the full,
 dependency-ordered plan and what remains (constrained on-device tool calling,
 Spotlight donation, notification delivery of nudges).
 
