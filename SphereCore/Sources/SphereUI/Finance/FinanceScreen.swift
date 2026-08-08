@@ -242,7 +242,7 @@ public struct FinanceScreen: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.title).font(.body.weight(.medium))
                 if item.isRipe() {
-                    Text("Ready — buy it or let it go").font(.caption).foregroundStyle(.orange)
+                    Text("Ready: buy it or let it go").font(.caption).foregroundStyle(.orange)
                 } else {
                     Text("Cooling off · ripens in \(item.hoursUntilRipe())h")
                         .font(.caption).foregroundStyle(.secondary)
@@ -427,7 +427,7 @@ public struct FinanceScreen: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Transactions").font(.title3.weight(.semibold))
             if store.transactions.isEmpty {
-                Text("No transactions yet — add one or tell your agent.")
+                Text("No transactions yet. Add one or tell your agent.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -715,7 +715,7 @@ struct AddWishlistSheet: View {
                     TextField("What do you want?", text: $title)
                     TextField("Price", text: $amountText)
                 } footer: {
-                    Text("It waits 72 hours before becoming a buy-or-drop decision — "
+                    Text("It waits 72 hours before becoming a buy-or-drop decision, "
                         + "a simple guard against impulse buys.")
                 }
             }

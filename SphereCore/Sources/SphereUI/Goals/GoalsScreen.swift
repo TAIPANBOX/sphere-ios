@@ -33,7 +33,7 @@ public struct GoalsScreen: View {
                         emoji: "🎯",
                         accent: accent,
                         title: "Start your Goals sphere",
-                        message: "Pick one goal that matters right now — you can always break it down later.",
+                        message: "Pick one goal that matters right now. You can always break it down later.",
                         buttonLabel: "Add your first goal"
                     ) {
                         showingAddGoal = true
@@ -44,7 +44,7 @@ public struct GoalsScreen: View {
 
                 section(title: "Active Goals") {
                     if activeGoals.isEmpty {
-                        emptyState("No goals yet. Add one — or just tell your agent.")
+                        emptyState("No goals yet. Add one, or just tell your agent.")
                     }
                     ForEach(activeGoals) { goal in
                         GoalCard(
@@ -439,7 +439,7 @@ struct AddAntiGoalSheet: View {
                     TextField("What will you say no to?", text: $title)
                     TextField("Why (optional)", text: $note, axis: .vertical).lineLimit(2...4)
                 } footer: {
-                    Text("A boundary, not a target — clarity on what you won't do.")
+                    Text("A boundary, not a target: clarity on what you won't do.")
                 }
             }
             .navigationTitle("New Anti-goal")

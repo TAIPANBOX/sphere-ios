@@ -15,7 +15,7 @@ public struct ModelsScreen: View {
                     row(model)
                 }
             } footer: {
-                Text("Models run entirely on your device — private and free. They download over Wi-Fi and live in on-device storage.")
+                Text("Models run entirely on your device, private and free. They download over Wi-Fi and live in on-device storage.")
             }
         }
         .sphereAnimation(SphereMotion.gentle, value: manager.activeModelID)

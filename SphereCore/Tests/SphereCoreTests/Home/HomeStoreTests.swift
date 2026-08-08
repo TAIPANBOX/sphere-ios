@@ -59,7 +59,7 @@ struct HomeStoreTests {
         let home = try makeHome(engine: engine)
 
         await home.streamBrief()
-        #expect(home.briefState == .failed("Offline — reconnect to refresh your brief."))
+        #expect(home.briefState == .failed("Offline. Reconnect to refresh your brief."))
     }
 
     @Test func briefWithoutAgentStaysIdle() async throws {

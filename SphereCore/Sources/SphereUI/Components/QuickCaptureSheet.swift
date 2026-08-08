@@ -61,7 +61,7 @@ public struct QuickCaptureSheet: View {
 
                 if missed {
                     Text("Didn't catch that. Try wording like \"water 2\", \"mood 4\", "
-                        + "or \"spent 12 on lunch\" — or open a sphere's chat for anything else.")
+                        + "or \"spent 12 on lunch\", or open a sphere's chat for anything else.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

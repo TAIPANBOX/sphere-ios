@@ -33,7 +33,7 @@ struct CareerSecondaryTests {
             if count < 2 { try await Task.sleep(for: .milliseconds(20)) }
         }
         let memories = try await engram.recall("achievement", agentId: "career")
-        #expect(memories.contains { $0.content == "Logged achievement: Led migration — cut costs 30%" })
+        #expect(memories.contains { $0.content == "Logged achievement: Led migration - cut costs 30%" })
 
         try await store.removeAchievement(id: "a1")
         #expect(store.achievements.map(\.id) == ["a2"])

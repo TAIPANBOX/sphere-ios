@@ -341,7 +341,7 @@ extension DemoSeed {
         // Journal ~3x/week, short entries.
         let journalLines = [
             "Good focus today, shipped the thing I'd been putting off.",
-            "Felt a bit stretched thin — too many meetings back to back.",
+            "Felt a bit stretched thin, too many meetings back to back.",
             "Long walk after work, cleared my head.",
             "Proud of how the week's going so far.",
             "Slept badly, dragged through the afternoon.",
@@ -927,7 +927,7 @@ extension DemoSeed {
         let creativity = container.creativity
 
         try? await creativity.add(CreativeProject(
-            id: "creative_song", title: "Song demo — 'Long Way Home'", type: .music,
+            id: "creative_song", title: "Song demo: 'Long Way Home'", type: .music,
             status: .inProgress, progressPercent: 60, createdAt: world.day(80, hour: 12)
         ))
         try? await creativity.add(CreativeProject(

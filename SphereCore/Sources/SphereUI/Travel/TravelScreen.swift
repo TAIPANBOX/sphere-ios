@@ -99,7 +99,7 @@ public struct TravelScreen: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Trips").font(.title3.weight(.semibold))
             if store.plans.isEmpty {
-                Text("No trips yet — plan one or ask your agent for ideas.")
+                Text("No trips yet. Plan one or ask your agent for ideas.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -341,7 +341,7 @@ struct TripDetailView: View {
     }
 
     @ViewBuilder private func offlineSection(_ info: CountryInfo, country: String) -> some View {
-        Section("Good to know — \(country)") {
+        Section("Good to know: \(country)") {
             LabeledContent("Emergency", value: info.emergency)
             LabeledContent("Plug / voltage", value: info.plug)
             if !info.note.isEmpty { LabeledContent("Note", value: info.note) }

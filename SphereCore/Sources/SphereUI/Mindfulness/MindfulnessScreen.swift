@@ -27,7 +27,7 @@ public struct MindfulnessScreen: View {
                         emoji: "🧘",
                         accent: accent,
                         title: "Start your Mindfulness sphere",
-                        message: "A few minutes of meditation is enough to begin — the streak builds from there.",
+                        message: "A few minutes of meditation is enough to begin, the streak builds from there.",
                         buttonLabel: "Log your first session"
                     ) {
                         showingLogMeditation = true
@@ -247,7 +247,7 @@ public struct MindfulnessScreen: View {
                 Text("🌬️").font(.system(size: 30))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Breathing Exercise").font(.body.weight(.medium)).foregroundStyle(.primary)
-                    Text("Pick a pattern — 4-7-8, box, or coherent")
+                    Text("Pick a pattern: 4-7-8, box, or coherent")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

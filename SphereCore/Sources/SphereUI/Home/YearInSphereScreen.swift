@@ -40,7 +40,7 @@ public struct YearInSphereScreen: View {
             Text("That's your \(String(stats.year)).")
                 .font(.title.weight(.bold))
                 .multilineTextAlignment(.center)
-            Text("Every part of your life, in one place — and it's yours to keep.")
+            Text("Every part of your life, in one place, and it's yours to keep.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

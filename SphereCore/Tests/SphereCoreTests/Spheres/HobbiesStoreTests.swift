@@ -78,7 +78,7 @@ struct HobbiesStoreTests {
             if count < 2 { try await Task.sleep(for: .milliseconds(20)) }
         }
         let memories = try await engram.recall("curry", agentId: "hobbies")
-        #expect(memories.first?.content == "Cooking session, 45 min — Thai green curry — turned out amazing")
+        #expect(memories.first?.content == "Cooking session, 45 min - Thai green curry — turned out amazing")
     }
 
     // MARK: - Agent tools

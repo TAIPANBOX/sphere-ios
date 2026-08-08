@@ -427,7 +427,7 @@ public struct HealthScreen: View {
                     if prediction.isEstimate {
                         cycleRow(
                             icon: "info.circle",
-                            text: "Estimate — log a couple more periods for accuracy."
+                            text: "Estimate. Log a couple more periods for accuracy."
                         )
                     }
                 }

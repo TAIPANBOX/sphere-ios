@@ -126,7 +126,7 @@ struct ProfileScreen: View {
             } header: {
                 Text("Health conditions")
             } footer: {
-                Text("Everything here flows into every agent's context — "
+                Text("Everything here flows into every agent's context: "
                     + "dietary tags shape Travel advice, conditions shape Health advice.")
             }
 
@@ -153,7 +153,7 @@ struct ProfileScreen: View {
             Section {
                 let context = container.profile.profile.agentContext()
                 if context.isEmpty {
-                    Text("Nothing yet — fill in the fields above.")
+                    Text("Nothing yet. Fill in the fields above.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 } else {
@@ -165,7 +165,7 @@ struct ProfileScreen: View {
             } header: {
                 Label("What your agents know about you", systemImage: "eye")
             } footer: {
-                Text("This is the entire context shared with your agents — nothing "
+                Text("This is the entire context shared with your agents, and nothing "
                     + "else about you leaves this device. Updates when you save.")
             }
         }

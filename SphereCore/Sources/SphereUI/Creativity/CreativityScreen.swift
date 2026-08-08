@@ -29,7 +29,7 @@ public struct CreativityScreen: View {
                 }
                 momentumCard
                 ideaCaptureCard
-                projectSection("In Progress", projects: store.inProgress, empty: "No active projects — start with an idea below.")
+                projectSection("In Progress", projects: store.inProgress, empty: "No active projects. Start with an idea below.")
                 if !store.ideaBacklog.isEmpty {
                     projectSection("Idea Backlog", projects: store.ideaBacklog, empty: "")
                 }

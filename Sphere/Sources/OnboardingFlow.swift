@@ -48,13 +48,13 @@ struct OnboardingFlow: View {
             Text("Welcome to Sphere")
                 .font(.largeTitle.weight(.bold))
                 .multilineTextAlignment(.center)
-            Text("An AI companion for all 12 spheres of your life — each with "
+            Text("An AI companion for all 12 spheres of your life, each with "
                 + "its own agent that remembers everything, on your device.")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
-            Label("Free & private — runs on-device, no account or key needed.",
+            Label("Free & private: runs on-device, no account or key needed.",
                   systemImage: "lock.shield")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
@@ -111,7 +111,7 @@ struct OnboardingFlow: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Choose your spheres")
                     .font(.title2.weight(.bold))
-                Text("Tap to turn any off — you can change this anytime in "
+                Text("Tap to turn any off. You can change this anytime in "
                     + "Settings.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)

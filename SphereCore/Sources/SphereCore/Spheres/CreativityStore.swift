@@ -186,7 +186,7 @@ public final class CreativityStore {
                 definition: LLMTool(
                     name: "capture_idea",
                     description: "Save a creative idea or inspiration for the user. Use when "
-                        + "they share an idea worth keeping — a story concept, melody, "
+                        + "they share an idea worth keeping: a story concept, melody, "
                         + "photo subject, project thought.",
                     inputSchema: [
                         "type": "object",

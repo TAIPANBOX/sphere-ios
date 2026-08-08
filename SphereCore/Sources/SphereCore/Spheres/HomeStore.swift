@@ -191,7 +191,7 @@ public final class HomeStore {
     private static func message(for error: AgentError) -> String {
         switch error {
         case .noApiKey: "Add an AI provider key in Settings to get your brief."
-        case .backendUnavailable: "Offline — reconnect to refresh your brief."
+        case .backendUnavailable: "Offline. Reconnect to refresh your brief."
         case .api(let message): message
         }
     }

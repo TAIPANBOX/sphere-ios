@@ -308,7 +308,7 @@ public final class FinanceStore {
                     let amount = input["amount"]?.doubleValue.map { String(format: "%g", $0) } ?? "?"
                     let title = input["title"]?.stringValue ?? ""
                     let category = input["category"]?.stringValue ?? ""
-                    return "\(verb) \(amount) — \(title)\(category.isEmpty ? "" : " (\(category))")"
+                    return "\(verb) \(amount) - \(title)\(category.isEmpty ? "" : " (\(category))")"
                 },
                 handler: { [weak self] input in
                     guard let self else { throw CancellationError() }

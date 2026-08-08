@@ -74,7 +74,7 @@ public struct ExperimentsScreen: View {
                 .font(.system(size: 44)).foregroundStyle(.secondary)
             Text("Run a personal experiment")
                 .font(.headline)
-            Text("Change one thing — caffeine, a bedtime, a habit — and Sphere measures the effect on your sleep, mood, spending and more.")
+            Text("Change one thing (caffeine, a bedtime, a habit) and Sphere measures the effect on your sleep, mood, spending and more.")
                 .font(.subheadline).foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button("Start one") { showingAdd = true }
@@ -136,7 +136,7 @@ struct ExperimentDetailView: View {
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(SphereTheme.accent(for: .mindfulness))
             if effects.isEmpty {
-                Text("Keep logging — an effect appears once there are at least 3 days of data before and during the change.")
+                Text("Keep logging. An effect appears once there are at least 3 days of data before and during the change.")
                     .font(.subheadline).foregroundStyle(.secondary)
             } else {
                 ForEach(effects, id: \.metricID) { effect in

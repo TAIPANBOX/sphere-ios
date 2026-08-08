@@ -34,7 +34,7 @@ public struct RelationshipsScreen: View {
                         emoji: "💜",
                         accent: accent,
                         title: "Start your Relationships sphere",
-                        message: "Add someone you want to stay close to — a friend, family member, or mentor.",
+                        message: "Add someone you want to stay close to: a friend, family member, or mentor.",
                         buttonLabel: "Add your first contact"
                     ) {
                         showingAddContact = true
@@ -317,7 +317,7 @@ struct ContactDetailSheet: View {
                         }
                     }
                 } header: {
-                    Label("Prep — before you see \(contact.name)", systemImage: "eyes")
+                    Label("Prep: before you see \(contact.name)", systemImage: "eyes")
                 }
 
                 Section {

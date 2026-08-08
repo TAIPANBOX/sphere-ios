@@ -30,7 +30,7 @@ public struct LearningScreen: View {
                 if !store.flashcards.isEmpty {
                     flashcardsCard
                 }
-                bookSection("Currently Reading", books: store.reading, empty: "Nothing in progress — pick one from the queue.")
+                bookSection("Currently Reading", books: store.reading, empty: "Nothing in progress. Pick one from the queue.")
                 bookSection("Queue", books: store.queue, empty: "Queue is empty.")
                 if !store.completed.isEmpty {
                     completedSection
@@ -89,7 +89,7 @@ public struct LearningScreen: View {
                 .buttonStyle(.borderedProminent)
                 .tint(accent)
             } else {
-                Text("All caught up — nothing due right now.")
+                Text("All caught up, nothing due right now.")
                     .font(.subheadline).foregroundStyle(.secondary)
             }
         }
@@ -474,7 +474,7 @@ struct FlashcardReviewSheet: View {
                     ContentUnavailableView(
                         "All caught up",
                         systemImage: "checkmark.seal.fill",
-                        description: Text("No cards due right now — come back later.")
+                        description: Text("No cards due right now, come back later.")
                     )
                     Spacer()
                 }
