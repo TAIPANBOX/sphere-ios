@@ -53,7 +53,7 @@ struct SettingsScreen: View {
                 Text("AI")
             } footer: {
                 Text(onDeviceAvailable
-                    ? "On-device AI is free and private — nothing leaves your "
+                    ? "On-device AI is free and private: nothing leaves your "
                         + "iPhone, no key needed. Add a key below only if you want "
                         + "a cloud model."
                     : "Add a provider key below, or use this iPhone's free "

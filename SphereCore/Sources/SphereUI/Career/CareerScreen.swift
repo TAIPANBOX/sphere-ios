@@ -254,7 +254,7 @@ public struct CareerScreen: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Tasks").font(.title3.weight(.semibold))
             if store.openTasks.isEmpty {
-                Text("All clear — add a task or tell your agent.")
+                Text("All clear. Add a task or tell your agent.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)

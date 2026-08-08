@@ -79,7 +79,7 @@ public enum ReadinessEngine {
             headline = "You're well-recovered."
             recommendation = "A good day to push on something hard."
         case .moderate:
-            headline = "Steady — a decent tank."
+            headline = "Steady, a decent tank."
             recommendation = "Protect your focus window and don't overcommit."
         case .low:
             headline = "Running low today."

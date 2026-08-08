@@ -409,7 +409,7 @@ public enum BragDocument {
             lines.append("## Achievements")
             for achievement in achievements {
                 var line = "- **\(achievement.title)**"
-                if !achievement.impact.isEmpty { line += " — \(achievement.impact)" }
+                if !achievement.impact.isEmpty { line += " - \(achievement.impact)" }
                 lines.append(line)
             }
             lines.append("")
@@ -430,7 +430,7 @@ public enum BragDocument {
         }
 
         if achievements.isEmpty && doneTasks.isEmpty {
-            lines.append("Nothing logged yet — add achievements and complete tasks to fill this in.")
+            lines.append("Nothing logged yet. Add achievements and complete tasks to fill this in.")
         }
 
         return lines.joined(separator: "\n")

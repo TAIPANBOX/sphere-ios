@@ -65,7 +65,7 @@ public enum LifeWheel {
         guard let top = deltas.first, abs(top.delta) >= minGap else { return nil }
         let name = top.sphere.rawValue.capitalized
         return top.delta < 0
-            ? "You feel worse about \(name) than your data suggests — worth a closer look."
-            : "You feel better about \(name) than the numbers show — nice."
+            ? "You feel worse about \(name) than your data suggests, worth a closer look."
+            : "You feel better about \(name) than the numbers show, nice."
     }
 }

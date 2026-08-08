@@ -449,7 +449,7 @@ public final class AgentService: Sendable {
                 do {
                     let picked = try resolveBackend()
                     let facts = digest.isEmpty
-                        ? "A quiet week — not much was logged."
+                        ? "A quiet week, not much was logged."
                         : digest.joined(separator: "\n")
                     let system = "You are a warm, concise life coach reviewing someone's week. "
                         + "Given the facts, write a short reflection of 3 to 4 sentences that "

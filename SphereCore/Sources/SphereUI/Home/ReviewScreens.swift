@@ -51,7 +51,7 @@ public struct WeeklyReviewSheet: View {
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(SphereTheme.accent(for: .goals))
             if digest.isEmpty {
-                Text("A quiet week — not much was logged.")
+                Text("A quiet week, not much was logged.")
                     .font(.body).foregroundStyle(.secondary)
             } else {
                 ForEach(digest, id: \.self) { line in
@@ -112,7 +112,7 @@ public struct WeeklyReviewSheet: View {
             for try await chunk in stream { narrative += chunk }
         } catch {
             if narrative.isEmpty {
-                narrative = "Couldn't reach the agent — your week is summarised above."
+                narrative = "Couldn't reach the agent, your week is summarised above."
             }
         }
         streaming = false

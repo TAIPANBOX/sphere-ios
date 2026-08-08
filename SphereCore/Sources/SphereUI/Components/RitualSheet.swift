@@ -82,7 +82,7 @@ public struct RitualSheet: View {
     @ViewBuilder private var eveningContent: some View {
         Section("Today you…") {
             if highlights.isEmpty {
-                Text("A quiet day — that's fine too.")
+                Text("A quiet day, that's fine too.")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(Array(highlights.enumerated()), id: \.offset) { _, line in

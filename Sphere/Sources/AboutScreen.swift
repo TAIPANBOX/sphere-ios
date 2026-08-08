@@ -14,7 +14,7 @@ struct AboutScreen: View {
                 VStack(spacing: 8) {
                     Text("🌐").font(.system(size: 56))
                     Text("Sphere").font(.title2.weight(.bold))
-                    Text("An AI companion for all 12 spheres of your life — private and on-device.")
+                    Text("An AI companion for all 12 spheres of your life, private and on-device.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -36,7 +36,7 @@ struct AboutScreen: View {
             }
 
             Section("Acknowledgements") {
-                acknowledgement("GRDB.swift", "MIT — SQLite persistence")
+                acknowledgement("GRDB.swift", "MIT, SQLite persistence")
                 acknowledgement("Open-Meteo", "Free weather API, no key")
             }
         }

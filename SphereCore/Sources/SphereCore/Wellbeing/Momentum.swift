@@ -60,7 +60,7 @@ public enum Momentum {
     /// Warm progress phrase that reframes the bare percentage.
     public static func progressPhrase(_ percent: Int) -> String {
         switch forProgress(percent) {
-        case .dormant: "Not started — one small step is enough"
+        case .dormant: "Not started, one small step is enough"
         case .starting: "Just beginning"
         case .building: "Building momentum"
         case .rolling: "Gaining ground"

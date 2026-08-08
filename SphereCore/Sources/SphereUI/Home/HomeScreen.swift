@@ -360,8 +360,8 @@ public struct HomeScreen: View {
                         .font(.headline)
                         .foregroundStyle(.primary)
                     Text(ritualPhase == .evening
-                        ? "See what you did and reflect — 1 minute."
-                        : "Set an intention and pick today's focus — 2 minutes.")
+                        ? "See what you did and reflect, 1 minute."
+                        : "Set an intention and pick today's focus, 2 minutes.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -438,7 +438,7 @@ public struct HomeScreen: View {
     private var reviewsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             if isSundayEvening {
-                Text("Sunday evening — a good moment to look back.")
+                Text("Sunday evening, a good moment to look back.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             HStack(spacing: 10) {

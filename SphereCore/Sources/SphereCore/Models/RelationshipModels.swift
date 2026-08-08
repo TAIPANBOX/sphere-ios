@@ -179,7 +179,7 @@ public struct MessageTemplate: Codable, Equatable, Identifiable, Sendable {
         MessageTemplate(id: "seed_bday", title: "Happy birthday",
                         body: "Happy birthday! 🎉 Hope you have a wonderful day."),
         MessageTemplate(id: "seed_catchup", title: "Long time no see",
-                        body: "Hey! It's been a while — would love to catch up soon. How are you?"),
+                        body: "Hey! It's been a while, would love to catch up soon. How are you?"),
         MessageTemplate(id: "seed_thinking", title: "Thinking of you",
                         body: "Just thinking of you and wanted to say hi. Hope all is well!"),
     ]

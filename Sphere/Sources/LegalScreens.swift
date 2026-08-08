@@ -40,8 +40,8 @@ struct TermsScreen: View {
              "Sphere is open-source software provided under the MIT License, without "
                 + "warranty of any kind. We aren't liable for any loss arising from its use."),
             ("Not professional advice",
-             "Anything Sphere or its AI agents suggest — about health, finances, or "
-                + "anything else — is informational only, not medical, financial, or legal advice."),
+             "Anything Sphere or its AI agents suggest (about health, finances, or "
+                + "anything else) is informational only, not medical, financial, or legal advice."),
             ("Your keys, your accounts",
              "If you add an API key for a cloud AI provider, you're bound by that "
                 + "provider's terms, and any usage costs are yours."),
@@ -56,7 +56,7 @@ struct PrivacyPolicyScreen: View {
         LegalTextView(title: "Privacy Policy", sections: [
             ("Local-first by design",
              "Sphere stores all of your data in a database on your device. There is no "
-                + "account and no server we operate — we never receive your data."),
+                + "account and no server we operate, so we never receive your data."),
             ("No tracking",
              "Sphere contains no analytics, ads, or third-party tracking SDKs."),
             ("On-device AI",

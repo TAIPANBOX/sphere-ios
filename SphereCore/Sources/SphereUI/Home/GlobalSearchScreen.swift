@@ -21,7 +21,7 @@ public struct GlobalSearchScreen: View {
                 ContentUnavailableViewCompat(
                     "Search everything",
                     systemImage: "magnifyingglass",
-                    description: "Goals, contacts, books, tasks, subscriptions, journal notes and memories — all in one place."
+                    description: "Goals, contacts, books, tasks, subscriptions, journal notes and memories, all in one place."
                 )
             } else if groups.isEmpty && memories.isEmpty {
                 ContentUnavailableViewCompat(

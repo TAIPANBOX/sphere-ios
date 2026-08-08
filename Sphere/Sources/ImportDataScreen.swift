@@ -19,8 +19,8 @@ struct ImportDataScreen: View {
                 ImportRow(
                     icon: "heart.fill", tint: .pink,
                     title: "Apple Health",
-                    caption: "Steps, heart rate, sleep, cycle, workouts and weight — "
-                        + "nothing leaves your device.",
+                    caption: "Steps, heart rate, sleep, cycle, workouts and weight. "
+                        + "Nothing leaves your device.",
                     state: healthState
                 ) {
                     await importHealth()
@@ -44,7 +44,7 @@ struct ImportDataScreen: View {
                 }
             } footer: {
                 Text("Everything is imported on-device. You can run these again "
-                    + "anytime — nothing is duplicated.")
+                    + "anytime. Nothing is duplicated.")
             }
         }
         .navigationTitle("Import from device")

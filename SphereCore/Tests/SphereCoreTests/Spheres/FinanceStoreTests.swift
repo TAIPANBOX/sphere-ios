@@ -154,7 +154,7 @@ struct FinanceStoreTests {
         #expect(store.transactions.count == 1)
         #expect(store.transactions[0].title == "Coffee")
         #expect(store.transactions[0].category == .food)
-        #expect(registry.confirmation(for: call) == "Logged expense 4.5 — Coffee (food)")
+        #expect(registry.confirmation(for: call) == "Logged expense 4.5 - Coffee (food)")
     }
 
     @Test func addTransactionToolValidatesInput() async throws {

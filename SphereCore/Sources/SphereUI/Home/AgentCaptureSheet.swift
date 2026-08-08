@@ -91,7 +91,7 @@ public struct AgentCaptureSheet: View {
             Label("Tell me anything", systemImage: "sparkles")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(SphereTheme.accent(for: .mindfulness))
-            Text("Type or dictate a thought, or snap a receipt — I'll sort it into the right spheres.")
+            Text("Type or dictate a thought, or snap a receipt, and I'll sort it into the right spheres.")
                 .font(.footnote).foregroundStyle(.secondary)
         }
     }

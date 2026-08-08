@@ -65,7 +65,7 @@ public enum NudgeEngine {
             nudges.append(Nudge(
                 id: "streak_lapse", priority: 90,
                 title: "Keep your streak",
-                body: "Your \(context.meditationStreak)-day meditation streak is alive — a few minutes keeps it going.",
+                body: "Your \(context.meditationStreak)-day meditation streak is alive, a few minutes keeps it going.",
                 cooldownDays: 1
             ))
         }

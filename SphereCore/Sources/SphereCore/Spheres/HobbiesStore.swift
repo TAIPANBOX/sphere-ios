@@ -153,7 +153,7 @@ public final class HobbiesStore {
         engram?.note(
             agentId: SphereType.hobbies.rawValue,
             content: "\(name) session, \(session.durationMinutes) min"
-                + (session.note.isEmpty ? "" : " — \(session.note)"),
+                + (session.note.isEmpty ? "" : " - \(session.note)"),
             tags: ["log", "hobbies", "session"]
         )
     }

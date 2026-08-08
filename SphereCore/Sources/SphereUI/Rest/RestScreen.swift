@@ -339,7 +339,7 @@ public struct RestScreen: View {
                     }
                 }
             } else {
-                Text("Nothing planned yet — dream a little.")
+                Text("Nothing planned yet. Dream a little.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

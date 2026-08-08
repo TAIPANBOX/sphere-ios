@@ -130,7 +130,7 @@ public enum NotificationPlanBuilder {
                 id: NotificationCategory.birthday.idPrefix + contact.id,
                 category: .birthday,
                 title: "\(contact.name)'s birthday is today 🎂",
-                body: "Send some love — your Relationships agent has gift ideas.",
+                body: "Send some love, your Relationships agent has gift ideas.",
                 dateComponents: parts,
                 repeats: true
             )
@@ -269,7 +269,7 @@ public enum NotificationPlanBuilder {
             id: NotificationCategory.bedtime.idPrefix + "main",
             category: .bedtime,
             title: "Wind down for bed 🌙",
-            body: "Lights out around \(schedule.bedtimeLabel) — start easing off screens.",
+            body: "Lights out around \(schedule.bedtimeLabel), start easing off screens.",
             dateComponents: DateComponents(hour: normalized / 60, minute: normalized % 60),
             repeats: true
         )
@@ -292,7 +292,7 @@ public enum NotificationPlanBuilder {
             return onDate(
                 category: .plant, id: plant.id,
                 title: "\(plant.emoji) Water \(plant.name)",
-                body: "It's watering day — every \(plant.intervalDays) day\(plant.intervalDays == 1 ? "" : "s").",
+                body: "It's watering day, every \(plant.intervalDays) day\(plant.intervalDays == 1 ? "" : "s").",
                 date: clamped, hour: hour, asOf: now,
                 actionCategoryIdentifier: NotificationAction.plantCategory,
                 userInfo: [NotificationAction.plantIdKey: plant.id]

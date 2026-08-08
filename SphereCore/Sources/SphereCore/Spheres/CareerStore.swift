@@ -183,7 +183,7 @@ public final class CareerStore {
         engram?.note(
             agentId: SphereType.career.rawValue,
             content: "Logged achievement: \(achievement.title)"
-                + (achievement.impact.isEmpty ? "" : " — \(achievement.impact)"),
+                + (achievement.impact.isEmpty ? "" : " - \(achievement.impact)"),
             tags: ["log", "career", "achievement"],
             salience: 0.75
         )

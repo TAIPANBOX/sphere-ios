@@ -59,7 +59,7 @@ public enum YearInSphere {
         var cards: [RecapCard] = [
             RecapCard(
                 id: "intro", emoji: "✨", value: "Your \(stats.year)",
-                caption: "in Sphere — a year across every part of your life."
+                caption: "in Sphere, a year across every part of your life."
             )
         ]
 
